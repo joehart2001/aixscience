@@ -42,6 +42,11 @@ uv run python -m boltz_mace.prepare_inputs \
   --n-samples 5
 ```
 
+`--allele` accepts any allele in the dataset (default `HLA-A*02:01`). The CSV
+gives only HLA residues 1-182, so each allele's alpha3 domain (residues 183-276)
+is appended from `Data/hla_alpha3.csv`. That table is built from IPD-IMGT/HLA
+3.65.0 with `uv run python -m boltz_mace.build_alpha3 --release 3650`.
+
 Run Boltz-2. Single-sequence mode is the reproducible, no-network default:
 
 ```bash

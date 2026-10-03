@@ -11,13 +11,10 @@ import numpy as np
 import pandas as pd
 import yaml
 
-# The challenge CSV supplies the alpha1/alpha2 domain. For HLA-A*02:01 we append
-# the constant extracellular alpha3-domain sequence from PDB 1AKJ, then include
-# beta-2-microglobulin as a separate chain. The dataset sequence ends in LQRT.
-HLA_A0201_ALPHA3 = (
-    "DAPKTHMTHHAVSDHEATLRCWALSFYPAEITLTWQRDGEDQTQDTELVETRPAGDGTFQKWAAVVV"
-    "PSGQEQRYTCHVQHEGLPKPLTLRWEP"
-)
+# The challenge CSV supplies mature residues 1-182 (alpha1/alpha2). Each allele's
+# alpha3 domain comes from IPD-IMGT/HLA via build_alpha3.py, and
+# beta-2-microglobulin is included as a separate chain.
+ALPHA3_TABLE = Path(__file__).resolve().parents[2] / "Data" / "hla_alpha3.csv"
 BETA2_MICROGLOBULIN = (
     "IQRTPKIQVYSRHPAENGKSNFLNCYVSGFHPSDIEVDLLKNGERIEKVEHSDLSFSKDWSFYLLYY"
     "TEFTPTEKDEYACRVNHVTLSQPKIVKWDRDM"
@@ -43,7 +40,15 @@ def select_quantile_spanning_rows(
     return ordered.iloc[indices].reset_index(drop=True)
 
 
-def make_boltz_input(hla_sequence: str, peptide: str, use_msa_server: bool) -> dict:
+def load_alpha3(path: Path = ALPHA3_TABLE) -> dict[str, str]:
+    """Map dataset allele names to their HLA alpha3-domain sequences."""
+    table = pd.read_csv(path)
+    return dict(zip(table["allele"], table["alpha3"], strict=True))
+
+
+def make_boltz_input(
+    hla_sequence: str, alpha3: str, peptide: str, use_msa_server: bool
+) -> dict:
     """Build a Boltz-2 input dictionary for one pHLA complex."""
     protein_msa = {} if use_msa_server else {"msa": "empty"}
     return {
@@ -52,7 +57,7 @@ def make_boltz_input(hla_sequence: str, peptide: str, use_msa_server: bool) -> d
             {
                 "protein": {
                     "id": "A",
-                    "sequence": hla_sequence + HLA_A0201_ALPHA3,
+                    "sequence": hla_sequence + alpha3,
                     **protein_msa,
                 }
             },
@@ -92,11 +97,9 @@ def prepare_inputs(
     allele_frame = frame.loc[frame["allele"] == allele].copy()
     if allele_frame.empty:
         raise ValueError(f"No rows found for allele {allele!r}")
-    if allele != "HLA-A*02:01":
-        raise ValueError(
-            "This pilot currently has a validated alpha3-domain extension only for "
-            "HLA-A*02:01"
-        )
+    alpha3 = load_alpha3().get(allele)
+    if alpha3 is None:
+        raise ValueError(f"No alpha3 domain for {allele!r} in {ALPHA3_TABLE}")
     if allele_frame["hla_seq"].nunique() != 1:
         raise ValueError(f"Expected one HLA sequence for {allele!r}")
 
@@ -111,7 +114,7 @@ def prepare_inputs(
         sample_id = f"{safe_slug(allele)}_{peptide.lower()}"
         yaml_path = boltz_dir / f"{sample_id}.yaml"
         payload = make_boltz_input(
-            str(row["hla_seq"]), peptide, use_msa_server=use_msa_server
+            str(row["hla_seq"]), alpha3, peptide, use_msa_server=use_msa_server
         )
         yaml_path.write_text(yaml.safe_dump(payload, sort_keys=False))
         manifest_rows.append(
