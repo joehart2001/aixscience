@@ -17,6 +17,7 @@ The script:
 from __future__ import annotations
 
 import argparse
+import copy
 
 import numpy as np
 import torch
@@ -27,7 +28,7 @@ from config import build_results, load_config, print_summary, train_from_config
 from data import PeptideMHCDataset, Vocab, load_splits
 from device_utils import move_batch, resolve_device, seed_everything
 from model import DirectAffinityNet
-from plots import make_all_plots, save_run_data
+from plots import make_all_plots, make_test_plots, save_run_data
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,7 +46,7 @@ def evaluate(
     loss_fn: nn.Module,
     device: torch.device,
 ) -> dict[str, float]:
-    """Return log-space loss plus hour-space MAE and Pearson correlation."""
+    """Return log-space loss plus hour-space error metrics and correlations."""
     model.eval()
     total_loss, n = 0.0, 0
     preds_log, targets_log = [], []
@@ -63,27 +64,39 @@ def evaluate(
     preds_log = np.concatenate(preds_log)
     targets_log = np.concatenate(targets_log)
 
-    # Back to hours for an interpretable error number.
+    # Back to hours for interpretable error numbers.
     preds_hours = np.expm1(preds_log)
     targets_hours = np.expm1(targets_log)
     mae_hours = float(np.mean(np.abs(preds_hours - targets_hours)))
+    rmse_hours = float(np.sqrt(np.mean((preds_hours - targets_hours) ** 2)))
     pearson = float(np.corrcoef(preds_log, targets_log)[0, 1])
+    spearman = _spearman(preds_log, targets_log)
 
     return {
         "loss": total_loss / n,
         "mae_hours": mae_hours,
+        "rmse_hours": rmse_hours,
         "pearson": pearson,
+        "spearman": spearman,
         "preds_hours": preds_hours,
         "targets_hours": targets_hours,
     }
 
 
+def _spearman(a: np.ndarray, b: np.ndarray) -> float:
+    """Rank correlation = Pearson of the ranks (no scipy dependency)."""
+    ra = np.argsort(np.argsort(a))
+    rb = np.argsort(np.argsort(b))
+    return float(np.corrcoef(ra, rb)[0, 1])
+
+
 def train_model(
     csv: str,
+    splits_csv: str,
+    split: str,
     hla_col: str = "hla_seq",
-    split_col: str = "split",
     train_value: str = "train",
-    val_value: str = "validation",
+    val_value: str = "val",
     epochs: int = 30,
     batch_size: int = 128,
     lr: float = 1e-3,
@@ -91,30 +104,38 @@ def train_model(
     seed: int = 0,
     device: str | None = None,
     num_workers: int = 0,
+    test_value: str = "test",
     out: str | None = None,
     tag: str = "",
-) -> tuple[dict[str, list[float]], dict]:
-    """Train one model and return (history, best_eval).
+) -> tuple[dict[str, list[float]], dict, dict | None]:
+    """Train one model and return (history, best_eval, test_eval).
 
-    `hla_col` selects the HLA representation ("hla_seq" or "hla_pseudoseq"), so
-    the same code trains either variant. `device` is auto-selected (GPU if
-    available, else CPU) unless forced. `history` holds per-epoch metrics and
-    `best_eval` holds the best epoch's validation predictions (for the scatter).
+    `split` selects which precomputed split to use (A/B/C/C2 from `splits_csv`);
+    sequences are joined in from `csv`. `hla_col` selects the HLA representation
+    ("hla_seq" or "hla_pseudoseq"), so the same code trains either variant.
+    `device` is auto-selected (GPU if available, else CPU) unless forced.
+    `history` holds per-epoch metrics, `best_eval` holds the best (by val loss)
+    epoch's validation predictions, and `test_eval` holds that same best model's
+    predictions on the held-out test split (None if the split has no test rows).
     """
     device = resolve_device(device)
     seed_everything(seed, device)
     prefix = f"[{tag or hla_col}]"
     print(f"{prefix} device = {device}")
 
-    # 1. Load the flagged splits.
-    train_df, val_df = load_splits(
+    # 1. Load the chosen precomputed split (sequences joined in by row_id).
+    train_df, val_df, test_df = load_splits(
         csv,
-        split_col=split_col,
+        splits_csv=splits_csv,
+        split=split,
         train_value=train_value,
         val_value=val_value,
-        seed=seed,
+        test_value=test_value,
     )
-    print(f"{prefix} train rows = {len(train_df)}, val rows = {len(val_df)}")
+    print(
+        f"{prefix} split={split} train rows = {len(train_df)}, "
+        f"val rows = {len(val_df)}, test rows = {len(test_df)}"
+    )
 
     # 2. Vocabulary is built from the training split only, for this HLA column.
     vocab = Vocab.build(train_df, hla_col=hla_col)
@@ -141,6 +162,18 @@ def train_model(
         pin_memory=pin,
         num_workers=num_workers,
     )
+    # The test split is evaluated once at the end with the best-val model.
+    test_loader = (
+        DataLoader(
+            PeptideMHCDataset(test_df, vocab),
+            batch_size=batch_size,
+            shuffle=False,
+            pin_memory=pin,
+            num_workers=num_workers,
+        )
+        if len(test_df) > 0
+        else None
+    )
 
     # 3. Model, loss, optimizer.
     model = DirectAffinityNet(
@@ -156,6 +189,7 @@ def train_model(
     # 4. Training loop.
     best_val = float("inf")
     best_eval = None  # keep the best epoch's val predictions for the scatter plot
+    best_state = None  # snapshot of the best-val weights, for the final test eval
     history = {
         "train_loss": [],
         "val_loss": [],
@@ -194,6 +228,10 @@ def train_model(
         if val["loss"] < best_val:
             best_val = val["loss"]
             best_eval = val
+            # Snapshot the weights (copied to CPU) so test uses this exact model.
+            best_state = copy.deepcopy(
+                {k: v.cpu() for k, v in model.state_dict().items()}
+            )
             if out is not None:  # only persist a checkpoint when asked to
                 torch.save(
                     {
@@ -210,7 +248,21 @@ def train_model(
                 print(f"{prefix}          ↳ saved best model to {out}")
 
     print(f"{prefix} done. best val_loss = {best_val:.4f}")
-    return history, best_eval
+
+    # 5. Final test evaluation with the best-val model (held-out until now).
+    test_eval = None
+    if test_loader is not None and best_state is not None:
+        model.load_state_dict(best_state)
+        test_eval = evaluate(model, test_loader, loss_fn, device)
+        print(
+            f"{prefix} TEST | loss {test_eval['loss']:.4f} | "
+            f"MAE {test_eval['mae_hours']:.2f} h | "
+            f"RMSE {test_eval['rmse_hours']:.2f} h | "
+            f"pearson {test_eval['pearson']:.3f} | "
+            f"spearman {test_eval['spearman']:.3f}"
+        )
+
+    return history, best_eval, test_eval
 
 
 def main() -> None:
@@ -219,16 +271,17 @@ def main() -> None:
     label = cfg["label"]
     print(f"=== Training model: {label} ({cfg['hla_col']}) ===")
 
-    history, best_eval = train_from_config(cfg, train_model)
+    history, best_eval, test_eval = train_from_config(cfg, train_model)
 
-    # Persist run data + draw the single-model figures.
-    results = build_results({label: history}, {label: best_eval})
+    # Persist run data + draw the single-model figures (val) and test suite.
+    results = build_results({label: history}, {label: best_eval}, {label: test_eval})
     figs_dir = cfg["figs_dir"]
     save_run_data(results, figs_dir)
     make_all_plots(results, figs_dir)
+    make_test_plots(results, figs_dir)
     print(f"[train] saved figures + data to {figs_dir}/")
 
-    print_summary({label: history})
+    print_summary({label: history}, {label: test_eval})
 
 
 if __name__ == "__main__":

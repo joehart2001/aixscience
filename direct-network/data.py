@@ -19,7 +19,6 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
@@ -123,47 +122,60 @@ class PeptideMHCDataset(Dataset):
 
 
 def load_splits(
-    csv_path: str,
-    split_col: str = "split",
+    sequences_csv: str,
+    splits_csv: str,
+    split: str,
     train_value: str = "train",
-    val_value: str = "validation",
-    seed: int = 0,
-    n_holdout_proteins: int = 5,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Read the CSV and return (train_df, val_df).
+    val_value: str = "val",
+    test_value: str = "test",
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Return (train_df, val_df, test_df) for one of the precomputed splits.
 
-    If the CSV already has a `split_col` flagging rows as train/validation, we
-    honor it. Otherwise we fall back to an out-of-domain split that reserves a
-    few entire proteins (distinct `hla_seq`) for validation, matching what
-    prepare_split.py produces, so the pipeline still runs on the raw dataset.
+    The split assignments live in `splits_csv` (Data/subsets/splits.csv): one
+    `split_<X>` column per strategy (A=random, B=by-peptide, C=by-allele,
+    C2=by-allele-cluster) with values train/val/test. That file has no sequences,
+    so we join it to `sequences_csv` (the rasmussen dataset) by `row_id` — which
+    is the 0-based row index of the sequences file — to attach `hla_seq` and
+    `hla_pseudoseq`. `test_df` may be empty if the split has no test rows.
     """
-    df = pd.read_csv(csv_path)
-    required = {"allele", "peptide", "thalf_hours", "hla_seq"}
-    missing = required - set(df.columns)
-    if missing:
-        raise ValueError(f"CSV is missing required columns: {sorted(missing)}")
+    split_col = f"split_{split}"
 
-    if split_col in df.columns:
-        train_df = df[df[split_col] == train_value].reset_index(drop=True)
-        val_df = df[df[split_col] == val_value].reset_index(drop=True)
-        if len(train_df) == 0 or len(val_df) == 0:
-            raise ValueError(
-                f"Column '{split_col}' present but did not yield both a "
-                f"'{train_value}' and a '{val_value}' split."
-            )
-    else:
-        print(
-            f"[data] No '{split_col}' column found; falling back to an "
-            f"out-of-domain split holding out {n_holdout_proteins} proteins "
-            f"(seed={seed}). Use prepare_split.py to flag splits explicitly."
+    seq = pd.read_csv(sequences_csv).reset_index(names="row_id")
+    sp = pd.read_csv(splits_csv)
+    if split_col not in sp.columns:
+        available = sorted(c[len("split_"):] for c in sp.columns if c.startswith("split_"))
+        raise ValueError(
+            f"Split '{split}' (column '{split_col}') not in {splits_csv}. "
+            f"Available: {available}"
         )
-        proteins = np.sort(df["hla_seq"].unique())
-        rng = np.random.default_rng(seed)
-        holdout = set(
-            rng.choice(proteins, size=n_holdout_proteins, replace=False)
-        )
-        is_val = df["hla_seq"].isin(holdout)
-        train_df = df[~is_val].reset_index(drop=True)
-        val_df = df[is_val].reset_index(drop=True)
 
-    return train_df, val_df
+    # Attach sequences by row_id, and verify the join lines up on allele/peptide.
+    merged = sp.merge(
+        seq[["row_id", "allele", "peptide", "hla_seq", "hla_pseudoseq"]],
+        on="row_id",
+        how="left",
+        suffixes=("", "_seq"),
+    )
+    if merged["hla_seq"].isna().any():
+        raise ValueError(
+            f"Some row_ids in {splits_csv} have no match in {sequences_csv}."
+        )
+    mismatch = (merged["allele"] != merged["allele_seq"]) | (
+        merged["peptide"] != merged["peptide_seq"]
+    )
+    if mismatch.any():
+        raise ValueError(
+            f"row_id mapping between {splits_csv} and {sequences_csv} is "
+            f"inconsistent ({int(mismatch.sum())} rows differ on allele/peptide)."
+        )
+    merged = merged.drop(columns=["allele_seq", "peptide_seq"])
+
+    train_df = merged[merged[split_col] == train_value].reset_index(drop=True)
+    val_df = merged[merged[split_col] == val_value].reset_index(drop=True)
+    test_df = merged[merged[split_col] == test_value].reset_index(drop=True)
+    if len(train_df) == 0 or len(val_df) == 0:
+        raise ValueError(
+            f"Column '{split_col}' did not yield both a '{train_value}' and a "
+            f"'{val_value}' split."
+        )
+    return train_df, val_df, test_df

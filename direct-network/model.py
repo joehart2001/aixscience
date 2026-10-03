@@ -58,7 +58,7 @@ class DirectAffinityNet(nn.Module):
             nn.ReLU(),                          # nonlinearity
             nn.Dropout(dropout),
             nn.Linear(hidden_dim, 1),  # layer 3: 256 -> 1 (predicted log half-life)
-        )
+        ) #XGBoost? Squeeze excitation?
 
     def forward(
         self,

@@ -14,31 +14,36 @@ learned amino-acid/allele embeddings feeding a plain MLP.
 | `train.py` | Trains a **single** model from a YAML config: `train.py <config.yaml>`. Holds `train_model()` (the training engine) and `evaluate()`. |
 | `compare.py` | Trains **one or more** models from YAML configs: `compare.py <config.yaml> [...]`; several overlay on shared comparison plots in `figs/compare/`. |
 | `config.py` | Shared YAML loading (`load_config`, `DEFAULTS`) + helpers used by both `train.py` and `compare.py`. |
-| `templates/` | One YAML per model variant (`hla_seq.yaml`, `pseudoseq.yaml`) holding all run parameters. |
+| `templates/` | One YAML per run. `split_A/B/C/C2.yaml` select the four data splits; `hla_seq.yaml`/`pseudoseq.yaml` select the HLA representation. |
 | `plots.py` | Saves single-model and comparison figures; persists run data to `figs/data/`. Run `python plots.py` to **regenerate all figures from saved data** without retraining. |
 | `device_utils.py` | Device selection helpers — picks GPU when available, else CPU. |
-| `prepare_split.py` | Adds a flagged `train`/`validation` `split` column using an **out-of-domain** (held-out protein) split. |
+| `prepare_split.py` | **Legacy** held-out-protein splitter (writes a `split` column into one CSV). Splits now come from `Data/subsets/splits.csv`. |
 
-## Input format
+## Data & splits
 
-A CSV in the same form as `rasmussen_et_al_dataset.csv`:
+Two inputs, joined by `row_id` (the 0-based row index of the sequence file):
 
-```
-allele, peptide, thalf_hours, hla_seq, hla_pseudoseq
-```
+1. **Sequences** — `../Data/rasmussen_et_al_dataset.csv` (the `csv:` key):
+   `allele, peptide, thalf_hours, hla_seq, hla_pseudoseq`.
+2. **Split assignments** — `../Data/subsets/splits.csv` (the `splits_csv:` key):
+   `row_id, allele, peptide, thalf_hours, cluster, split_A, split_B, split_C, split_C2`.
+   Each `split_<X>` column labels every row `train` / `val` / `test`.
 
-plus one extra column (default name `split`) flagging each row as `train` or
-`validation`. Use `prepare_split.py` to generate it.
+A config picks a strategy with `split: A|B|C|C2`. The pipeline joins sequences in,
+then uses that column's `train` and `val` rows (the `test` rows are held back).
 
-### Out-of-domain split
+### The four splits (all 70/15/15, stratified on zero-fraction and log half-life)
 
-Rather than scattering rows randomly, `prepare_split.py` reserves ~5 entire
-proteins (distinct `hla_seq` values) for validation: every row for a held-out
-protein goes to validation, and those proteins never appear in training. This
-tests generalization to **unseen HLA proteins** — a much harder and more honest
-signal than a random split. Held-out alleles are absent from the training
-vocabulary, so at validation time they fall back to the model's "unknown allele"
-slot and predictions must rely on the `hla_seq` and `peptide` inputs.
+| Split | Grouping | What it tests |
+|-------|----------|---------------|
+| **A** | random | easiest; peptides & alleles leak across folds |
+| **B** | by peptide | unseen peptides |
+| **C** | by allele | a new allele whose close relative may be in training (realistic clinical case) |
+| **C2** | by allele *cluster* (≥30/34 shared contact residues → 22 clusters) | a genuinely unseen binding groove |
+
+The C→C2 gap measures how much performance is near-neighbour lookup vs. real
+generalization. C2 has only ~22 groups, so its val/test estimates are noisy —
+read it as a spread, not a point value. See `../Data/planning-data-split.md`.
 
 ## Quick start
 
@@ -47,25 +52,21 @@ From this directory (uses the repo's `.venv`):
 ```bash
 PY=../../.venv/bin/python
 
-# 1. Flag an out-of-domain split holding out 5 proteins for validation.
-$PY prepare_split.py \
-    --in ../Data/rasmussen_et_al_dataset.csv \
-    --out ../Data/rasmussen_et_al_dataset_split.csv \
-    --n-holdout-proteins 5
+# Train a single model on one split (split chosen inside the YAML).
+$PY train.py templates/split_A.yaml
 
-# 2. Train a single model from a YAML config in templates/.
-$PY train.py templates/pseudoseq.yaml
-
-# 3. Or train several and overlay them on comparison plots.
-$PY compare.py templates/hla_seq.yaml templates/pseudoseq.yaml
+# Compare all four splits on shared plots (the intended comparison).
+$PY compare.py templates/split_A.yaml templates/split_B.yaml \
+               templates/split_C.yaml templates/split_C2.yaml
 ```
 
-Every parameter (HLA column, dataset path, epochs, learning rate, seed, device,
+Every parameter (which split, HLA column, epochs, learning rate, seed, device,
 output locations, …) lives in its own `templates/*.yaml` — edit those rather than
 passing flags. `train.py` takes exactly one config; `compare.py` takes one or more.
 
-If the CSV has **no** split column, the pipeline logs a warning and falls back to
-the same out-of-domain held-out-protein split so it still runs.
+> `prepare_split.py` (old held-out-protein splitter that writes a `split` column
+> into a single CSV) is **legacy** — splits now come from `Data/subsets/splits.csv`,
+> generated by `../Data/scripts/make_splits.py`.
 
 ## Two models
 

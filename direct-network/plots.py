@@ -118,24 +118,20 @@ def save_comparison_scatter(
     """Side-by-side predicted-vs-actual scatter, one panel per model."""
     os.makedirs(figs_dir, exist_ok=True)
 
-    n = 1
+    n = len(results)
     fig, axes = plt.subplots(1, n, figsize=(6 * n, 6), squeeze=False)
-    ax = axes[0, 0]
-    hi = 0
-    lo = 1e5
-    for (label, ev) in results.items():
+    for ax, (label, ev) in zip(axes.flatten(), results.items()):
         targets = ev["targets_hours"]
         preds = ev["preds_hours"]
-        ax.scatter(targets, preds, s=8, alpha=0.3, label = f"{label} (Pearson r = {ev['pearson']:.3f})")
-        lo = float(min(targets.min(), preds.min(), lo))
-        hi = float(max(targets.max(), preds.max(), hi))
-    ax.plot([lo, hi], [lo, hi], "k--", linewidth=1, label="perfect")
-    ax.set_xlabel("actual thalf_hours")
-    ax.set_ylabel("predicted thalf_hours")
-    plt.yscale("log")
-    plt.xscale("log")
-    ax.grid(True, alpha=0.3)
-    ax.legend()
+        ax.scatter(targets, preds, s=8, alpha=0.3)
+        lo = float(min(targets.min(), preds.min()))
+        hi = float(max(targets.max(), preds.max()))
+        ax.plot([lo, hi], [lo, hi], "k--", linewidth=1, label="perfect")
+        ax.set_xlabel("actual thalf_hours")
+        ax.set_ylabel("predicted thalf_hours")
+        ax.set_title(f"{label} (Pearson r = {ev['pearson']:.3f})")
+        ax.grid(True, alpha=0.3)
+        ax.legend()
     fig.tight_layout()
     fig.savefig(os.path.join(figs_dir, "compare_pred_vs_actual.png"), dpi=150)
     plt.close(fig)
@@ -171,19 +167,27 @@ def save_run_data(results: dict[str, dict], figs_dir: str) -> None:
     for label, r in results.items():
         slug = _slug(label)
         # Arrays are saved separately because JSON can't hold them compactly.
-        np.savez(
-            os.path.join(data_dir, f"{slug}.npz"),
-            preds_hours=r["preds_hours"],
-            targets_hours=r["targets_hours"],
-        )
-        manifest.append(
-            {
-                "label": label,
-                "slug": slug,
-                "pearson": r["pearson"],
-                "history": r["history"],
+        arrays = {
+            "preds_hours": r["preds_hours"],
+            "targets_hours": r["targets_hours"],
+        }
+        entry = {
+            "label": label,
+            "slug": slug,
+            "pearson": r["pearson"],
+            "history": r["history"],
+        }
+        # Include test predictions + metrics when the run has a test split.
+        test = r.get("test")
+        if test is not None:
+            arrays["test_preds_hours"] = test["preds_hours"]
+            arrays["test_targets_hours"] = test["targets_hours"]
+            entry["test_metrics"] = {
+                k: test[k]
+                for k in ("loss", "mae_hours", "rmse_hours", "pearson", "spearman")
             }
-        )
+        np.savez(os.path.join(data_dir, f"{slug}.npz"), **arrays)
+        manifest.append(entry)
     with open(os.path.join(data_dir, "runs.json"), "w") as f:
         json.dump(manifest, f, indent=2)
 
@@ -203,12 +207,19 @@ def load_run_data(figs_dir: str) -> dict[str, dict]:
     results: dict[str, dict] = {}
     for entry in manifest:
         arrays = np.load(os.path.join(data_dir, f"{entry['slug']}.npz"))
-        results[entry["label"]] = {
+        res = {
             "history": entry["history"],
             "preds_hours": arrays["preds_hours"],
             "targets_hours": arrays["targets_hours"],
             "pearson": entry["pearson"],
         }
+        if "test_preds_hours" in arrays:
+            res["test"] = {
+                "preds_hours": arrays["test_preds_hours"],
+                "targets_hours": arrays["test_targets_hours"],
+                **entry.get("test_metrics", {}),
+            }
+        results[entry["label"]] = res
     return results
 
 
@@ -227,6 +238,134 @@ def make_all_plots(results: dict[str, dict], figs_dir: str) -> None:
         save_comparison_scatter(results, figs_dir)
 
 
+# --- Test-set evaluation suite (written to <figs_dir>/test/) ------------------
+
+
+def _residuals_log(test: dict) -> tuple[np.ndarray, np.ndarray]:
+    """Return (actual_hours, residual) where residual = predicted - actual in log space."""
+    actual = test["targets_hours"]
+    resid = np.log1p(test["preds_hours"]) - np.log1p(actual)
+    return actual, resid
+
+
+def _test_title(test: dict, label: str) -> str:
+    return (
+        f"{label} — TEST\n"
+        f"Pearson {test['pearson']:.3f} | Spearman {test['spearman']:.3f} | "
+        f"MAE {test['mae_hours']:.2f} h | RMSE {test['rmse_hours']:.2f} h"
+    )
+
+
+def _save_test_scatter(test: dict, path: str, label: str) -> None:
+    """Predicted vs. actual half-life on the test set (log-log)."""
+    targets, preds = test["targets_hours"], test["preds_hours"]
+    plt.figure(figsize=(6, 6))
+    plt.scatter(targets, preds, s=8, alpha=0.3)
+    hi = float(max(targets.max(), preds.max()))
+    plt.plot([0, hi], [0, hi], "k--", linewidth=1, label="perfect")
+    plt.xlabel("actual thalf_hours")
+    plt.ylabel("predicted thalf_hours")
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.title(_test_title(test, label))
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(path, dpi=150)
+    plt.close()
+
+
+def _save_test_residuals(test: dict, path: str, label: str) -> None:
+    """Residual (log-space pred - actual) vs. actual — shows bias across the range."""
+    actual, resid = _residuals_log(test)
+    plt.figure(figsize=(7, 5))
+    plt.scatter(actual, resid, s=8, alpha=0.3)
+    plt.axhline(0, color="k", linewidth=1)
+    plt.xscale("log")
+    plt.xlabel("actual thalf_hours")
+    plt.ylabel("residual  log1p(pred) - log1p(actual)")
+    plt.title(f"{label} — TEST residuals (>0 over-predicts, <0 under-predicts)")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(path, dpi=150)
+    plt.close()
+
+
+def _save_test_residual_hist(test: dict, path: str, label: str) -> None:
+    """Distribution of the log-space residuals (ideally centered on 0)."""
+    _, resid = _residuals_log(test)
+    plt.figure(figsize=(7, 5))
+    plt.hist(resid, bins=40, alpha=0.8)
+    plt.axvline(0, color="k", linewidth=1)
+    plt.axvline(float(resid.mean()), color="C3", linestyle="--", linewidth=1,
+                label=f"mean {resid.mean():.3f}")
+    plt.xlabel("residual  log1p(pred) - log1p(actual)")
+    plt.ylabel("count")
+    plt.title(f"{label} — TEST residual distribution")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(path, dpi=150)
+    plt.close()
+
+
+def _save_test_metric_bars(tests: dict[str, dict], path: str) -> None:
+    """Grouped bars comparing test metrics across models (correlations + errors)."""
+    labels = list(tests)
+    x = range(len(labels))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6 + 2 * len(labels), 5))
+
+    width = 0.38
+    ax1.bar([i - width / 2 for i in x], [tests[l]["pearson"] for l in labels],
+            width, label="Pearson")
+    ax1.bar([i + width / 2 for i in x], [tests[l]["spearman"] for l in labels],
+            width, label="Spearman")
+    ax1.set_xticks(list(x))
+    ax1.set_xticklabels(labels, rotation=20, ha="right")
+    ax1.set_ylabel("correlation (higher = better)")
+    ax1.set_title("Test correlation")
+    ax1.legend()
+    ax1.grid(True, axis="y", alpha=0.3)
+
+    ax2.bar([i - width / 2 for i in x], [tests[l]["mae_hours"] for l in labels],
+            width, label="MAE (h)")
+    ax2.bar([i + width / 2 for i in x], [tests[l]["rmse_hours"] for l in labels],
+            width, label="RMSE (h)")
+    ax2.set_xticks(list(x))
+    ax2.set_xticklabels(labels, rotation=20, ha="right")
+    ax2.set_ylabel("error in hours (lower = better)")
+    ax2.set_title("Test error")
+    ax2.legend()
+    ax2.grid(True, axis="y", alpha=0.3)
+
+    fig.tight_layout()
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+
+
+def make_test_plots(results: dict[str, dict], figs_dir: str) -> None:
+    """Draw the test-set suite for every run that has test data, into <figs_dir>/test/.
+
+    Per model: predicted-vs-actual scatter, residuals-vs-actual, residual
+    histogram. With several models, also a grouped metric-comparison bar chart.
+    Runs without a test split (e.g. old data) are silently skipped.
+    """
+    tests = {label: r["test"] for label, r in results.items() if r.get("test")}
+    if not tests:
+        return
+    test_dir = os.path.join(figs_dir, "test")
+    os.makedirs(test_dir, exist_ok=True)
+
+    multi = len(tests) > 1
+    for label, t in tests.items():
+        pre = f"{_slug(label)}_" if multi else ""
+        _save_test_scatter(t, os.path.join(test_dir, f"{pre}test_pred_vs_actual.png"), label)
+        _save_test_residuals(t, os.path.join(test_dir, f"{pre}test_residuals.png"), label)
+        _save_test_residual_hist(t, os.path.join(test_dir, f"{pre}test_residual_hist.png"), label)
+    if multi:
+        _save_test_metric_bars(tests, os.path.join(test_dir, "compare_test_metrics.png"))
+
+
 def main() -> None:
     """Regenerate all figures from previously saved run data (no retraining)."""
     p = argparse.ArgumentParser(
@@ -237,6 +376,7 @@ def main() -> None:
 
     results = load_run_data(args.figs_dir)
     make_all_plots(results, args.figs_dir)
+    make_test_plots(results, args.figs_dir)
     print(
         f"Regenerated figures in {args.figs_dir}/ from "
         f"{len(results)} saved run(s): {', '.join(results)}"

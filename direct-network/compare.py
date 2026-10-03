@@ -18,7 +18,7 @@ from __future__ import annotations
 import argparse
 
 from config import build_results, load_config, print_summary, train_from_config
-from plots import make_all_plots, save_run_data
+from plots import make_all_plots, make_test_plots, save_run_data
 from train import train_model
 
 
@@ -31,24 +31,32 @@ def main() -> None:
 
     histories: dict[str, dict] = {}
     best_evals: dict[str, dict] = {}
+    test_evals: dict[str, dict] = {}
     for cfg in configs:
         label = cfg["label"]
         print(f"\n=== Training model: {label} ({cfg['hla_col']}) ===")
-        history, best_eval = train_from_config(cfg, train_model)
+        history, best_eval, test_eval = train_from_config(cfg, train_model)
         histories[label] = history
         best_evals[label] = best_eval
+        test_evals[label] = test_eval
 
-    # Comparison figures share one dedicated plot folder (not the per-model dirs).
-    figs_dir = "figs/compare"
+    # Base dir "figs": run data -> figs/data/, comparison figures -> figs/compare/
+    # (make_all_plots appends the "compare" subfolder). Regenerate later with
+    # `python plots.py --figs-dir figs`.
+    figs_dir = "figs"
 
     # Persist the underlying data so plots.py can regenerate figures later,
     # then draw them now (single-model or comparison, chosen automatically).
-    results = build_results(histories, best_evals)
+    results = build_results(histories, best_evals, test_evals)
     save_run_data(results, figs_dir)
     make_all_plots(results, figs_dir)
-    print(f"\n[compare] saved figures + data to {figs_dir}/")
+    make_test_plots(results, figs_dir)
+    print(
+        f"\n[compare] saved data to {figs_dir}/data/, val figures to "
+        f"{figs_dir}/compare/, test figures to {figs_dir}/test/"
+    )
 
-    print_summary(histories)
+    print_summary(histories, test_evals)
 
 
 if __name__ == "__main__":
