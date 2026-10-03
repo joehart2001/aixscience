@@ -1,2 +1,14 @@
 CLAUDE.md
 claude-experiments/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+
+# Generated experiment artifacts
+inputs/
+outputs/
+results/*
+!results/pilot_scores.csv
+!results/pilot_summary.md

@@ -1,4 +1,5 @@
 [project]
+<<<<<<< Updated upstream
 name = "aixscience"
 version = "0.1.0"
 description = "Add your description here"
@@ -7,3 +8,40 @@ requires-python = ">=3.12"
 dependencies = [
     "modal>=1.6.0",
 ]
+=======
+name = "boltz-mace-stability"
+version = "0.1.0"
+description = "Pilot ranking of peptide-HLA stability using Boltz-2 structures and MACE-MH-1/OMOL interaction energies"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "ase>=3.24",
+  "boltz>=2.2",
+  "mace-torch>=0.3.14",
+  "numpy>=1.26",
+  "openmm>=8.2",
+  "pandas>=2.2",
+  "pdbfixer @ git+https://github.com/openmm/pdbfixer.git@v1.12",
+  "pyyaml>=6.0",
+  "scipy>=1.13",
+]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[dependency-groups]
+dev = ["pytest>=8.3", "ruff>=0.8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+>>>>>>> Stashed changes
