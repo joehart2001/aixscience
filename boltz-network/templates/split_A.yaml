@@ -1,0 +1,31 @@
+# Split A — RANDOM 70/15/15 split, using Boltz2 embeddings as input.
+#
+# Compare both applicable splits:
+#   python compare.py templates/split_A.yaml templates/split_B.yaml
+
+label: split A (random)
+csv: ../Data/rasmussen_et_al_dataset.csv        # sequence source (row_id -> allele/peptide)
+splits_csv: ../Data/subsets/splits.csv          # precomputed split assignments
+split: A                                         # A (random) or B (by-peptide)
+embeddings_dir: ../Data/boltz2/boltz_embeddings/a0201  # Boltz .npz per complex
+feature_key: features                            # which embedding vector to feed the model
+allele: HLA-A*02:01                              # embeddings currently cover this allele
+
+# --- split label values inside the split_<X> column ---
+train_value: train
+val_value: val
+
+# --- training hyperparameters ---
+epochs: 30
+batch_size: 128
+lr: 0.001
+weight_decay: 0.00001
+seed: 0
+
+# --- compute ---
+device: auto        # auto = CUDA if available (prod GPU), else CPU (local); or force cpu/cuda
+num_workers: 0
+
+# --- outputs ---
+figs_dir: figs/split_A
+out: null
