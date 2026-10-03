@@ -12,3 +12,9 @@ outputs/
 results/*
 !results/pilot_scores.csv
 !results/pilot_summary.md
+
+# Large boltz2 embeddings
+boltz2/
+
+# Outdated attempts
+old-*
