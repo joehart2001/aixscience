@@ -45,8 +45,13 @@ def evaluate(
     loader: DataLoader,
     loss_fn: nn.Module,
     device: torch.device,
+    alleles: np.ndarray | None = None,
 ) -> dict[str, float]:
-    """Return log-space loss plus hour-space error metrics and correlations."""
+    """Return log-space loss plus hour-space error metrics and correlations.
+
+    `alleles` (one label per row, in loader order — so the loader must be
+    unshuffled) enables the within-allele Spearman metric.
+    """
     model.eval()
     total_loss, n = 0.0, 0
     preds_log, targets_log = [], []
@@ -61,26 +66,47 @@ def evaluate(
         preds_log.append(pred.cpu().numpy())
         targets_log.append(target.cpu().numpy())
 
-    preds_log = np.concatenate(preds_log)
-    targets_log = np.concatenate(targets_log)
+    return {
+        "loss": total_loss / n,
+        **metrics_from_log(
+            np.concatenate(preds_log), np.concatenate(targets_log), alleles
+        ),
+    }
 
+
+def metrics_from_log(
+    preds_log: np.ndarray,
+    targets_log: np.ndarray,
+    alleles: np.ndarray | None = None,
+) -> dict:
+    """Error metrics + correlations from predictions in log1p space.
+
+    Split out of `evaluate` so that anything holding raw predictions — notably
+    the averaged predictions of a committee (see c2-committee/) — is scored by
+    exactly the same code as a single model's.
+
+    When `alleles` (one allele label per row) is given, we also compute the
+    **within-allele Spearman** — the mean per-allele rank correlation. Global
+    Pearson/Spearman are inflated because much of the variance is just the
+    allele's baseline stability; within-allele ρ measures the harder, clinically
+    relevant task of ranking peptides *for one allele*.
+    """
     # Back to hours for interpretable error numbers.
     preds_hours = np.expm1(preds_log)
     targets_hours = np.expm1(targets_log)
-    mae_hours = float(np.mean(np.abs(preds_hours - targets_hours)))
-    rmse_hours = float(np.sqrt(np.mean((preds_hours - targets_hours) ** 2)))
-    pearson = float(np.corrcoef(preds_log, targets_log)[0, 1])
-    spearman = _spearman(preds_log, targets_log)
-
-    return {
-        "loss": total_loss / n,
-        "mae_hours": mae_hours,
-        "rmse_hours": rmse_hours,
-        "pearson": pearson,
-        "spearman": spearman,
+    out = {
+        "mae_hours": float(np.mean(np.abs(preds_hours - targets_hours))),
+        "rmse_hours": float(np.sqrt(np.mean((preds_hours - targets_hours) ** 2))),
+        "pearson": float(np.corrcoef(preds_log, targets_log)[0, 1]),
+        "spearman": _spearman(preds_log, targets_log),
         "preds_hours": preds_hours,
         "targets_hours": targets_hours,
     }
+    if alleles is not None:
+        out["within_allele_spearman"] = within_allele_spearman(
+            preds_log, targets_log, alleles
+        )
+    return out
 
 
 def _spearman(a: np.ndarray, b: np.ndarray) -> float:
@@ -90,11 +116,39 @@ def _spearman(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.corrcoef(ra, rb)[0, 1])
 
 
+def within_allele_spearman(
+    preds_log: np.ndarray,
+    targets_log: np.ndarray,
+    alleles: np.ndarray,
+    min_count: int = 5,
+) -> float:
+    """Mean Spearman ρ computed *within* each allele (unweighted over alleles).
+
+    Only alleles with >= `min_count` rows and non-constant predictions/targets
+    contribute. A model that just predicts each allele's baseline stability scores
+    near 0 here, even if its global correlation looks high. NaN if no allele
+    qualifies (e.g. a single peptide per allele).
+    """
+    alleles = np.asarray(alleles)
+    rhos = []
+    for a in np.unique(alleles):
+        m = alleles == a
+        if int(m.sum()) < min_count:
+            continue
+        p, t = preds_log[m], targets_log[m]
+        if np.std(p) == 0 or np.std(t) == 0:
+            continue
+        rhos.append(_spearman(p, t))
+    return float(np.mean(rhos)) if rhos else float("nan")
+
+
 def train_model(
     csv: str,
     splits_csv: str,
     split: str,
     hla_col: str = "hla_seq",
+    allele: str | None = None,
+    embeddings_dir: str | None = None,
     train_value: str = "train",
     val_value: str = "val",
     epochs: int = 30,
@@ -131,6 +185,8 @@ def train_model(
         train_value=train_value,
         val_value=val_value,
         test_value=test_value,
+        allele=allele,
+        embeddings_dir=embeddings_dir,
     )
     print(
         f"{prefix} split={split} train rows = {len(train_df)}, "
@@ -186,6 +242,10 @@ def train_model(
         model.parameters(), lr=lr, weight_decay=weight_decay
     )
 
+    # Allele labels per row (loaders are unshuffled) for within-allele metrics.
+    val_alleles = val_df["allele"].to_numpy()
+    test_alleles = test_df["allele"].to_numpy()
+
     # 4. Training loop.
     best_val = float("inf")
     best_eval = None  # keep the best epoch's val predictions for the scatter plot
@@ -195,6 +255,8 @@ def train_model(
         "val_loss": [],
         "val_mae_hours": [],
         "val_pearson": [],
+        "val_spearman": [],
+        "val_within_rho": [],
     }
     for epoch in range(1, epochs + 1):
         model.train()
@@ -213,17 +275,20 @@ def train_model(
             n += len(target)
 
         train_loss = running / n
-        val = evaluate(model, val_loader, loss_fn, device)
+        val = evaluate(model, val_loader, loss_fn, device, alleles=val_alleles)
         print(
             f"{prefix} epoch {epoch:3d} | train_loss {train_loss:.4f} | "
             f"val_loss {val['loss']:.4f} | val_MAE {val['mae_hours']:.2f} h | "
-            f"val_pearson {val['pearson']:.3f}"
+            f"val_pearson {val['pearson']:.3f} | "
+            f"val_within_rho {val['within_allele_spearman']:.3f}"
         )
 
         history["train_loss"].append(train_loss)
         history["val_loss"].append(val["loss"])
         history["val_mae_hours"].append(val["mae_hours"])
         history["val_pearson"].append(val["pearson"])
+        history["val_spearman"].append(val["spearman"])
+        history["val_within_rho"].append(val["within_allele_spearman"])
 
         if val["loss"] < best_val:
             best_val = val["loss"]
@@ -253,13 +318,14 @@ def train_model(
     test_eval = None
     if test_loader is not None and best_state is not None:
         model.load_state_dict(best_state)
-        test_eval = evaluate(model, test_loader, loss_fn, device)
+        test_eval = evaluate(model, test_loader, loss_fn, device, alleles=test_alleles)
         print(
             f"{prefix} TEST | loss {test_eval['loss']:.4f} | "
             f"MAE {test_eval['mae_hours']:.2f} h | "
             f"RMSE {test_eval['rmse_hours']:.2f} h | "
             f"pearson {test_eval['pearson']:.3f} | "
-            f"spearman {test_eval['spearman']:.3f}"
+            f"spearman {test_eval['spearman']:.3f} | "
+            f"within_rho {test_eval['within_allele_spearman']:.3f}"
         )
 
     return history, best_eval, test_eval

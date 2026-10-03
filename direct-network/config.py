@@ -16,6 +16,8 @@ DEFAULTS = {
     "splits_csv": "../Data/subsets/splits.csv",  # precomputed A/B/C/C2 splits
     "split": "A",          # which split strategy: A, B, C, or C2
     "hla_col": "hla_seq",
+    "allele": None,          # optional: restrict to one allele (subset comparison)
+    "embeddings_dir": None,  # optional: keep only rows with a Boltz embedding here
     "train_value": "train",
     "val_value": "val",
     "epochs": 30,
@@ -49,6 +51,8 @@ def train_from_config(cfg: dict, train_fn: Callable) -> tuple[dict, dict]:
         splits_csv=cfg["splits_csv"],
         split=cfg["split"],
         hla_col=cfg["hla_col"],
+        allele=cfg["allele"],
+        embeddings_dir=cfg["embeddings_dir"],
         train_value=cfg["train_value"],
         val_value=cfg["val_value"],
         epochs=cfg["epochs"],
@@ -92,6 +96,9 @@ def build_results(
                 "rmse_hours": test["rmse_hours"],
                 "pearson": test["pearson"],
                 "spearman": test["spearman"],
+                "within_allele_spearman": test.get(
+                    "within_allele_spearman", float("nan")
+                ),
             }
         results[label] = entry
     return results
@@ -112,10 +119,11 @@ def print_summary(
 
     test_evals = {k: v for k, v in (test_evals or {}).items() if v is not None}
     if test_evals:
-        print("\nmodel            | test_loss | test_MAE(h) | test_RMSE(h) | test_Pearson | test_Spearman")
-        print("-" * 90)
+        print("\nmodel            | test_loss | test_MAE(h) | test_RMSE(h) | test_Pearson | test_Spearman | within-allele_rho")
+        print("-" * 108)
         for label, t in test_evals.items():
             print(
                 f"{label:16s} | {t['loss']:9.4f} | {t['mae_hours']:11.2f} | "
-                f"{t['rmse_hours']:12.2f} | {t['pearson']:12.3f} | {t['spearman']:13.3f}"
+                f"{t['rmse_hours']:12.2f} | {t['pearson']:12.3f} | {t['spearman']:13.3f} | "
+                f"{t.get('within_allele_spearman', float('nan')):17.3f}"
             )

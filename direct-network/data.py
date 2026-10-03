@@ -17,6 +17,7 @@ Everything here is deliberately plain so the pipeline is easy to follow.
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass
 
 import pandas as pd
@@ -128,6 +129,8 @@ def load_splits(
     train_value: str = "train",
     val_value: str = "val",
     test_value: str = "test",
+    allele: str | None = None,
+    embeddings_dir: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Return (train_df, val_df, test_df) for one of the precomputed splits.
 
@@ -137,6 +140,10 @@ def load_splits(
     so we join it to `sequences_csv` (the rasmussen dataset) by `row_id` — which
     is the 0-based row index of the sequences file — to attach `hla_seq` and
     `hla_pseudoseq`. `test_df` may be empty if the split has no test rows.
+
+    Optional subset filters (used to compare fairly against boltz-network on the
+    exact same rows): `allele` keeps only that allele; `embeddings_dir` keeps only
+    rows whose Boltz embedding file exists there (`hla_a_02_01_<peptide>.npz`).
     """
     split_col = f"split_{split}"
 
@@ -169,6 +176,17 @@ def load_splits(
             f"inconsistent ({int(mismatch.sum())} rows differ on allele/peptide)."
         )
     merged = merged.drop(columns=["allele_seq", "peptide_seq"])
+
+    # Optional subset filters so this matches boltz-network's rows exactly.
+    if allele is not None:
+        merged = merged[merged["allele"] == allele]
+    if embeddings_dir is not None:
+        has_emb = merged["peptide"].map(
+            lambda p: os.path.exists(
+                os.path.join(embeddings_dir, f"hla_a_02_01_{p.lower()}.npz")
+            )
+        )
+        merged = merged[has_emb]
 
     train_df = merged[merged[split_col] == train_value].reset_index(drop=True)
     val_df = merged[merged[split_col] == val_value].reset_index(drop=True)

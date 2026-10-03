@@ -16,6 +16,36 @@ import matplotlib.pyplot as plt  # noqa: E402  (must come after use())
 import numpy as np  # noqa: E402
 
 
+# --- Published reference performance, drawn as horizontal lines for context ----
+# Directly-comparable SOTA for pMHC-I *stability* (half-life) regression under a
+# leakage-controlled (similarity-aware) split — the same regime as our B/C/C2:
+#   "Peptide:MHC Binding Stability Prediction Using Protein Language Models",
+#   bioRxiv 2026, doi:10.64898/2026.06.28.735023. Best model (MINT Transfer) on
+#   the NetMHCstabpan test set with 80%-identity peptide-cluster splits:
+#   Pearson r = 0.76, Spearman ρ = 0.79.
+# For reference, the classic NetMHCstabpan (Rasmussen et al., J Immunol 2016,
+# doi:10.4049/jimmunol.1600582) pan-specific PCC = 0.676 (global rescaling); it
+# scores ρ = 0.88 on the above test set but that is leakage-inflated.
+# Keyed by metric so each panel gets the comparable line; set a value to None or
+# remove the key to hide it.
+REFERENCES = {
+    "pearson": (0.76, "SOTA PLM stability (r=0.76, 2026)"),
+    "spearman": (0.79, "SOTA PLM stability (ρ=0.79, 2026)"),
+    # no directly-comparable published within-allele ρ, so none is drawn there
+}
+
+
+def _add_reference(metric: str, ax=None) -> None:
+    """Draw the published-reference line for a given metric ('pearson'/'spearman')."""
+    ref = REFERENCES.get(metric)
+    if not ref:
+        return
+    value, label = ref
+    (ax or plt).axhline(
+        value, color="black", linestyle="--", linewidth=1.2, label=label
+    )
+
+
 def save_training_curves(history: dict[str, list[float]], figs_dir: str) -> None:
     """Plot train/val loss, val MAE, and val Pearson over epochs."""
     os.makedirs(figs_dir, exist_ok=True)
@@ -45,16 +75,28 @@ def save_training_curves(history: dict[str, list[float]], figs_dir: str) -> None
     plt.savefig(os.path.join(figs_dir, "val_mae.png"), dpi=150)
     plt.close()
 
-    # Validation Pearson correlation.
-    plt.figure(figsize=(7, 5))
-    plt.plot(epochs, history["val_pearson"], color="C3", marker="o")
-    plt.xlabel("epoch")
-    plt.ylabel("Pearson r (log space)")
-    plt.title("Validation correlation (out-of-domain proteins)")
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.savefig(os.path.join(figs_dir, "val_pearson.png"), dpi=150)
-    plt.close()
+    # One validation-correlation curve per metric that's present in history:
+    # global Pearson, global Spearman, and within-allele ρ.
+    corr_panels = [
+        ("val_pearson", "Pearson r (global)", "val_pearson.png", "C3", "pearson"),
+        ("val_spearman", "Spearman ρ (global)", "val_spearman.png", "C4", "spearman"),
+        ("val_within_rho", "within-allele ρ", "val_within_rho.png", "C5", None),
+    ]
+    for key, ylabel, fname, color, ref_metric in corr_panels:
+        if not history.get(key):
+            continue
+        plt.figure(figsize=(7, 5))
+        plt.plot(epochs, history[key], color=color, marker="o", label=ylabel)
+        if ref_metric:
+            _add_reference(ref_metric)  # SOTA stability reference
+        plt.xlabel("epoch")
+        plt.ylabel(ylabel)
+        plt.title(f"Validation {ylabel}")
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig(os.path.join(figs_dir, fname), dpi=150)
+        plt.close()
 
 
 def save_prediction_scatter(
@@ -94,14 +136,22 @@ def save_comparison_curves(
     panels = [
         ("val_loss", "val MSE on log1p(thalf)", "compare_val_loss.png"),
         ("val_mae_hours", "val MAE (hours)", "compare_val_mae.png"),
-        ("val_pearson", "val Pearson r (log space)", "compare_val_pearson.png"),
+        ("val_pearson", "val Pearson r (global)", "compare_val_pearson.png"),
+        ("val_spearman", "val Spearman ρ (global)", "compare_val_spearman.png"),
+        ("val_within_rho", "val within-allele ρ", "compare_val_within_rho.png"),
     ]
+    ref_metric_of = {"val_pearson": "pearson", "val_spearman": "spearman"}
     for key, ylabel, fname in panels:
+        # Skip a metric unless every model tracked it (older runs may not have it).
+        if not all(h.get(key) for h in histories.values()):
+            continue
         plt.figure(figsize=(7, 5))
         # Draw one line per model so they sit on identical axes.
         for label, history in histories.items():
             epochs = range(1, len(history[key]) + 1)
             plt.plot(epochs, history[key], marker="o", label=label)
+        if key in ref_metric_of:
+            _add_reference(ref_metric_of[key])  # SOTA stability reference
         plt.xlabel("epoch")
         plt.ylabel(ylabel)
         plt.title(f"Model comparison: {ylabel}")
@@ -184,7 +234,7 @@ def save_run_data(results: dict[str, dict], figs_dir: str) -> None:
             arrays["test_targets_hours"] = test["targets_hours"]
             entry["test_metrics"] = {
                 k: test[k]
-                for k in ("loss", "mae_hours", "rmse_hours", "pearson", "spearman")
+                for k in ("loss", "mae_hours", "rmse_hours", "pearson", "spearman", "within_allele_spearman")
             }
         np.savez(os.path.join(data_dir, f"{slug}.npz"), **arrays)
         manifest.append(entry)
@@ -315,15 +365,22 @@ def _save_test_metric_bars(tests: dict[str, dict], path: str) -> None:
     x = range(len(labels))
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6 + 2 * len(labels), 5))
 
-    width = 0.38
-    ax1.bar([i - width / 2 for i in x], [tests[l]["pearson"] for l in labels],
-            width, label="Pearson")
-    ax1.bar([i + width / 2 for i in x], [tests[l]["spearman"] for l in labels],
-            width, label="Spearman")
+    # Three correlation bars: global Pearson/Spearman vs. within-allele ρ (the
+    # honest ranking metric — near 0 for a model that only learns allele baselines).
+    width = 0.27
+    ax1.bar([i - width for i in x], [tests[l]["pearson"] for l in labels],
+            width, label="Pearson (global)")
+    ax1.bar(list(x), [tests[l]["spearman"] for l in labels],
+            width, label="Spearman (global)")
+    ax1.bar([i + width for i in x],
+            [tests[l].get("within_allele_spearman", float("nan")) for l in labels],
+            width, label="within-allele ρ")
+    _add_reference("pearson", ax1)   # SOTA stability Pearson reference
+    _add_reference("spearman", ax1)  # SOTA stability Spearman reference
     ax1.set_xticks(list(x))
     ax1.set_xticklabels(labels, rotation=20, ha="right")
     ax1.set_ylabel("correlation (higher = better)")
-    ax1.set_title("Test correlation")
+    ax1.set_title("Test correlation (global vs. within-allele)")
     ax1.legend()
     ax1.grid(True, axis="y", alpha=0.3)
 
