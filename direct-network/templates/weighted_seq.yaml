@@ -1,0 +1,28 @@
+# Model variant: uses the FULL HLA sequence (182 aa) as the protein input.
+#
+# Run a single model:   python compare.py templates/hla_seq.yaml
+# Compare two models:    python compare.py templates/hla_seq.yaml templates/pseudoseq.yaml
+
+label: full hla_seq          # name shown in logs, plots, and the summary table
+csv: ../Data/rasmussen_et_al_dataset_split.csv  # dataset with a flagged `split` column
+hla_col: weighted_seq             # which HLA column to feed the model
+
+# --- split flags (must match the column produced by prepare_split.py) ---
+split_col: split
+train_value: train
+val_value: validation
+
+# --- training hyperparameters ---
+epochs: 30
+batch_size: 128
+lr: 0.001
+weight_decay: 0.00001
+seed: 0
+
+# --- compute ---
+device: auto        # auto = CUDA if available (prod GPU), else CPU (local); or force cpu/cuda
+num_workers: 0      # raise on a production GPU box for faster data loading
+
+# --- outputs ---
+figs_dir: figs/weighted               # where figures are written
+out: null                    # checkpoint path, or null to skip saving
