@@ -1,0 +1,30 @@
+# Split A — RANDOM 70/15/15 split (the easiest; peptides & alleles leak across folds).
+#
+# Compare all four splits:
+#   python compare.py templates/split_A.yaml templates/split_B.yaml \
+#                      templates/split_C.yaml templates/split_C2.yaml
+
+label: split A (random)
+csv: ../Data/rasmussen_et_al_dataset.csv   # sequence source (joined by row_id)
+splits_csv: ../Data/subsets/splits.csv     # precomputed split assignments
+split: A                                   # which split_* column to use
+hla_col: hla_pseudoseq                     # HLA representation fed to the model
+
+# --- split label values inside the split_<X> column ---
+train_value: train
+val_value: val
+
+# --- training hyperparameters ---
+epochs: 30
+batch_size: 128
+lr: 0.001
+weight_decay: 0.00001
+seed: 0
+
+# --- compute ---
+device: auto        # auto = CUDA if available (prod GPU), else CPU (local); or force cpu/cuda
+num_workers: 0      # raise on a production GPU box for faster data loading
+
+# --- outputs ---
+figs_dir: figs/split_A
+out: null

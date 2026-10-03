@@ -4,13 +4,14 @@
 # Compare two models:    python compare.py templates/hla_seq.yaml templates/pseudoseq.yaml
 
 label: full hla_seq          # name shown in logs, plots, and the summary table
-csv: ../Data/rasmussen_et_al_dataset_split.csv  # dataset with a flagged `split` column
+csv: ../Data/rasmussen_et_al_dataset.csv   # sequence source (joined by row_id)
+splits_csv: ../Data/subsets/splits.csv     # precomputed split assignments
+split: A                                   # which split_* column (A/B/C/C2)
 hla_col: hla_seq             # which HLA column to feed the model
 
-# --- split flags (must match the column produced by prepare_split.py) ---
-split_col: split
+# --- split label values inside the split_<X> column ---
 train_value: train
-val_value: validation
+val_value: val
 
 # --- training hyperparameters ---
 epochs: 30
