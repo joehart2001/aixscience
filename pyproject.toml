@@ -7,6 +7,9 @@ requires-python = ">=3.11,<3.13"
 dependencies = [
   "ase>=3.24",
   "boltz>=2.2",
+  "cuequivariance-ops-torch-cu13>=0.5.0",
+  "cuequivariance-torch>=0.5.0",
+  "graph-longrange",
   "mace-torch>=0.3.14",
   "modal>=1.6.0",
   "numpy>=1.26",
@@ -36,3 +39,6 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.uv.sources]
+graph-longrange = { git = "https://github.com/WillBaldwin0/graph_electrostatics", rev = "v0.4.0" }

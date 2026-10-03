@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 
 import pandas as pd
+import torch
 import yaml
 
 from boltz_mace.prepare_inputs import make_boltz_input, safe_slug
@@ -29,7 +30,7 @@ subprocess.run(
         "--out_dir",
         str(OUT_DIR),
         "--accelerator",
-        "cpu",
+        "gpu" if torch.cuda.is_available() else "cpu",
         "--override",
     ],
     check=True,

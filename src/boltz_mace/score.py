@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
 from ase import Atoms
 from mace.calculators import mace_mp
 from openmm import Platform, unit
@@ -173,6 +174,8 @@ def score_manifest(
         device=device,
         default_dtype=dtype,
         dispersion=False,
+        # Without cuEquivariance, float64 MH-1 on a ~2k-atom crop exceeds 32 GB.
+        enable_cueq=device.startswith("cuda"),
     )
 
     results: list[dict] = []
@@ -230,7 +233,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=Path("results/pilot_scores.csv"))
     parser.add_argument("--model", default="mh-1")
     parser.add_argument("--head", default="omol")
-    parser.add_argument("--device", default="cpu")
+    parser.add_argument(
+        "--device", default="cuda" if torch.cuda.is_available() else "cpu"
+    )
     parser.add_argument("--dtype", choices=["float32", "float64"], default="float64")
     parser.add_argument("--peptide-chain", default="C")
     parser.add_argument("--crop-radius", type=float, default=10.0)
