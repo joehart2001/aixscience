@@ -1,12 +1,14 @@
 [project]
-name = "aixscience"
+name = "boltz-mace-stability"
 version = "0.1.0"
 description = "Pilot ranking of peptide-HLA stability using Boltz-2 structures and MACE-MH-1/OMOL interaction energies"
+readme = "README.md"
 requires-python = ">=3.11,<3.13"
 dependencies = [
   "ase>=3.24",
   "boltz>=2.2",
   "mace-torch>=0.3.14",
+  "modal>=1.6.0",
   "numpy>=1.26",
   "openmm>=8.2",
   "pandas>=2.2",
