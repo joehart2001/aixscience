@@ -12,3 +12,9 @@ outputs/
 results/*
 !results/pilot_scores.csv
 !results/pilot_summary.md
+
+# local scratch / backups
+*.conflicted-backup
+*.from-origin-main
+*.worktree-backup
+uv.lock.conflicted-*
