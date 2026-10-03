@@ -1,0 +1,9 @@
+ase>=3.24
+boltz>=2.2
+mace-torch>=0.3.14
+numpy>=1.26
+openmm>=8.2
+pandas>=2.2
+pdbfixer @ git+https://github.com/openmm/pdbfixer.git@v1.12
+pyyaml>=6.0
+scipy>=1.13

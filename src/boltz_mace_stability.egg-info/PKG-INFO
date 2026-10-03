@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: boltz-mace-stability
+Version: 0.1.0
+Summary: Pilot ranking of peptide-HLA stability using Boltz-2 structures and MACE-MH-1/OMOL interaction energies
+Requires-Python: <3.13,>=3.11
+Requires-Dist: ase>=3.24
+Requires-Dist: boltz>=2.2
+Requires-Dist: mace-torch>=0.3.14
+Requires-Dist: numpy>=1.26
+Requires-Dist: openmm>=8.2
+Requires-Dist: pandas>=2.2
+Requires-Dist: pdbfixer @ git+https://github.com/openmm/pdbfixer.git@v1.12
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: scipy>=1.13

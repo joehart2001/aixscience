@@ -12,3 +12,6 @@ outputs/
 results/*
 !results/pilot_scores.csv
 !results/pilot_summary.md
+
+# Boltz test outputs
+src/**/out/

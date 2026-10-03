@@ -1,0 +1,52 @@
+Rasmussen et al. dataset - label audit
+Source: Data/rasmussen_et_al_dataset.csv
+
+SHAPE
+  rows 28166, cols 5 (allele, peptide, thalf_hours, hla_seq, hla_pseudoseq)
+  nulls 0, duplicate rows 0
+  all peptides 9-mers, 0 non-standard residues
+
+ALLELES
+  75 alleles, 75 distinct hla_seq, 74 distinct hla_pseudoseq
+  HLA-B*15:01 1070 | HLA-A*02:01 1023 | HLA-A*03:01 861
+  >=500 rows: 9 alleles   >=1000 rows: 2 alleles
+  COLLISION: HLA-B*14:01(C67S) and HLA-B*14:02(C67S) share one pseudoseq
+  several engineered (C67S) mutants present, not natural alleles
+
+thalf_hours
+  mean 5.449  sd 11.709
+  min 0  q25 0.20  median 1.10  q75 5.60  max 256.7
+  min non-zero 0.05 (1 row), max 256.7 (1 row) -> no right-censoring
+  944 distinct values; 354 not on the 0.1 h grid
+  below 1.0 h: 13540 rows (48%) across only 49 distinct values
+
+ZEROS (left-censoring)
+  5679 rows = 20.16%; log10 undefined for all of them
+  strongly allele-dependent, 0% to 92% (alleles with n>=300):
+    HLA-B*39:06(C67S) 92.1   HLA-B*14:01(C67S) 89.0
+    HLA-B*14:02(C67S) 74.9   HLA-B*45:01       67.1
+    HLA-B*41:01       59.8   HLA-B*55:01       55.6
+    ...
+    HLA-A*02:11        1.1   HLA-B*57:03        0.5
+    HLA-A*24:03        0.0   HLA-A*23:01        0.0
+  -> a zero largely encodes which allele was tested, not peptide instability alone
+
+REPEATED MEASUREMENTS
+  none: all 28166 allele-peptide pairs are unique (max repeats 1)
+
+PEPTIDE REUSE ACROSS ALLELES (leakage risk)
+  5633 distinct peptides over 28166 rows
+  3941 peptides (70.0%) tested against >1 allele; max 36 alleles
+  26474 rows (94.0%) involve such a peptide
+  -> group CV splits on peptide, not on row
+
+LOG TRANSFORM
+  log10 of 22487 non-zero rows: mean 0.34  sd 0.68  range [-1.30, 2.41]
+
+HLA-A*02:01 (pilot allele)
+  n 1023, all distinct peptides
+  zeros 16 (1.6%) - far below the 20% global rate
+  q25 0.86  median 3.9  q75 13.9  max 48.1
+  log10 non-zero: mean 0.51  sd 0.73  n 1007
+  CAVEAT: censoring nearly absent here, so a protocol validated on this
+  allele is untested against the problem dominating 20% of the full data
