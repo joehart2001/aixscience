@@ -1,15 +1,5 @@
 [project]
-<<<<<<< Updated upstream
 name = "aixscience"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "modal>=1.6.0",
-]
-=======
-name = "boltz-mace-stability"
 version = "0.1.0"
 description = "Pilot ranking of peptide-HLA stability using Boltz-2 structures and MACE-MH-1/OMOL interaction energies"
 requires-python = ">=3.11,<3.13"
@@ -44,4 +34,3 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
->>>>>>> Stashed changes
