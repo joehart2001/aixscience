@@ -37,8 +37,8 @@ table in `mlp-embeds/figs/compare/summary_all75_test_metrics.md`. C2e holds only
   truth; models read from it, never write to it).
 - **`demo_app_html/`** — animated explainers of the representation ladder and
   the structure pipeline, each building to one dependency-free HTML file, plus
-  the renderer that produced the animation above. See
-  `demo_app_html/README.md`.
+  the renderer that produced the animation above. Live at
+  **[https://joehart2001.github.io/aixscience/](https://joehart2001.github.io/aixscience/)**; see `demo_app_html/README.md`.
 
 ## References
 

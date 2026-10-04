@@ -19,3 +19,6 @@ boltz2/
 # Outdated attempts
 old-*
 run.log
+
+# demo site build output
+demo_app_html/dist/

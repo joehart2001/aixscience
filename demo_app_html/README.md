@@ -18,14 +18,25 @@ from disk, dropped into a slide, or published behind a link.
 
 | Page | What it shows |
 |---|---|
-| `dist/levels.html` | The representation ladder: direct MLP baseline → SE gate → transformer → frozen Boltz-2, and where each one breaks across the four held-out splits. |
-| `dist/pipeline.html` | The structure pipeline: sequence dataset → Boltz-2 complex → frozen MACE features → shallow head. |
+| `dist/pipeline.html` | A plain-language walkthrough: measurements → Boltz-2 complex → frozen MACE descriptors → trainable regression head. |
+| `dist/levels.html` | A like-for-like comparison of the direct MLP, SE variants, transformer, and frozen Boltz-2 representation across four held-out splits. |
+
+**Live: [https://joehart2001.github.io/aixscience/](https://joehart2001.github.io/aixscience/)** — published from `main` by
+`.github/workflows/pages.yml`, which runs the build and every check below and
+refuses to deploy if any of them fail.
 
 ```bash
-python build.py     # src/ -> dist/
-node verify.js      # the checks below; exits non-zero on failure
-open dist/levels.html
+python build.py                      # src/ -> dist/
+node verify.js                       # correctness checks
+node tools/check_text.js             # label collisions, desktop
+node tools/check_text.js --width 400 # and phone
+open dist/local/index.html           # or: cd dist/local && python3 -m http.server
 ```
+
+`dist/` is generated and gitignored. `dist/local/` is what Pages serves, and the
+only copies with their own `<head>`: the publishable fragments in `dist/` omit
+it because the artifact platform supplies one, which means opening them
+directly shows mojibake for every degree sign and Greek letter.
 
 ## Where the numbers come from
 
@@ -48,10 +59,9 @@ Frozen Boltz-2 takes every metric on every split except RMSE on A, where
 `SE+XGB` wins 11.014 to 11.297.
 
 **Two caveats the pages carry on their face.** C2e holds only 2 test clusters,
-so that row is a spread rather than a point value. And there is no Level 0 run:
-`direct-network` defaults to `hla_col: hla_seq`, but every committed template
-overrides it to `hla_pseudoseq`, so the full 182-residue path exists in code and
-was never trained.
+so the size of that gap should be treated cautiously. And SE is presented as a
+variant of the direct baseline because it reweights the same 704 input channels
+rather than introducing a different raw representation.
 
 ## The structure
 
@@ -78,10 +88,9 @@ structure itself — x along the peptide N→C, y from the peptide centroid towa
 the platform centroid, z their cross product. That is why the groove stays
 horizontal at every rotation without a hand-tuned camera.
 
-Note that Boltz writes heavy atoms only. Hydrogens enter during preparation,
-somewhere between the CIF and MACE, which is worth pinning down since it decides
-whether the atom-to-residue mapping is built from the CIF or from the protonated
-structure.
+The structure coordinates are literal. The moving messages, feature bars, and
+compressed neural-network nodes in `pipeline.html` are explanatory schematics;
+they communicate data flow rather than exact activations or layer widths.
 
 ## The README animation
 

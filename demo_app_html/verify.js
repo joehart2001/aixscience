@@ -17,7 +17,18 @@ let fail = 0;
 const check = (ok, msg) => { console.log(`  ${ok ? "ok  " : "FAIL"}  ${msg}`); if (!ok) fail++; };
 
 /* 1 ---------------------------------------------------------------- metrics */
-const M = eval("(" + src.slice(src.indexOf("const M={") + 8, src.indexOf("const MODELS=")).trim().replace(/;$/, "") + ")");
+/* read a `const NAME={...}` literal by balancing braces, so inserting another
+   declaration after it cannot break this */
+function literal(name) {
+  const at = src.indexOf(`const ${name}={`);
+  let i = src.indexOf("{", at), depth = 0;
+  for (let j = i; j < src.length; j++) {
+    if (src[j] === "{") depth++;
+    else if (src[j] === "}" && --depth === 0) return eval("(" + src.slice(i, j + 1) + ")");
+  }
+  throw new Error(`unterminated ${name}`);
+}
+const M = literal("M");
 const METRICS = path.join(__dirname, "../mlp-embeds/figs/compare/summary_all75_test_metrics.md");
 const md = fs.readFileSync(METRICS, "utf8");   // read in place, never copied
 const KEY = { "direct (MLP)": "direct", transformer: "transformer", "SE+MLP": "semlp", "SE+XGB": "sexgb", "boltz2 (frozen)": "boltz2" };
@@ -47,16 +58,16 @@ chips.forEach((a, i) => {
 
 /* 3 ------------------------------------------------------------- dwell times */
 const DUR = +src.match(/const DUR=(\d+)/)[1];
-console.log("\ndwell (every reveal must finish before its scene is cut)");
-["s1", "s2", "s3", "s4", "s5"].forEach((name, i) => {
+console.log("\ndwell (each scene ends on a conclusion, which must be readable)");
+["s1", "s2", "s3", "s4", "s5", "s6"].forEach((name, i) => {
   const from = src.indexOf(`function ${name}(`);
   const body = src.slice(from, src.indexOf("\n/* ---", from));
   const ends = [...body.matchAll(/sub\(p,[\d.]+,([\d.]+)\)/g)].map(m => +m[1]);
-  const strip = body.match(/resultStrip\([^;]*?,\s*(\.\d+)\s*[,)]/);
-  if (strip) ends.push(+strip[1] + 0.175);        // strip staggers its four values
+  const strip = body.match(/(?:result|mace)Strip\([^;]*?,\s*(\.\d+)\s*[,)]/);
+  if (strip) ends.push(+strip[1] + 0.26);         // strip ends on its conclusion line
   const last = Math.max(...ends, 0);
   const dwell = (1 - last) * (bounds[i + 1] - bounds[i]) * DUR / 1000;
-  check(dwell >= 1.0, `${name} last reveal at p=${last.toFixed(2)} -> ${dwell.toFixed(1)}s on screen`);
+  check(dwell >= 2.0, `${name} last reveal at p=${last.toFixed(2)} -> ${dwell.toFixed(1)}s on screen`);
 });
 
 /* 4 ----------------------------------------------------------------- cartoon */
@@ -82,6 +93,52 @@ const seen = new Set([0]), stack = [0];
 while (stack.length) { const v = stack.pop(); for (const w of adj[v]) if (!seen.has(w)) { seen.add(w); stack.push(w); } }
 check(inter === 8, `${inter} inter-residue bonds (a 9-mer has 8 peptide bonds)`);
 check(seen.size === at.length, `all ${at.length} peptide atoms in one connected chain (${bonds} bonds)`);
+
+/* 5 ------------------------------------------------------------ MACE blocks */
+const MACE = literal("MACE");
+const ablation = fs.readFileSync(path.join(__dirname, "src/data/mace_feature_blocks.md"), "utf8");
+const cell = (blocks, col) => {
+  const row = ablation.split("\n").find(l => l.split("|")[1]?.trim() === blocks);
+  if (!row) throw new Error(`no row for ${blocks}`);
+  return parseFloat(row.split("|")[col].trim().split(" ")[0]);
+};
+console.log("\nMACE ablation (shown on screen vs src/data/mace_feature_blocks.md)");
+[["boltz", "boltz", 5, MACE.boltz], ["boltz+node", "boltzNode", 5, MACE.boltzNode],
+ ["node", "node", 5, MACE.node], ["node train", "nodeTrain", 3, MACE.nodeTrain]]
+  .forEach(([label, , col, shown]) => {
+    const blocks = label.split(" ")[0];
+    const want = cell(blocks, col);
+    check(Math.abs(want - shown) < 1e-9, `${label} = ${shown.toFixed(3)} (table says ${want.toFixed(3)})`);
+  });
+check(MACE.boltzNode < MACE.boltz,
+  `adding node features lowers the score, ${MACE.boltz.toFixed(3)} -> ${MACE.boltzNode.toFixed(3)}`);
+check(Math.abs(MACE.node) < 0.05 && MACE.nodeTrain > 0.7,
+  `MACE alone memorises: train ${MACE.nodeTrain.toFixed(3)}, test ${MACE.node.toFixed(3)}`);
+
+/* 6 ------------------------------------------------- does the page even run? */
+console.log("\nruntime");
+const names = [...src.matchAll(/^function (s\d+)\(/gm)].map(m => m[1]);
+check(new Set(names).size === names.length, `scene functions are unique: ${names.join(", ")}`);
+const listed = src.match(/const SCENES=\[([^\]]+)\]/)[1].split(",").map(x => x.trim());
+check(listed.every(n => names.includes(n)) && listed.length === names.length,
+  `SCENES matches the definitions: ${listed.join(", ")}`);
+try {
+  const ctx = new Proxy({}, { get: (_, k) => k === "canvas"
+      ? { parentElement: { clientWidth: 1000 } }
+      : (k === "measureText" ? () => ({ width: 10 }) : () => {}), set: () => true });
+  const el = () => ({ getContext: () => ctx, parentElement: { clientWidth: 1000 },
+    style: {}, setAttribute: () => {}, addEventListener: () => {}, innerHTML: "" });
+  global.window = global; global.devicePixelRatio = 1;
+  global.document = { getElementById: el, querySelectorAll: () => [], documentElement: {} };
+  global.getComputedStyle = () => ({ getPropertyValue: () => "#888888" });
+  global.matchMedia = () => ({ matches: false, addEventListener: () => {} });
+  global.ResizeObserver = class { observe() {} };
+  let n = 0; global.requestAnimationFrame = (f) => { if (n++ < 3) f(n * 16); };
+  eval(src);
+  check(true, "bundle evaluates and renders without throwing");
+} catch (e) {
+  check(false, `bundle threw: ${e.message}`);
+}
 
 console.log(fail ? `\n${fail} FAILED\n` : "\nall checks passed\n");
 process.exit(fail ? 1 : 0);

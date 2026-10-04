@@ -26,16 +26,24 @@
   color-scheme:dark;
 }
 
-body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55;}
 .wrap{max-width:1060px;margin:0 auto;padding-inline:20px;padding-block:28px 56px;}
 
 header{display:flex;flex-direction:column;gap:6px;margin-bottom:22px;}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;}
+.page-nav{display:flex;gap:6px;flex-wrap:wrap;}
+.page-nav a{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);}
+.page-nav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:var(--surface);}
+.page-nav a:focus-visible{outline:2px solid var(--model);outline-offset:2px;}
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
 h1{font-family:var(--disp);font-weight:800;font-size:clamp(28px,5.2vw,44px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.02em;}
 .sub{color:var(--muted);max-width:62ch;margin:0;font-size:15px;}
+.thesis{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;margin:18px 0 20px;padding:13px 15px;border:1px solid var(--line);border-left:3px solid var(--model);border-radius:7px;background:var(--surface);}
+.thesis .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--model);padding-top:2px;}
+.thesis p{margin:0;font-size:14px;color:var(--ink);}
 
 figure{margin:0;}
-.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 12px 34px rgba(20,32,43,.07);}
 canvas{display:block;width:100%;}
 
 .transport{display:flex;align-items:center;gap:14px;padding:12px 14px;border-top:1px solid var(--line);background:var(--sunk);}
@@ -49,9 +57,11 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--model);height:20px;curso
 button.chip{all:unset;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);}
 button.chip[aria-current="true"]{color:var(--surface);background:var(--ink);border-color:var(--ink);}
 button.chip:focus-visible{outline:2px solid var(--model);outline-offset:2px;}
+button.chip:hover,.page-nav a:hover{border-color:var(--model);color:var(--ink);}
 
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;}
 @media (max-width:760px){.cards{grid-template-columns:1fr;}}
+@media (max-width:640px){.topline{align-items:flex-start;flex-direction:column;margin-bottom:8px;}.thesis{grid-template-columns:1fr;gap:4px;}}
 .card{min-width:0;border-top:2px solid var(--c);padding-top:12px;}
 .card .n{font-family:var(--mono);font-size:11px;color:var(--c);letter-spacing:.1em;}
 .card h2{font-family:var(--disp);font-weight:600;font-size:17px;margin:4px 0 6px;letter-spacing:-.01em;}
@@ -66,15 +76,26 @@ button.chip:focus-visible{outline:2px solid var(--model);outline-offset:2px;}
 
 <div class="wrap">
 <header>
-  <span class="eyebrow">HLA-A*02:01 · ALLENIHRV · t½ = 44.7 h</span>
-  <h1>Sequence to Half-Life</h1>
-  <p class="sub">Nine-mer sequences become predicted complexes, complexes become frozen MACE descriptors, and a shallow head maps those descriptors onto measured dissociation half-lives. The structure shown is the real Boltz-2 output for ALLENIHRV, the strongest binder in the set with a prediction on disk.</p>
+  <div class="topline">
+    <span class="eyebrow">HLA-A*02:01 · ALLENIHRV · measured t½ = 44.7 h</span>
+    <nav class="page-nav" aria-label="Demo pages">
+      <a href="pipeline.html" aria-current="page">How it works</a>
+      <a href="levels.html">Compare models</a>
+    </nav>
+  </div>
+  <h1>From Sequence to Stability</h1>
+  <p class="sub">The model turns a peptide–HLA sequence pair into a predicted 3D complex, describes the local atomic environment, then learns how those descriptors relate to measured dissociation half-life.</p>
 </header>
+
+<div class="thesis">
+  <span class="k">Core idea</span>
+  <p>Boltz-2 and MACE supply structural information; only the small regression head is fitted to the half-life measurements.</p>
+</div>
 
 <figure>
   <div class="frame">
     <canvas id="stage" role="img" aria-describedby="alt"></canvas>
-    <p id="alt" class="vh">A three-part animation. First, a table of nine-residue peptide sequences paired with measured half-lives. Second, the peptide ALLENIHRV folded by Boltz-2 into the HLA-A*02:01 groove, drawn from the deposited coordinates alongside the 180-residue alpha-1/alpha-2 platform trace. Third, that structure converted into an atom graph, passed through a frozen MACE backbone, mean-pooled into nine per-residue feature vectors, and fed to a small trainable multilayer perceptron that predicts log half-life.</p>
+    <p id="alt" class="vh">A four-step animation. Measured peptide half-lives provide the training target. Boltz-2 predicts each peptide–HLA complex. A frozen MACE model converts the atomic neighbourhood into numerical descriptors. A small trainable regression head maps those descriptors to log half-life.</p>
     <div class="transport">
       <button class="play" id="play" aria-label="Pause animation"><svg id="icon" viewBox="0 0 12 12"><rect x="1.5" y="1" width="3" height="10" rx="1"/><rect x="7.5" y="1" width="3" height="10" rx="1"/></svg></button>
       <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Animation timeline">
@@ -92,22 +113,22 @@ button.chip:focus-visible{outline:2px solid var(--model);outline-offset:2px;}
 <div class="cards">
   <div class="card" style="--c:var(--peptide)">
     <div class="n">01 / DATA</div>
-    <h2>Measured peptides</h2>
-    <p>1,023 nine-mers measured on this allele in the Rasmussen set. The target is <code>log(t½ / 1 h)</code>; the 16 entries recorded as zero are excluded and counted.</p>
+    <h2>Start with measurements</h2>
+    <p>Each row pairs a nine-residue peptide with an experimentally measured dissociation half-life. A log target keeps very long-lived complexes from dominating the fit.</p>
   </div>
   <div class="card" style="--c:var(--model)">
     <div class="n">02 / STRUCTURE</div>
-    <h2>Boltz complexes</h2>
-    <p>Each peptide is folded with the shared heavy chain and β2m. The example here scores 0.988 complex pLDDT and contributes 74 peptide heavy atoms.</p>
+    <h2>Predict the complex</h2>
+    <p>Boltz-2 places the peptide in the HLA binding groove. The animation uses the saved coordinates for ALLENIHRV rather than a generic protein cartoon.</p>
   </div>
   <div class="card" style="--c:var(--learn)">
     <div class="n">03 / MODEL</div>
-    <h2>Frozen MACE, shallow head</h2>
-    <p>Invariant scalars are read before the energy readout, mean-pooled per peptide position, concatenated, and regressed. Only the head has gradients.</p>
+    <h2>Describe, then regress</h2>
+    <p>Frozen MACE features summarise each residue’s atomic neighbourhood. A small trainable head combines them into one half-life prediction.</p>
   </div>
 </div>
 
-<p class="note"><strong>Coordinates are real; the feature widths are not.</strong> The peptide, the contact graph and the platform trace are read from <code style="font-family:var(--mono)">predictions/all75/hla_a_02_01_allenihrv/</code>. The descriptor and head dimensions are placeholders until the checkpoint is inspected. Boltz writes heavy atoms only, so hydrogens enter at preparation, before MACE sees the complex.</p>
+<p class="note"><strong>How to read the animation.</strong> The peptide and HLA trace use the saved ALLENIHRV coordinates. The moving messages, feature bars, and compressed neural-network nodes are explanatory schematics: they show the direction of computation, not literal activations or layer widths.</p>
 </div>
 
 <script>
@@ -180,7 +201,7 @@ function lock(x,y,s,c,al){ctx.save();ctx.globalAlpha=al;ctx.strokeStyle=c;ctx.fi
 /* ---------- stage 1 ---------- */
 function stage1(p){
   const R=narrow?{x:16,y:62,w:368,rh:26,n:11,sq:13}:{x:120,y:88,w:760,rh:30,n:13,sq:16};
-  txt('PEPTIDE–HLA DATASET',R.x,R.y-30,{s:narrow?10:11.5,c:P.mut,w:500});
+  txt('1 · MEASURED HALF-LIVES',R.x,R.y-30,{s:narrow?10:11.5,c:P.mut,w:500});
   ctx.save();ctx.globalAlpha=.6;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(R.x,R.y-20);ctx.lineTo(R.x+R.w,R.y-20);ctx.stroke();ctx.restore();
   txt('t½ (h)',R.x+R.w,R.y-30,{s:narrow?10:11.5,c:P.mut,al2:'right'});
@@ -201,7 +222,6 @@ function stage1(p){
     ctx.save();ctx.globalAlpha=al*.35;ctx.strokeStyle=P.ln;ctx.setLineDash([2,4]);
     ctx.beginPath();ctx.moveTo(seqX+(narrow?110:134),y-4);ctx.lineTo(R.x+R.w-(narrow?54:64),y-4);ctx.stroke();ctx.restore();
     txt(zero?'0.0':row[1].toFixed(1),R.x+R.w-(narrow?30:34),y,{s:R.sq-1.5,c:zero?P.mut:P.ink,al,al2:'right'});
-    if(zero)txt('excl',R.x+R.w,y,{s:narrow?9:10,c:P.wrn,al:al*.9,al2:'right'});
     if(sel&&focus>0){
       ctx.save();ctx.globalAlpha=focus*.14;ctx.fillStyle=P.pep;
       rr(R.x-8,y-R.sq-4,R.w+16,R.rh-2,4);ctx.fill();ctx.restore();
@@ -209,15 +229,15 @@ function stage1(p){
   }
   const n=Math.round(lerp(0,1023,ease(sub(p,.1,.7))));
   const fy=R.y+R.n*R.rh+(narrow?18:24);
-  txt(`n = ${n.toLocaleString()} HLA-A*02:01 measurements`,R.x,fy,{s:narrow?10.5:12,c:P.mut});
-  txt('16 recorded as t\u00bd = 0, excluded and reported',R.x,fy+(narrow?15:18),{s:narrow?10.5:12,c:P.wrn,al:sub(p,.4,.6)});
-  if(p>.78)txt('→ one example carried forward',R.x+R.w,fy,{s:narrow?10.5:12,c:P.pep,al2:'right',al:sub(p,.78,.92)});
+  txt(`n = ${n.toLocaleString()} measurements for HLA-A*02:01`,R.x,fy,{s:narrow?10.5:12,c:P.mut});
+  txt('measured t½ supplies the supervised target',R.x,fy+(narrow?15:18),{s:narrow?10.5:12,c:P.mut,al:sub(p,.4,.6)});
+  if(p>.78)txt('→ follow one example',R.x+R.w,fy,{s:narrow?10.5:12,c:P.pep,al2:'right',al:sub(p,.78,.92)});
 }
 
 /* ---------- stage 2 ---------- */
 function stage2(p,ang){
   const cx=VW/2, cy=narrow?268:196, zoom=narrow?.55:.85;
-  txt('BOLTZ-2 · hla_a_02_01_allenihrv · model_0',narrow?16:120,narrow?54:76,{s:narrow?10:11.5,c:P.mut,w:500});
+  txt('2 · BOLTZ-2 PREDICTS THE COMPLEX',narrow?16:120,narrow?54:76,{s:narrow?10:11.5,c:P.mut,w:500});
 
   const letters=sub(p,0,.22), folding=ease(sub(p,.16,.68)), env=sub(p,.44,.86), atoms=sub(p,.5,.95);
   // sequence strip
@@ -267,8 +287,8 @@ function stage2(p,ang){
   });
 
   const by=narrow?600:470;
-  txt('α1/α2 platform, 180 Cα · complex pLDDT 0.988',narrow?16:120,by,{s:narrow?10:11.5,c:P.mut,al:env});
-  txt(`${ATOMS.length} peptide heavy atoms · H added at preparation`,narrow?16:120,by+(narrow?16:19),{s:narrow?10:11.5,c:P.pep,al:atoms});
+  txt('α1/α2 platform · 180 Cα positions from the saved prediction',narrow?16:120,by,{s:narrow?10:11.5,c:P.mut,al:env});
+  txt(`${ATOMS.length} peptide heavy atoms · ALLENIHRV highlighted`,narrow?16:120,by+(narrow?16:19),{s:narrow?10:11.5,c:P.pep,al:atoms});
 }
 
 /* ---------- stage 3 ---------- */
@@ -281,7 +301,7 @@ function stage3(p,ang){
 
   /* --- graph panel --- */
   ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle=P.ln;rr(G.x,G.y,G.w,G.h,8);ctx.stroke();ctx.restore();
-  txt('MACE-MH-1 · omol head',G.x+12,G.y+20,{s:narrow?10:11.5,c:P.mdl,w:500});
+  txt('3 · FROZEN MACE DESCRIPTORS',G.x+12,G.y+20,{s:narrow?10:11.5,c:P.mdl,w:500});
   lock(G.x+G.w-28,G.y+16,13,P.mdl,.85);
   txt('frozen',G.x+G.w-40,G.y+20,{s:narrow?9.5:10.5,c:P.mdl,al2:'right',al:.85});
 
@@ -310,11 +330,11 @@ function stage3(p,ang){
     ctx.fillStyle=hex(col,.85);
     ctx.beginPath();ctx.arc(s.x,s.y,ATOMS[k].r*s.k*zoom*1.4,0,7);ctx.fill();ctx.restore();
   });
-  txt(`r_max = 5.0 Å · ${EDGES.length} contacts · 2 layers`,G.x+12,G.y+G.h-14,{s:narrow?9.5:10.5,c:P.mut,al:draw});
+  txt(`local neighbours within 5.0 Å · schematic message passing`,G.x+12,G.y+G.h-14,{s:narrow?9.5:10.5,c:P.mut,al:draw});
   if(wave>0&&wave<1)txt('message passing',G.x+G.w-12,G.y+G.h-14,{s:narrow?9.5:10.5,c:P.mdl,al2:'right',al:.9});
 
   /* --- pooling panel --- */
-  txt('MEAN-POOL INVARIANT SCALARS BY POSITION',Q.x,Q.y-8,{s:narrow?9.5:11,c:P.mut,w:500,al:pool});
+  txt('POOL ATOM FEATURES BY PEPTIDE POSITION',Q.x,Q.y-8,{s:narrow?9.5:11,c:P.mut,w:500,al:pool});
   const gw=(Q.w-8*6)/9;
   for(let i=0;i<9;i++){
     const a=sub(pool,i*.055,.34+i*.055);
@@ -328,12 +348,12 @@ function stage3(p,ang){
     }
     txt('P'+(i+1),gx+gw/2,Q.y+Q.h-6,{s:narrow?8.5:10,c:P.mut,al2:'center',al:a});
   }
-  txt('128 scalars × 2 layers = 256 per atom',Q.x,Q.y+Q.h+(narrow?14:16),{s:narrow?9.5:10.5,c:P.mut,al:pool});
-  txt('9 × 256 = 2304',Q.x+Q.w,Q.y+Q.h+(narrow?14:16),{s:narrow?9.5:10.5,c:P.ink,al2:'right',al:pool});
+  txt('one descriptor block per peptide residue',Q.x,Q.y+Q.h+(narrow?14:16),{s:narrow?9.5:10.5,c:P.mut,al:pool});
+  txt('concatenate P1 … P9',Q.x+Q.w,Q.y+Q.h+(narrow?14:16),{s:narrow?9.5:10.5,c:P.ink,al2:'right',al:pool});
 
   /* --- MLP panel --- */
   const my=M.y+(narrow?26:34);
-  txt('TRAINABLE HEAD',M.x,M.y+(narrow?10:12),{s:narrow?9.5:11,c:P.lrn,w:500,al:fwd});
+  txt('4 · TRAINABLE REGRESSION HEAD',M.x,M.y+(narrow?10:12),{s:narrow?9.5:11,c:P.lrn,w:500,al:fwd});
   const cols=[8,5,1], colX=[M.x+(narrow?64:96),M.x+(narrow?176:232),M.x+(narrow?282:356)];
   const colH=narrow?96:132;
   const nodes=cols.map((n,ci)=>Array.from({length:n},(_,k)=>({x:colX[ci],y:my+colH/2+(k-(n-1)/2)*(colH/(Math.max(n-1,1))||0)*(n>1?1:0)})));
@@ -345,7 +365,7 @@ function stage3(p,ang){
     ctx.fillRect(ix,my+k*(colH/18),iw,colH/18-1);
   }
   ctx.restore();
-  txt('2304',ix+iw/2,my+colH+(narrow?12:14),{s:narrow?8.5:10,c:P.mut,al2:'center',al:fwd});
+  txt('features',ix+iw/2,my+colH+(narrow?12:14),{s:narrow?8:9,c:P.mut,al2:'center',al:fwd});
 
   for(let ci=0;ci<2;ci++){
     const from=ci===0?nodes[0].map(n=>({x:ix+iw,y:n.y})):nodes[ci];
@@ -366,11 +386,8 @@ function stage3(p,ang){
   // prediction readout
   if(fit>0){
     const ry=my+colH+(narrow?36:44);
-    const pred=lerp(2.71,1.68,ease(fit)), meas=Math.log(44.7);
-    txt('log t½  pred',M.x,ry,{s:narrow?10:11.5,c:P.mut,al:fit});
-    txt(pred.toFixed(2),M.x+(narrow?82:104),ry,{s:narrow?13:15,w:600,c:P.lrn,al:fit});
-    txt('meas',M.x+(narrow?124:156),ry,{s:narrow?10:11.5,c:P.mut,al:fit});
-    txt(meas.toFixed(2),M.x+(narrow?162:200),ry,{s:narrow?13:15,w:600,c:P.ink,al:fit});
+    txt('output',M.x,ry,{s:narrow?10:11.5,c:P.mut,al:fit});
+    txt('predicted log half-life',M.x+(narrow?52:64),ry,{s:narrow?12:14,w:600,c:P.lrn,al:fit});
     // loss curve
     const L={x:M.x+(narrow?220:272),y:ry-(narrow?26:32),w:narrow?146:198,h:narrow?34:44};
     ctx.save();ctx.globalAlpha=fit*.5;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
@@ -380,8 +397,8 @@ function stage3(p,ang){
     ctx.beginPath();
     for(let k=0;k<kN;k++){const x=L.x+(k/(LOSS.length-1))*L.w, y=L.y+L.h-(LOSS[k]/.95)*L.h;k?ctx.lineTo(x,y):ctx.moveTo(x,y);}
     ctx.stroke();ctx.restore();
-    txt('val MAE',L.x+L.w,L.y-4,{s:narrow?8.5:10,c:P.mut,al2:'right',al:fit});
-    txt('ridge baseline beaten on held-out groups',M.x,ry+(narrow?20:24),{s:narrow?9.5:10.5,c:P.mut,al:sub(fit,.5,.9)});
+    txt('validation loss',L.x+L.w,L.y-4,{s:narrow?8.5:10,c:P.mut,al2:'right',al:fit});
+    txt('only this small head is fitted to the measurements',M.x,ry+(narrow?20:24),{s:narrow?9.5:10.5,c:P.mut,al:sub(fit,.5,.9)});
   }
 }
 
@@ -395,7 +412,7 @@ function frame(){
   let label='', idx=0;
   if(t<A[1]){stage1(sub(t,A[0],A[1]));label='01 — measured peptides';idx=0;}
   else if(t<B[1]){stage2(sub(t,B[0],B[1]),ang);label='02 — Boltz structure prediction';idx=1;}
-  else {stage3(sub(t,C[0],C[1]),ang);label=t<.88?'03 — frozen MACE features':'04 — supervised head';idx=t<.88?2:3;}
+  else {stage3(sub(t,C[0],C[1]),ang);label=t<.88?'03 — structural descriptors':'04 — half-life regressor';idx=t<.88?2:3;}
 
   // cross-fades between stages
   [[A[1],()=>stage1(1)],[B[1],()=>stage2(1,ang)]].forEach(([edge,fn])=>{

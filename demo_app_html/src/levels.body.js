@@ -3,7 +3,7 @@ const cv=document.getElementById('stage'), ctx=cv.getContext('2d');
 const scrub=document.getElementById('scrub'), playBtn=document.getElementById('play');
 const icon=document.getElementById('icon'), clock=document.getElementById('clock');
 const chips=[...document.querySelectorAll('.chip')];
-const DUR=48000;
+const DUR=66000;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let VW=1000,VH=520,narrow=false,P=pal(),t=reduce?.94:0,playing=!reduce,last=0;
 
@@ -23,12 +23,54 @@ const M={
  semlp:{A:[0.773,0.745,0.564,4.252,11.019],B:[0.723,0.724,0.457,4.783,12.200],C:[0.663,0.607,0.434,4.269,8.296],C2e:[0.116,0.144,0.026,3.198,6.312]},
  sexgb:{A:[0.773,0.739,0.552,4.198,11.014],B:[0.720,0.720,0.468,4.633,11.768],C:[0.666,0.654,0.353,4.203,7.645],C2e:[0.014,0.103,0.059,3.279,6.380]},
  boltz2:{A:[0.792,0.766,0.576,4.196,11.297],B:[0.764,0.761,0.566,4.525,11.337],C:[0.792,0.773,0.578,3.252,6.479],C2e:[0.511,0.545,0.279,2.912,5.777]}};
+/* feature-ablation run, src/data/mace_feature_blocks.md — a separate experiment
+   from the A/B/C/C2e table, so these are shown on their own terms */
+const MACE={boltz:0.603, boltzNode:0.571, node:0.020, nodeTrain:0.768,
+            energy:0.430, dims:{node:11520, edge:14450, energy:430}};
 const MODELS=[{id:'direct',l:'direct (MLP)',ck:'dir'},{id:'transformer',l:'transformer',ck:'tf'},
  {id:'semlp',l:'SE+MLP',ck:'se'},{id:'sexgb',l:'SE+XGB',ck:'se',dash:[5,3]},{id:'boltz2',l:'boltz2 (frozen)',ck:'bz'}];
 /* the 34 NetMHCpan pseudosequence positions, 1-indexed on the 182-aa chain */
 const PSEUDO=[7,9,24,45,59,62,63,66,67,69,70,73,74,76,77,80,81,84,95,97,99,114,116,118,143,147,150,152,156,158,159,163,167,171];
 const NHLA=182, NPEP=9, NALL=NHLA+NPEP;
 const SURV=PSEUDO.map(p=>p-1).concat(Array.from({length:NPEP},(_,i)=>NHLA+i)); // 43 of the 191
+
+/* A real two-residue fragment of the peptide for the MPNN scene: His-Arg at
+   P7-P8, 21 atoms and 21 bonds including the imidazole ring. The viewing
+   angles were chosen by maximising the closest on-screen approach of any two
+   atoms, so nothing stacks. Covalent bonds are drawn as sticks; the 5 A graph
+   MACE actually passes messages on is overlaid dashed, which is the point. */
+const FRAG=(()=>{
+  const want=a=>a.ri===6||a.ri===7;
+  const ids=ATOMS.map((a,i)=>i).filter(i=>want(ATOMS[i]));
+  const D=(i,j)=>Math.hypot(ATOMS[i].p.x-ATOMS[j].p.x,
+                            ATOMS[i].p.y-ATOMS[j].p.y,
+                            ATOMS[i].p.z-ATOMS[j].p.z);
+  const bonds=[];
+  ids.forEach((i,n)=>ids.slice(n+1).forEach(j=>{if(D(i,j)<1.95*SC)bonds.push([i,j]);}));
+  // centre on the atom with the busiest 5 A shell inside the fragment
+  let c=ids[0],best=-1;
+  ids.forEach(i=>{const n=ids.filter(j=>j!==i&&D(i,j)<5.0*SC).length;
+    if(n>best){best=n;c=i;}});
+  const one=ids.filter(j=>j!==c&&D(c,j)<5.0*SC);
+  const two=ids.filter(j=>j!==c&&!one.includes(j)&&one.some(k=>D(k,j)<5.0*SC));
+  const near=k=>one.reduce((b2,j)=>D(j,k)<D(b2,k)?j:b2,one[0]);
+  return {ids,bonds,c,one,two,
+          e1:one.map(j=>[c,j]),
+          e2:two.map(k=>[near(k),k])};
+})();
+const FRAG_VIEW={a:1.04,b:0.70};
+function fragLayout(rect){
+  const {a,b}=FRAG_VIEW;
+  const pts=FRAG.ids.map(i=>{const p=ATOMS[i].p;
+    const x1=p.x*Math.cos(a)+p.z*Math.sin(a), z1=-p.x*Math.sin(a)+p.z*Math.cos(a);
+    return {i,x:x1,y:p.y*Math.cos(b)-z1*Math.sin(b),z:p.y*Math.sin(b)+z1*Math.cos(b)};});
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  pts.forEach(q=>{x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);y0=Math.min(y0,q.y);y1=Math.max(y1,q.y);});
+  const s=Math.min(rect.w/(x1-x0+26),rect.h/(y1-y0+26));
+  const ox=rect.x+rect.w/2-(x0+x1)/2*s, oy=rect.y+rect.h/2-(y0+y1)/2*s;
+  const P2={}; pts.forEach(q=>P2[q.i]={x:ox+q.x*s,y:oy+q.y*s,z:q.z}); return P2;
+}
+const ELCOL=()=>[P.bz,P.mut,P.wrn];        // N, C, O
 
 /* ---------- helpers ---------- */
 const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -176,7 +218,7 @@ function L(){
    ? {rail:{x:16,y:34,w:368,h:22,horiz:true}, pan:{x:16,y:80,w:368,h:438}}
    : {rail:{x:30,y:54,w:122,h:426,horiz:false}, pan:{x:188,y:52,w:782,h:428}};
 }
-const RAIL=[['LEVEL 1','BASELINE'],['LEVEL 1b','SE GATE'],['LEVEL 2','ATTENTION'],['LEVEL 3','BOLTZ-2'],['','RESULTS']];
+const RAIL=[['MODEL','DIRECT'],['VARIANT','SE GATE'],['MODEL','ATTENTION'],['MODEL','BOLTZ-2'],['MODEL','MACE'],['','RESULTS']];
 function drawRail(idx,r){
   const N=RAIL.length;
   if(r.horiz){
@@ -203,14 +245,14 @@ function gridRect(i,n,reg,rows,gap){
 
 /* ---------- scene 1: the real baseline ---------- */
 function s1(p,pan){
-  txt('LEVEL 1 — DIRECT (MLP) · THE BASELINE',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.dir,f:'d'});
-  txt('hla_pseudoseq 34 aa + peptide 9 aa + allele index',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('DIRECT MLP · THE REFERENCE MODEL',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.dir,f:'d'});
+  txt('34 groove residues + 9 peptide residues + allele identity',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
 
   const rows=narrow?4:2, gap=narrow?1:1.5;
   const AW=narrow?44:70;                     // allele block sits to the right
   const regA={x:pan.x,y:pan.y+(narrow?92:120),w:pan.w,h:narrow?78:58};
   const regB={x:pan.x,y:pan.y+(narrow?100:128),w:pan.w-AW-(narrow?8:14),h:narrow?32:42};
-  const drop=ease(sub(p,.03,.22)), move=ease(sub(p,.14,.40)), grow=sub(p,.32,.50);
+  const drop=ease(sub(p,.03,.18)), move=ease(sub(p,.12,.32)), grow=sub(p,.26,.40);
   const survSet=new Set(SURV);
 
   for(let i=0;i<NALL;i++){
@@ -227,7 +269,7 @@ function s1(p,pan){
     ctx.fillRect(x,y+(B.h-hh)*move,w,hh);ctx.restore();
   }
   // the third input: a learned per-allele vector
-  const ae=sub(p,.38,.55);
+  const ae=sub(p,.30,.44);
   if(ae>0){
     const ax=pan.x+pan.w-AW;
     for(let k=0;k<6;k++){const w=AW/6;
@@ -241,17 +283,19 @@ function s1(p,pan){
   txt('peptide 9',pan.x+regB.w,ly,{s:narrow?9:10.5,c:P.dir,ta:'right',al:move});
   txt('shared AA embedding → flatten → concat allele → MLP head',pan.x,ly+(narrow?20:24),
     {s:narrow?10:11.5,c:P.ink,al:grow});
-  resultStrip('direct',p,pan,ly+(narrow?44:52)+38,.56);
+  resultStrip('direct',p,pan,ly+(narrow?44:52)+38,.48,null,
+    ['Learns the motif. Lost on an unseen groove.',
+     'Lost on an unseen groove.']);
 }
 
 /* ---------- scene 2: squeeze-and-excitation ---------- */
 function s2(p,pan){
-  txt('LEVEL 1b — SQUEEZE-AND-EXCITATION GATE',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.se,f:'d'});
-  txt('the identical direct-network features · 704 channels, recalibrated',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('SE GATE · REWEIGHT THE SAME FEATURES',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.se,f:'d'});
+  txt(narrow?'704 channels · example-dependent weights':'same 704 channels as the direct model · weights depend on the example',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
 
   const N=narrow?48:72, gap=narrow?2:3;
   const reg={x:pan.x,y:pan.y+(narrow?150:166),w:pan.w,h:narrow?40:52};
-  const show=sub(p,.02,.14), squeeze=sub(p,.10,.32), gate=sub(p,.28,.50);
+  const show=sub(p,.02,.12), squeeze=sub(p,.08,.28), gate=sub(p,.24,.42);
   for(let i=0;i<N;i++){
     const R=gridRect(i,N,reg,1,gap);
     const base=.25+JIT[i+120]*.7;
@@ -276,17 +320,19 @@ function s2(p,pan){
   }
   txt('two heads on the recalibrated vector — MLP, and XGBoost',pan.x,reg.y+reg.h+(narrow?22:26),
     {s:narrow?10:11.5,c:P.ink,al:gate});
-  resultStrip('semlp',p,pan,reg.y+reg.h+(narrow?22:26)+38,.56,'SE+MLP');
+  resultStrip('semlp',p,pan,reg.y+reg.h+(narrow?22:26)+38,.48,'SE+MLP',
+    ['Helps on new alleles. Not on new grooves.',
+     'Helps on alleles, not grooves.']);
 }
 
 /* ---------- scene 3: attention ---------- */
 function s3(p,pan){
-  txt('LEVEL 2 — CONTENT-DEPENDENT SELF-ATTENTION',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.tf,f:'d'});
-  txt('the same indices · [CLS] + peptide + pseudoseq · d_model 64, 4 heads',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('TRANSFORMER · LET POSITIONS INTERACT',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.tf,f:'d'});
+  txt('[CLS] + peptide + groove residues · 64-wide attention, 4 heads',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
 
   const N=44, gap=narrow?2:3;
   const reg={x:pan.x,y:pan.y+(narrow?152:168),w:pan.w,h:narrow?34:46};
-  const ins=ease(sub(p,.03,.15)), arcs=sub(p,.10,.72), mix=sub(p,.22,.46);
+  const ins=ease(sub(p,.03,.12)), arcs=sub(p,.08,.70), mix=sub(p,.18,.38);
   for(let i=0;i<N;i++){
     const R=gridRect(i,N,reg,1,gap);
     const isCls=i===0, isPep=i>=N-NPEP;
@@ -309,22 +355,25 @@ function s3(p,pan){
   ctx.restore();
   txt('all-pairs attention over 44 tokens, trained from scratch on 9,031 rows',
     pan.x,reg.y+reg.h+(narrow?30:34),{s:narrow?10:11.5,c:P.ink,al:mix});
-  resultStrip('transformer',p,pan,reg.y+reg.h+(narrow?30:34)+38,.56);
+  resultStrip('transformer',p,pan,reg.y+reg.h+(narrow?30:34)+38,.48,null,
+    ['Attention from scratch underfits 9,031 rows.',
+     'Underfits 9,031 rows.']);
 }
 
 /* ---------- scene 4: boltz-2 ---------- */
 function s4(p,pan,ang){
-  txt('LEVEL 3 — 3D CO-FOLDING REPRESENTATION',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.bz,f:'d'});
-  txt('precomputed Boltz-2 complex embedding · frozen · z-scored from train',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('BOLTZ-2 · START FROM A STRUCTURAL EMBEDDING',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.bz,f:'d'});
+  txt('precomputed complex embedding · frozen · standardised on train only',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
   txt('\u03b11/\u03b12 platform \u00b7 2 helices, 9 strands \u00b7 ALLENIHRV in the groove',
-    pan.x,pan.y+pan.h-(narrow?76:72),{s:narrow?9:10.5,c:P.mut,al:sub(p,.14,.26)*(1-sub(p,.42,.56))});
+    pan.x,pan.y+pan.h-(narrow?76:72),{s:narrow?9:10.5,c:P.mut,al:sub(p,.14,.26)*(1-sub(p,.34,.46))});
 
-  const show=sub(p,.02,.12), fold=sub(p,.40,.58), vec=sub(p,.60,.78);
-  const cx=pan.x+pan.w/2, cy=pan.y+(narrow?160:140), zoom=(narrow?.50:.78)*(1-fold*.45);
-  if(show>0&&fold<1){
-    const al=show*(1-fold*.9);
-    drawCartoon(ang,cx,cy,zoom,al);
-  }
+  const show=sub(p,.02,.12), fold=sub(p,.36,.50), vec=sub(p,.50,.62);
+  // the complex does not leave: it shrinks into the top right and keeps turning
+  const F=ease(fold);
+  const cx=lerp(pan.x+pan.w/2, pan.x+pan.w-(narrow?64:92), F);
+  const cy=lerp(pan.y+(narrow?160:140), pan.y+(narrow?40:70), F);
+  const zoom=lerp(narrow?.50:.78, narrow?.21:.30, F);
+  if(show>0)drawCartoon(ang,cx,cy,zoom,show);
   const reg={x:pan.x,y:pan.y+(narrow?236:220),w:pan.w,h:narrow?44:58};
   if(vec>0){
     const N=narrow?80:160;
@@ -335,15 +384,17 @@ function s4(p,pan,ang){
       ctx.save();ctx.globalAlpha=a*(.3+Math.abs(Math.sin(i*.27))*.65);ctx.fillStyle=P.bz;
       ctx.fillRect(reg.x+i*w,reg.y+reg.h-h,w-.6,h);ctx.restore();
     }
-    txt('1,547-d → the same 2×256 ReLU MLP head as the baseline',pan.x,reg.y+reg.h+(narrow?17:20),
-      {s:narrow?10:11.5,c:P.ink,al:sub(vec,.45,.75)});
-    txt('backbone frozen',pan.x+pan.w,reg.y+reg.h+(narrow?17:20),{s:narrow?9.5:10.5,c:P.bz,ta:'right',al:sub(vec,.45,.75)});
+    txt(narrow?'1,547-d → the same MLP head':'1,547-d → the same 2×256 ReLU MLP head as the baseline',
+      pan.x,reg.y+reg.h+(narrow?17:20),{s:narrow?10:11.5,c:P.ink,al:sub(vec,.45,.75)});
+    txt('backbone frozen',pan.x+pan.w,reg.y+reg.h+(narrow?32:20),{s:narrow?9.5:10.5,c:P.bz,ta:narrow?'left':'right',al:sub(vec,.45,.75)});
   }
-  resultStrip('boltz2',p,pan,reg.y+reg.h+(narrow?17:20)+38,.72);
+  resultStrip('boltz2',p,pan,reg.y+reg.h+(narrow?17:20)+24,.56,null,
+    ['0.792 on random and on unseen alleles alike.',
+     'Same score, random or unseen allele.']);
 }
 
 /* ---------- shared results strip ---------- */
-function resultStrip(id,p,pan,top,at,name){
+function resultStrip(id,p,pan,top,at,name,note){
   const a=sub(p,at,at+.12); if(a<=0)return;
   const w=pan.w/4, S=narrow?.82:1;
 
@@ -361,26 +412,169 @@ function resultStrip(id,p,pan,top,at,name){
     txt(s.k,x+bw/2,top+11+bh-4*S,{s:(narrow?8.5:10)*1,c:P.sf,ta:'center',w:600,al:aa});
     txt(s.short,x+bw+6*S,top+11+bh-4*S,{s:narrow?9:11,c:P.ink,w:600,al:aa});
     txt(s.plain,x,top+(narrow?40:42),{s:narrow?8.5:10,c:P.mut,al:aa});
-    txt(v.toFixed(3),x,top+(narrow?64:70),{s:narrow?17:24,w:600,c:v>.4?P.ink:P.wrn,al:aa});
+    txt(v.toFixed(3),x,top+(narrow?60:66),{s:narrow?17:24,w:600,c:v>.4?P.ink:P.wrn,al:aa});
   });
 
-  // difficulty ramp under the four values
-  const ry=top+(narrow?76:84), g=sub(p,at+.06,at+.18);
-  if(g>0){
-    ctx.save();ctx.globalAlpha=g*.45;ctx.strokeStyle=P.ln;ctx.lineWidth=1.5;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(pan.x,ry);ctx.lineTo(pan.x+pan.w-(narrow?44:58),ry);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(pan.x+pan.w-(narrow?50:64),ry-3.5);
-    ctx.lineTo(pan.x+pan.w-(narrow?44:58),ry);ctx.lineTo(pan.x+pan.w-(narrow?50:64),ry+3.5);
-    ctx.stroke();ctx.restore();
-    txt('more leakage',pan.x,ry-6,{s:narrow?8:9.5,c:P.mut,al:g*.9});
-    txt('harder',pan.x+pan.w,ry+3,{s:narrow?8:9.5,c:P.mut,ta:'right',al:g*.9,w:500});
+  // what the four numbers mean
+  const ny=top+(narrow?86:94), g=sub(p,at+.14,at+.26);
+  if(g>0&&note){
+    ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.bz;
+    ctx.beginPath();ctx.moveTo(pan.x,ny-7);ctx.lineTo(pan.x+6,ny-3.5);ctx.lineTo(pan.x,ny);
+    ctx.closePath();ctx.fill();ctx.restore();
+    txt(narrow?note[1]:note[0],pan.x+12,ny,{s:narrow?9.5:12.5,c:P.ink,f:'s',w:600,al:g});
   }
 }
 
-/* ---------- scene 5: results ---------- */
+/* ---------- scene 5: MACE, atomistic descriptors ---------- */
 function s5(p,pan){
-  txt('WHERE EACH REPRESENTATION BREAKS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
-  txt('Pearson r · 9,031 embedded rows, 54 alleles · splits by decreasing leakage',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('LEVEL 4 — ATOMISTIC DESCRIPTORS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.se,f:'d'});
+  txt('MACE-MH-1 · an equivariant message-passing net over the complex',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+
+  const box={x:pan.x,y:pan.y+(narrow?50:54),w:narrow?pan.w:pan.w*.54,h:narrow?150:190};
+  const L=fragLayout(box);
+  const build=sub(p,.02,.12), l1=sub(p,.14,.34), l2=sub(p,.34,.54);
+  const EC=ELCOL(), AR=narrow?4.2:5.6, CR=narrow?6.6:8.6;
+
+  // the 5 A graph MACE passes messages on, dashed so it reads as a graph
+  ctx.save();ctx.setLineDash([2,4]);ctx.lineCap='round';
+  FRAG.e2.forEach(([j,k])=>{const a=L[j],c=L[k];
+    ctx.globalAlpha=sub(build,.4,1)*.3;ctx.strokeStyle=P.se;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(c.x,c.y);ctx.stroke();});
+  FRAG.e1.forEach(([c0,j])=>{const a=L[c0],c=L[j];
+    ctx.globalAlpha=build*.55;ctx.strokeStyle=P.se;ctx.lineWidth=1.3;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(c.x,c.y);ctx.stroke();});
+  ctx.restore();
+
+  // covalent bonds as sticks, each half taking its own atom's colour
+  ctx.save();ctx.lineCap='round';
+  FRAG.bonds.forEach(([i,j])=>{
+    const a=L[i],c=L[j],mx=(a.x+c.x)/2,my=(a.y+c.y)/2;
+    ctx.globalAlpha=build;
+    [[a,ATOMS[i].el],[c,ATOMS[j].el]].forEach(([q,el])=>{
+      ctx.strokeStyle=hex(P.ink,.22);ctx.lineWidth=narrow?4.4:5.8;
+      ctx.beginPath();ctx.moveTo(q.x,q.y);ctx.lineTo(mx,my);ctx.stroke();
+      ctx.strokeStyle=EC[el];ctx.lineWidth=narrow?2.6:3.4;
+      ctx.beginPath();ctx.moveTo(q.x,q.y);ctx.lineTo(mx,my);ctx.stroke();});
+  });
+  ctx.restore();
+
+  // the receptive field grows one shell per layer
+  [[l1,.58],[l2,1.0]].forEach(([u,f])=>{
+    if(u<=0)return;
+    ctx.save();ctx.globalAlpha=(1-sub(u,.75,1))*.28;ctx.strokeStyle=P.se;
+    ctx.setLineDash([3,4]);ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.arc(L[FRAG.c].x,L[FRAG.c].y,f*(narrow?62:80)*ease(u),0,7);
+    ctx.stroke();ctx.restore();});
+
+  // atoms, coloured by element, drawn back to front
+  const order=FRAG.ids.slice().sort((i,j)=>L[i].z-L[j].z);
+  order.forEach(i=>{
+    const q=L[i], centre=i===FRAG.c;
+    const r=(centre?CR:AR)*(centre?1+.10*Math.sin(p*46)*ease(l1)*(1-ease(l2)):1);
+    ctx.save();ctx.globalAlpha=build;
+    ctx.fillStyle=centre?P.se:EC[ATOMS[i].el];
+    ctx.strokeStyle=P.sf;ctx.lineWidth=narrow?1.6:2;
+    ctx.beginPath();ctx.arc(q.x,q.y,r,0,7);ctx.fill();ctx.stroke();ctx.restore();});
+
+  // messages travelling inward, one hop per layer
+  const flow=(edges,u,rev)=>{
+    if(u<=0||u>=1)return;
+    edges.forEach(([a0,b0],n)=>{
+      const st=(n%5)*.06, w=sub(u,st,st+.55);
+      if(w<=0||w>=1)return;
+      const A=L[rev?b0:a0], B=L[rev?a0:b0], e=ease(w);
+      ctx.save();ctx.globalAlpha=Math.sin(w*Math.PI);ctx.fillStyle=P.se;
+      ctx.beginPath();ctx.arc(lerp(B.x,A.x,e),lerp(B.y,A.y,e),narrow?2.4:3.1,0,7);
+      ctx.fill();ctx.restore();});
+  };
+  flow(FRAG.e2,sub(l2,0,.5),true);
+  flow(FRAG.e1,l1,false);
+  flow(FRAG.e1,sub(l2,.45,1),false);
+
+  // element key, so the colours mean something
+  if(build>.5){
+    let kx=box.x+(narrow?0:4);
+    [['N',0],['C',1],['O',2]].forEach(([n,el])=>{
+      ctx.save();ctx.globalAlpha=sub(build,.5,1)*.9;ctx.fillStyle=EC[el];
+      ctx.beginPath();ctx.arc(kx+3,box.y+(narrow?8:10),3.2,0,7);ctx.fill();ctx.restore();
+      txt(n,kx+9,box.y+(narrow?11:13),{s:narrow?8.5:9.5,c:P.mut,al:sub(build,.5,1)});
+      kx+=narrow?24:28;});
+    txt('His-Arg at P7-P8',box.x+box.w,box.y+(narrow?11:13),
+      {s:narrow?8.5:9.5,c:P.mut,ta:'right',al:sub(build,.5,1)});
+  }
+
+  // what the animation to the left is doing, in words
+  if(!narrow){
+    const tx=pan.x+pan.w*.60, lines=[
+      ['every atom starts as its element and position',build],
+      ['layer 1  \u2014  sum messages from atoms within 5 \u00c5',l1],
+      ['layer 2  \u2014  those neighbours have summed theirs',l2],
+      ['so two layers see 10 \u00c5 without ever going global',sub(p,.46,.58)]];
+    lines.forEach(([s,u],i)=>{
+      const a=sub(u,.05,.45), y=box.y+42+i*34;
+      ctx.save();ctx.globalAlpha=a;ctx.fillStyle=i<3?P.se:P.ink;
+      ctx.beginPath();ctx.arc(tx+3,y-4,i<3?3.2:0,0,7);ctx.fill();ctx.restore();
+      txt(s,tx+(i<3?13:0),y,{s:i<3?11.5:12,c:i<3?P.ink:P.ink,f:'s',w:i<3?400:600,al:a});
+    });
+  }
+
+  const ly=box.y+box.h+(narrow?14:17);
+  txt(l2>.1?'layer 2 · receptive field 10 Å':(l1>.1?'layer 1 · receptive field 5 Å':'invariant scalars per atom'),
+    pan.x,ly,{s:narrow?10:11.5,c:P.se,w:600,al:build});
+  txt(narrow?'pooled into three blocks':'pooled into node, edge and energy blocks',
+    pan.x+pan.w,ly+(narrow?13:0),{s:narrow?9:10.5,c:P.mut,ta:'right',al:sub(p,.5,.62)});
+
+  // the three descriptor blocks, to scale by width
+  const bw=sub(p,.48,.58);
+  if(bw>0){
+    const by=ly+(narrow?12:14), tot=MACE.dims.node+MACE.dims.edge+MACE.dims.energy;
+    let x=pan.x;
+    [['node',MACE.dims.node],['edge',MACE.dims.edge],['energy',MACE.dims.energy]].forEach(([n,dm],i)=>{
+      const w=pan.w*(dm/tot)*ease(bw);
+      ctx.save();ctx.globalAlpha=bw*(i===2?.95:.5);ctx.fillStyle=i===2?P.se:hex(P.se,.45);
+      ctx.fillRect(x,by,Math.max(1,w-2),narrow?9:11);ctx.restore();
+      if(w>(narrow?74:46))txt(n+'  '+dm.toLocaleString(),x+2,by+(narrow?20:23),
+        {s:narrow?8.5:9.5,c:P.mut,al:bw});
+      x+=w;});
+  }
+  maceStrip(p,pan,ly+(narrow?54:64),.58);
+}
+
+/* three numbers that say whether the atomistic blocks earned their place */
+function maceStrip(p,pan,top,at){
+  const a=sub(p,at,at+.12); if(a<=0)return;
+  ctx.save();ctx.globalAlpha=a*.6;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pan.x,top);ctx.lineTo(pan.x+pan.w,top);ctx.stroke();ctx.restore();
+  txt('HELD-OUT TEST  ·  GBM HEAD  ·  SEPARATE ABLATION RUN',pan.x,top-7,
+    {s:narrow?8.5:10,c:P.mut,w:500,al:a});
+
+  const cols=[
+    ['Boltz-2 alone',        MACE.boltz,     'structure only',  P.bz],
+    ['+ MACE node',          MACE.boltzNode, '− 0.032',    P.se],
+    ['MACE only, no Boltz',  MACE.node,      'at chance',       P.wrn]];
+  const w=pan.w/3;
+  cols.forEach(([lab,v,sub2,col],i)=>{
+    const aa=sub(p,at+i*.03,at+.1+i*.03), x=pan.x+i*w;
+    txt(lab,x,top+(narrow?16:19),{s:narrow?9.5:11,c:P.ink,w:600,al:aa});
+    txt(v.toFixed(3),x,top+(narrow?40:46),{s:narrow?17:24,w:600,c:col,al:aa});
+    txt(sub2,narrow?x:x+84,top+(narrow?56:46),{s:narrow?9:10.5,c:P.mut,al:aa});
+  });
+  const g=sub(p,at+.14,at+.26);
+  if(g>0){
+    const ny=top+(narrow?76:70);
+    ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.se;
+    ctx.beginPath();ctx.moveTo(pan.x,ny-7);ctx.lineTo(pan.x+6,ny-3.5);ctx.lineTo(pan.x,ny);
+    ctx.closePath();ctx.fill();ctx.restore();
+    txt(narrow?'Memorises. Never reaches Boltz.'
+              :'Trains to 0.768, tests at 0.020. It memorises, and it never reaches Boltz.',
+      pan.x+12,ny,{s:narrow?9.5:12.5,c:P.ink,f:'s',w:600,al:g});
+  }
+}
+
+/* ---------- scene 6: results ---------- */
+function s6(p,pan){
+  txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
+  txt('Pearson r · 9,031 rows, 54 alleles · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
 
   const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?6:10);
   const Y0=pan.y+(narrow?62:70), Y1=pan.y+pan.h-(narrow?124:98);
@@ -426,32 +620,34 @@ function s5(p,pan){
       ctx.fill();ctx.stroke();ctx.restore();});
     if(lead&&grow>=3)pts.forEach((q,i)=>
       txt(M[id][SPLITS[i].k][0].toFixed(3),q[0],q[1]-(narrow?10:13),
-        {s:narrow?10:11.5,w:600,c:P.bz,ta:i===3?'right':'center',al:sub(p,.50,.60)}));
+        {s:narrow?10:11.5,w:600,c:P.bz,ta:i===3?'right':'center',al:sub(p,.44,.54)}));
     if(grow>=3)txt(m.l,pts[3][0]+(narrow?0:6),pts[3][1]+(lead?(narrow?20:24):4),
       {s:narrow?8.5:10.5,c:P[m.ck],ta:'right',al:lead?1:.6,w:lead?600:400});
   });
 
-  const k=sub(p,.56,.68);
+  const k=sub(p,.54,.64);
   if(k>0){
     const by=Y1+(narrow?62:74);
     ctx.save();ctx.globalAlpha=k*.5;ctx.strokeStyle=P.bz;ctx.lineWidth=1.5;
     ctx.beginPath();ctx.moveTo(pan.x,by);ctx.lineTo(pan.x+pan.w*ease(k),by);ctx.stroke();ctx.restore();
-    txt('On the cluster split every sequence model is at chance.',pan.x,by+(narrow?19:24),
-      {s:narrow?11:14,c:P.ink,f:'s',w:600,al:k});
-    txt('Frozen Boltz-2 reaches r = 0.511, against −0.034 for the baseline MLP.',pan.x,by+(narrow?35:44),
-      {s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.64,.74)});
-    txt('C2e holds only 2 test clusters — read that column as a spread, not a point value.',
-      pan.x,by+(narrow?50:62),{s:narrow?9:11,c:P.wrn,f:'s',al:sub(p,.72,.82)});
+    txt('Only the Boltz-2 embeddings generalise to an unseen allele.',pan.x,by+(narrow?19:24),
+      {s:narrow?11:15,c:P.ink,f:'s',w:600,al:k});
+    txt('0.792 on held-out alleles, the same score it gets on random rows. Every sequence',
+      pan.x,by+(narrow?34:44),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.60,.70)});
+    txt('model drops, and on unseen clusters they sit at chance. Atomistic features did not close it.',
+      pan.x,by+(narrow?47:60),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.66,.76)});
+    txt('C2e has only 2 test clusters, so treat the size of that gap cautiously.',
+      pan.x,by+(narrow?62:78),{s:narrow?9:11,c:P.wrn,f:'s',al:sub(p,.72,.82)});
   }
 }
 
 /* ---------- compose ---------- */
-const CUT=[.20,.35,.50,.76];
-const SCENES=[s1,s2,s3,s4,s5];
+const CUT=[.155,.275,.395,.585,.80];
+const SCENES=[s1,s2,s3,s4,s5,s6];
 function frame(){
   ctx.clearRect(0,0,VW,VH);ctx.fillStyle=P.sf;ctx.fillRect(0,0,VW,VH);
   const g=L(), ang=t*Math.PI*2.6;
-  let idx=CUT.findIndex(c=>t<c); if(idx<0)idx=4;
+  let idx=CUT.findIndex(c=>t<c); if(idx<0)idx=5;
   drawRail(idx,g.rail);
   const bounds=[0,...CUT,1], seg=[bounds[idx],bounds[idx+1]];
   SCENES[idx](sub(t,seg[0],seg[1]),g.pan,ang);

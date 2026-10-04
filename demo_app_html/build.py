@@ -37,11 +37,60 @@ def build_levels() -> None:
     print(f"  dist/levels.html    {out.stat().st_size:>7,} bytes")
 
 
+# Two shapes of the same pages.
+#
+# dist/        publishable fragments. The artifact platform wraps the page in
+#              its own <!doctype>/<head> at publish time, so these must NOT
+#              carry one. pipeline rides along as a sibling file; sibling files
+#              are served raw, so that one does need a skeleton, and its link
+#              back to levels has to point at the artifact root.
+# dist/local/  complete documents for opening from disk or a plain file server,
+#              which supply no charset of their own. Without the meta the
+#              browser reads UTF-8 as Latin-1 and every degree sign, middle dot
+#              and Greek letter turns to mojibake.
+STANDALONE = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+__PAGE__
+</body></html>
+"""
+
+
+def build_pipeline() -> None:
+    page = (SRC / "pipeline.html").read_text()
+    standalone = STANDALONE.replace("__PAGE__", page.replace('href="levels.html"', 'href="./"'))
+    (DIST / "pipeline.standalone.html").write_text(standalone)
+    print(f"  dist/pipeline.standalone.html  "
+          f"{(DIST / 'pipeline.standalone.html').stat().st_size:>7,} bytes  (publishes beside levels)")
+
+
+def build_local() -> None:
+    """Browsable copies, and exactly what GitHub Pages serves.
+
+    levels becomes index.html so Pages has a root document, which means
+    pipeline's link back has to point at the directory rather than a filename.
+    """
+    local = DIST / "local"
+    local.mkdir(exist_ok=True)
+    pages = {
+        "index.html": (DIST / "levels.html").read_text()
+                      .replace('href="levels.html"', 'href="./"'),
+        "pipeline.html": (SRC / "pipeline.html").read_text()
+                         .replace('href="levels.html"', 'href="./"'),
+    }
+    for name, body in pages.items():
+        out = local / name
+        out.write_text(STANDALONE.replace("__PAGE__", body))
+        print(f"  dist/local/{name:<14} {out.stat().st_size:>7,} bytes")
+
+
 def main() -> None:
     DIST.mkdir(exist_ok=True)
     build_levels()
-    shutil.copy(SRC / "pipeline.html", DIST / "pipeline.html")
-    print(f"  dist/pipeline.html  {(DIST / 'pipeline.html').stat().st_size:>7,} bytes")
+    build_pipeline()
+    build_local()
 
 
 if __name__ == "__main__":
