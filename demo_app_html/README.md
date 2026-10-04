@@ -48,7 +48,7 @@ metrics, re-run `node verify.js`, and it will tell you which cells moved.
 
 Five models over four splits, ordered by decreasing leakage:
 
-| split | held out | direct (MLP) | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
+| split | held out | direct (MLP) | transformer | squeeze-and-excitation + MLP | squeeze-and-excitation + XGBoost | **boltz2 (frozen)** |
 |---|---|---|---|---|---|---|
 | A | nothing (shuffled) | 0.728 | 0.634 | 0.749 | 0.741 | **0.794** |
 | B | peptides | 0.696 | 0.596 | 0.712 | 0.729 | **0.761** |
@@ -58,9 +58,10 @@ Five models over four splits, ordered by decreasing leakage:
 Frozen Boltz-2 takes every metric on every split.
 
 **Two caveats the pages carry on their face.** C2 puts about 3 of its 22
-clusters in test, so the size of that gap should be treated cautiously. And SE is presented as a
-variant of the direct baseline because it reweights the same 704 input channels
-rather than introducing a different raw representation.
+clusters in test, so the size of that gap should be treated cautiously.
+Squeeze-and-excitation is presented as a variant of the direct baseline because
+it reweights the same 704 input channels rather than introducing a different raw
+representation.
 
 ## The structure
 

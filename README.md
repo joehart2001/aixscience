@@ -16,7 +16,7 @@ it dissociates.
 
 <p align="center">
   <a href="https://joehart2001.github.io/boltz-tau/"><strong>▶&nbsp; Watch the interactive demo</strong></a><br>
-  <sub>Five scenes, 68 s. Sequence baselines, transferred Boltz-2 embeddings,
+  <sub>Five scenes, 90 s. Sequence baselines, transferred Boltz-2 embeddings,
   held-out results, and the MACE extension. Scrub it, or jump to any scene.</sub>
 </p>
 
@@ -52,7 +52,7 @@ sequence model goes negative while the Boltz-τ readout remains predictive.
   <em>Graph comparing performance of each model on Pearson correlation across alleles and Spearman correlation within individual alleles. Dashed line indicates reference state-of-the-art methods performed on splits by peptide from Rasmussen et. al (2016).</em>
 </p>
 
-| split label | held out | direct (MLP) | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
+| split label | held out | direct (MLP) | transformer | squeeze-and-excitation + MLP | squeeze-and-excitation + XGBoost | **boltz2 (frozen)** |
 |---|---|---|---|---|---|---|
 | A | nothing (shuffled) | 0.728 | 0.634 | 0.749 | 0.741 | **0.794** |
 | B | peptides | 0.696 | 0.596 | 0.712 | 0.729 | **0.761** |

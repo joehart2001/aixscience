@@ -111,7 +111,7 @@ td.best::after{content:"▌";color:var(--boltz);margin-left:5px;font-size:9px;ve
   </div>
   <div class="chips">
     <button class="chip" data-at="0.005">Direct MLP</button>
-    <button class="chip" data-at="0.10">SE gate</button>
+    <button class="chip" data-at="0.10">Squeeze-and-excitation</button>
     <button class="chip" data-at="0.16">Transformer</button>
     <button class="chip" data-at="0.28">Boltz-2</button>
     <button class="chip" data-at="0.48">Results</button>
@@ -131,6 +131,6 @@ td.best::after{content:"▌";color:var(--boltz);margin-left:5px;font-size:9px;ve
 
   <h3>Two caveats</h3>
   <p class="flag"><strong>C2 puts about 3 of its 22 clusters in test.</strong> Treat that column as a strong signal worth following up, not as a precise estimate of generalisation to every unseen groove.</p>
-  <p class="flag"><strong>SE changes feature weighting, not the raw input.</strong> It starts from the direct model’s same 704 channels, learns a gate over them, then feeds either an MLP or XGBoost. It is best read as a baseline variant rather than a separate rung in a hierarchy.</p>
+  <p class="flag"><strong>Squeeze-and-excitation changes feature weighting, not the raw input.</strong> It starts from the direct model’s same 704 channels, learns a gate over them, then feeds either an MLP or XGBoost. It is best read as a baseline variant rather than a separate rung in a hierarchy.</p>
 </div>
 </div>

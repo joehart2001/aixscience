@@ -3,7 +3,7 @@ const cv=document.getElementById('stage'), ctx=cv.getContext('2d');
 const scrub=document.getElementById('scrub'), playBtn=document.getElementById('play');
 const icon=document.getElementById('icon'), clock=document.getElementById('clock');
 const chips=[...document.querySelectorAll('.chip')];
-const DUR=68000;
+const DUR=90000;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let VW=1000,VH=520,narrow=false,P=pal(),t=reduce?.94:0,playing=!reduce,last=0;
 
@@ -28,7 +28,9 @@ const M={
 const MACE={boltz:0.603, boltzNode:0.571, node:0.020, nodeTrain:0.768,
             energy:0.430, dims:{node:11520, edge:14450, energy:430}};
 const MODELS=[{id:'direct',l:'direct (MLP)',ck:'dir'},{id:'transformer',l:'transformer',ck:'tf'},
- {id:'semlp',l:'SE+MLP',ck:'se'},{id:'sexgb',l:'SE+XGB',ck:'se',dash:[5,3]},{id:'boltz2',l:'boltz2 (frozen)',ck:'bz'}];
+ {id:'semlp',l:'squeeze-and-excitation + MLP',ck:'se'},
+ {id:'sexgb',l:'squeeze-and-excitation + XGBoost',ck:'se',dash:[5,3]},
+ {id:'boltz2',l:'boltz2 (frozen)',ck:'bz'}];
 /* the 34 NetMHCpan pseudosequence positions, 1-indexed on the 182-aa chain */
 const PSEUDO=[7,9,24,45,59,62,63,66,67,69,70,73,74,76,77,80,81,84,95,97,99,114,116,118,143,147,150,152,156,158,159,163,167,171];
 const NHLA=182, NPEP=9, NALL=NHLA+NPEP;
@@ -248,7 +250,7 @@ const SEQCOLS=[
  {id:'direct', name:'Direct MLP', ck:'dir', kind:'bars',
   input:'34 pocket residues + 9 peptide + allele',
   note:'embeddings, flattened, 3-layer MLP'},
- {id:'semlp',  name:'SE gate',    ck:'se',  kind:'gate',
+ {id:'semlp',  name:'Squeeze-and-excitation', ck:'se', kind:'gate',
   input:'the same 704 channels, recalibrated',
   note:'learned per-channel gate, MLP and XGBoost heads'},
  {id:'transformer', name:'Transformer', ck:'tf', kind:'attn',
@@ -451,7 +453,7 @@ function s3(p,pan){
 
   // Keep the series endpoints inside the plot and reserve a clean gutter for
   // their labels. Previously the labels sat on top of the final curve segment.
-  const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?68:126);
+  const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?106:196);
   const labelX=X1+(narrow?8:14);
   const Y0=pan.y+(narrow?62:70), Y1=pan.y+pan.h-(narrow?124:98);
   const RMIN=-.12,RMAX=.85;
@@ -514,7 +516,8 @@ function s3(p,pan){
     const shift=Math.max(0,ls[ls.length-1].y-(Y1-4));
     ls.forEach(l=>{
       const y=l.y-shift;
-      const label=narrow?l.m.l.replace(' (MLP)','').replace(' (frozen)',''):l.m.l;
+      const label=narrow?l.m.l.replace('squeeze-and-excitation + ','Squeeze–excitation ')
+                                      .replace(' (MLP)','').replace(' (frozen)',''):l.m.l;
       ctx.save();ctx.globalAlpha=(l.lead?.75:.3)*reveal;ctx.strokeStyle=P[l.m.ck];
       ctx.lineWidth=l.lead?1.4:1;ctx.setLineDash(l.m.dash||[]);
       ctx.beginPath();ctx.moveTo(X1+4,l.pointY);ctx.lineTo(labelX-3,y);ctx.stroke();ctx.restore();
