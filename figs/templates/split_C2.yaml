@@ -1,0 +1,22 @@
+# Inter-model comparison on split C2: grouped by allele cluster — a genuinely unseen binding groove.
+#
+# Each model entry points at a network's figs dir and names a run inside its
+# data/runs.json. Nothing is retrained — the test predictions saved by that
+# network are reloaded and replotted on shared axes.
+#
+#   PY=../../.venv/bin/python
+#   $PY plots.py templates/split_C2.yaml
+
+label: split C2 (grouped by allele cluster)
+out: split_C2             # subfolder under figs/compare/
+
+models:
+  - label: direct (MLP)
+    figs_dir: ../direct-network/figs
+    run: split C2 (cluster)
+  - label: transformer
+    figs_dir: ../transformer-network/figs
+    run: split C2 (cluster)
+
+caption: >-
+  Only 22 clusters, so ~3 land in test: read C2 as a spread, not a point value.

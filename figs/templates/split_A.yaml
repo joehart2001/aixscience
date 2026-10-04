@@ -1,0 +1,24 @@
+# Inter-model comparison on split A: random split — peptides and alleles leak across folds; the easy ceiling.
+#
+# Each model entry points at a network's figs dir and names a run inside its
+# data/runs.json. Nothing is retrained — the test predictions saved by that
+# network are reloaded and replotted on shared axes.
+#
+#   PY=../../.venv/bin/python
+#   $PY plots.py templates/split_A.yaml
+
+label: split A (random split)
+out: split_A             # subfolder under figs/compare/
+
+models:
+  - label: direct (MLP)
+    figs_dir: ../direct-network/figs
+    run: split A (random)
+  - label: transformer
+    figs_dir: ../transformer-network/figs
+    run: split A (random)
+
+# NOTE: boltz-network is deliberately absent. Its runs cover HLA-A*02:01 rows
+# only, so its test set is a different set of rows and its bars would not be
+# comparable. To include it, first retrain direct/transformer with the matching
+# `allele` + `embeddings_dir` filters so all three share the same test rows.
