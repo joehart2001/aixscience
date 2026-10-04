@@ -61,11 +61,16 @@ left above chance.
 table in `mlp-embeds/figs/compare/summary_all75_test_metrics.md`. C2e holds only
 2 test clusters, so read that row as a spread rather than a point value.</sub>
 
+From the above table and graph, we can see that of all the lighter archictectures perform at a level comparable to the current state-of-the-art MINT methods on random and peptide-excluded data partitioning. However, these lighter models fail to generalize to allele structures, with catastrophic failure when a completely unseen allele structure group is introduced, with the exception of the Boltz-2 embedded model. The reference value comes from an exclude-peptide-type splitting, which we also show is not sufficient to generalize structure predictions to different alleles.
+
+We also report the inter-allele Spearman correlation, which measures how well the models actually learned the peptide's influence on the lifetime as opposed to reading out exclusively for given allele types. This also shows a significant decline in correlation values, suggesting that further works need to consider these individual-allele benchmarks to truly evaluate the peptide learning task.
+
+## Repository structure
+
 - **`mlp-embeds/`** — the models: four `*-network/` frameworks (direct,
   transformer, squeeze-boost, boltz) sharing flat modules, plus a cross-network
   comparison harness in `mlp-embeds/figs/`. See `mlp-embeds/README.md`.
-- **`Data/`** — dataset, precomputed splits, and Boltz2 embeddings (source of
-  truth; models read from it, never write to it).
+- **`Data/`** — dataset, precomputed splits, and Boltz2 embeddings (embeddings gitignored here due to file size constraints).
 - **`demo_app_html/`** — the demo above, plus the structure pipeline explainer
   and the renderer behind the rotating complex. Each builds to one
   dependency-free HTML file; published to [Pages](https://joehart2001.github.io/aixscience/) by
