@@ -14,17 +14,39 @@ Engineering Track Challenge).
   prediction, t½ 44.7 h, complex pLDDT 0.988.</em>
 </p>
 
+This repository first splits peptide-allele information using several clustering schemes, the first being a random 
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="workflow/umap_energy/fig_umap_boltz.png">
+    <img src="workflow/umap_energy/fig_umap_boltz.png" alt="UMAP of diversity in training set" width="920">
+  </picture>
+</p>
+<p align="center">
+  <em>UMAP of allele structure configurations generated from Boltz-2 (https://github.com/jwohlwend/boltz) architecture </em>
+</p>
+
 **Frozen Boltz-2 complex embeddings beat every from-scratch sequence model, and
 the margin grows with how hard the split is.** On the cluster split, where no
 peptide group leaks between train and test, they are the only representation
 left above chance.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="mlp-embeds/figs/compare/final_test_metrics.png">
+    <img src="demo_app_html/docs/protein-light.gif" alt="Graph comparing performance of each model on Pearson correlation across alleles and Spearman correlation within individual alleles" width="920">
+  </picture>
+</p>
+<p align="center">
+  <em>Graph comparing performance of each model on Pearson correlation across alleles and Spearman correlation within individual alleles. Dashed line indicates reference state-of-the-art methods performed on peptide-excluding splits from Karthikeyan et. al (2026).</em>
+</p>
+
 | split | held out | direct (MLP) | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
 |---|---|---|---|---|---|---|
-| A | nothing (shuffled) | 0.757 | 0.655 | 0.773 | 0.773 | **0.792** |
-| B | peptides | 0.715 | 0.643 | 0.723 | 0.720 | **0.764** |
-| C | alleles | 0.584 | 0.379 | 0.663 | 0.666 | **0.792** |
-| C2e | clusters | −0.034 | 0.158 | 0.116 | 0.014 | **0.511** |
+| A | nothing (shuffled) | 0.728 | 0.634 | 0.749 | 0.741 | **0.794** |
+| B | peptides | 0.696 | 0.596 | 0.712 | 0.729 | **0.761** |
+| C | alleles | 0.570 | 0.375 | 0.592 | 0.487 | **0.714** |
+| C2 | allele clusters | −0.065 | −0.098 | −0.108 | −0.075 | **0.425** |
 
 <sub>Pearson r on held-out test, 9,031 embedded rows across 54 alleles. Full
 table in `mlp-embeds/figs/compare/summary_all75_test_metrics.md`. C2e holds only
