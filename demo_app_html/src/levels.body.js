@@ -374,7 +374,7 @@ function s4(p,pan,ang){
   const cy=lerp(pan.y+(narrow?160:140), pan.y+(narrow?40:70), F);
   const zoom=lerp(narrow?.50:.78, narrow?.21:.30, F);
   if(show>0)drawCartoon(ang,cx,cy,zoom,show);
-  const reg={x:pan.x,y:pan.y+(narrow?236:220),w:pan.w,h:narrow?44:58};
+  const reg={x:pan.x,y:pan.y+(narrow?214:196),w:pan.w,h:narrow?44:58};
   if(vec>0){
     // the actual 1,547-d vector for this complex, z-scored and bucketed to fit
     const N=EMB.z.length, mid=reg.y+reg.h/2, half=reg.h/2-1, w=reg.w/N;
@@ -402,7 +402,7 @@ function s4(p,pan,ang){
       pan.x,reg.y+reg.h+(narrow?17:20),{s:narrow?10:11.5,c:P.ink,al:sub(vec,.45,.75)});
     txt('backbone frozen',pan.x+pan.w,reg.y+reg.h+(narrow?32:20),{s:narrow?9.5:10.5,c:P.bz,ta:narrow?'left':'right',al:sub(vec,.45,.75)});
   }
-  resultStrip('boltz2',p,pan,reg.y+reg.h+(narrow?17:20)+24,.56,null,
+  resultStrip('boltz2',p,pan,reg.y+reg.h+(narrow?46:44)+24,.56,null,
     ['0.792 on random and on unseen alleles alike.',
      'Same score, random or unseen allele.']);
 }
@@ -414,8 +414,11 @@ function resultStrip(id,p,pan,top,at,name,note){
 
   ctx.save();ctx.globalAlpha=a*.6;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(pan.x,top);ctx.lineTo(pan.x+pan.w,top);ctx.stroke();ctx.restore();
-  txt('PEARSON r  ·  HELD-OUT TEST'+(name?'  ·  '+name:''),pan.x,top-7,
-    {s:narrow?8.5:10,c:P.mut,w:500,al:a});
+  txt((narrow?'FOUR HELD-OUT TEST SETS · PEARSON r'
+             :'PEARSON r ON FOUR HELD-OUT TEST SETS, HARDER LEFT TO RIGHT')
+      +(name?'  ·  '+name:''),pan.x,top-19,{s:narrow?8.5:10,c:P.mut,w:500,al:a});
+  txt('1.0 perfect · 0 chance',pan.x+pan.w,top-19,
+    {s:narrow?8:9.5,c:P.mut,ta:'right',al:a*.85});
 
   SPLITS.forEach((s,i)=>{
     const aa=sub(p,at+i*.022,at+.1+i*.022), x=pan.x+i*w, v=M[id][s.k][0];
@@ -427,10 +430,19 @@ function resultStrip(id,p,pan,top,at,name,note){
     txt(s.short,x+bw+6*S,top+11+bh-4*S,{s:narrow?9:11,c:P.ink,w:600,al:aa});
     txt(s.plain,x,top+(narrow?40:42),{s:narrow?8.5:10,c:P.mut,al:aa});
     txt(v.toFixed(3),x,top+(narrow?60:66),{s:narrow?17:24,w:600,c:v>.4?P.ink:P.wrn,al:aa});
+    // track runs -0.2 to 1.0 with a tick at zero, so a negative bar reads as negative
+    const tw=w-(narrow?14:26), ty=top+(narrow?70:76), th=narrow?4:5;
+    const zx=x+tw*(0.2/1.2), vx=x+tw*((v+0.2)/1.2);
+    ctx.save();ctx.globalAlpha=aa*.5;ctx.fillStyle=P.ln;
+    ctx.fillRect(x,ty,tw,th);ctx.restore();
+    ctx.save();ctx.globalAlpha=aa;ctx.fillStyle=v<0?P.wrn:P.bz;
+    ctx.fillRect(Math.min(zx,vx),ty,Math.max(1.5,Math.abs(vx-zx)),th);ctx.restore();
+    ctx.save();ctx.globalAlpha=aa*.75;ctx.fillStyle=P.mut;
+    ctx.fillRect(zx-0.5,ty-2,1,th+4);ctx.restore();
   });
 
   // what the four numbers mean
-  const ny=top+(narrow?86:94), g=sub(p,at+.14,at+.26);
+  const ny=top+(narrow?92:98), g=sub(p,at+.14,at+.26);
   if(g>0&&note){
     ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.bz;
     ctx.beginPath();ctx.moveTo(pan.x,ny-7);ctx.lineTo(pan.x+6,ny-3.5);ctx.lineTo(pan.x,ny);
