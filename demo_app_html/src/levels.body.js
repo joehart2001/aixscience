@@ -358,7 +358,7 @@ function s1(p,pan){
 /* ---------- scene 2: boltz-2 ---------- */
 function s2(p,pan,ang){
   txt(narrow?'OUR LEVERAGE · PRETRAINED 3D':'OUR LEVERAGE · A PRETRAINED 3D REPRESENTATION',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.bz,f:'d'});
-  txt(narrow?'reuse what Boltz-2 learned · frozen':'reuse what Boltz-2 learned about protein complexes · frozen · standardised on train only',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
+  txt(narrow?'freeze Boltz-2 · train a stability readout':'freeze Boltz-2 · train a shallow MLP stability readout on its structural embeddings',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
   txt('\u03b11/\u03b12 platform \u00b7 2 helices, 9 strands \u00b7 ALLENIHRV in the groove',
     pan.x,pan.y+pan.h-(narrow?76:72),{s:narrow?9:10.5,c:P.mut,al:sub(p,.14,.26)*(1-sub(p,.34,.46))});
 
@@ -393,7 +393,7 @@ function s2(p,pan,ang){
         const x0=reg.x+(acc/EMB.n)*reg.w, wd=(sz/EMB.n)*reg.w; acc+=sz;
         if(wd>70)txt(n,x0+3,reg.y-5,{s:9,c:P.mut,al:sub(vec,.35,.6)});});
     }
-    txt(narrow?'1,547-d → the same MLP head':'1,547-d, z-scored → the same 2×256 ReLU MLP head as the baseline',
+    txt(narrow?'1,547-d → trained MLP readout':'1,547-d, z-scored → trained 2×256 ReLU stability readout',
       pan.x,reg.y+reg.h+(narrow?17:20),{s:narrow?10:11.5,c:P.ink,al:sub(vec,.45,.75)});
     txt('backbone frozen',pan.x+pan.w,reg.y+reg.h+(narrow?32:20),{s:narrow?9.5:10.5,c:P.bz,ta:narrow?'left':'right',al:sub(vec,.45,.75)});
   }
