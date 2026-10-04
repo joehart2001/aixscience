@@ -26,7 +26,8 @@ def build_levels() -> None:
     head = (SRC / "levels.head.html").read_text()
     body = (SRC / "levels.body.js").read_text()
     data = ((SRC / "data" / "boltz_allenihrv.js").read_text()
-            + (SRC / "data" / "boltz_embedding.js").read_text())
+            + (SRC / "data" / "boltz_embedding.js").read_text()
+            + (SRC / "data" / "umap.js").read_text())
 
     # the structure constant has to land inside the IIFE, before first use
     marker = "(function(){\n"

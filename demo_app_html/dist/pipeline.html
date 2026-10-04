@@ -83,13 +83,13 @@ button.chip:hover,.page-nav a:hover{border-color:var(--model);color:var(--ink);}
       <a href="levels.html">Compare models</a>
     </nav>
   </div>
-  <h1>From Foundation Models to Stability</h1>
-  <p class="sub">Most predictors start and end with sequence. We use representations learned from 3D protein structures and atomistic environments, then fit a small task-specific head to measured dissociation half-life.</p>
+  <h1>From Sequence to Stability</h1>
+  <p class="sub">The model turns a peptide–HLA sequence pair into a predicted 3D complex, describes the local atomic environment, then learns how those descriptors relate to measured dissociation half-life.</p>
 </header>
 
 <div class="thesis">
-  <span class="k">Our leverage</span>
-  <p>Experience with atomistic machine learning lets us reuse what Boltz-2 and MACE have already learned, instead of relearning molecular interactions from a limited stability dataset.</p>
+  <span class="k">Core idea</span>
+  <p>Boltz-2 and MACE supply structural information; only the small regression head is fitted to the half-life measurements.</p>
 </div>
 
 <figure>
@@ -117,13 +117,13 @@ button.chip:hover,.page-nav a:hover{border-color:var(--model);color:var(--ink);}
     <p>Each row pairs a nine-residue peptide with an experimentally measured dissociation half-life. A log target keeps very long-lived complexes from dominating the fit.</p>
   </div>
   <div class="card" style="--c:var(--model)">
-    <div class="n">02 / FOUNDATION MODEL</div>
+    <div class="n">02 / STRUCTURE</div>
     <h2>Predict the complex</h2>
     <p>Boltz-2 places the peptide in the HLA binding groove. The animation uses the saved coordinates for ALLENIHRV rather than a generic protein cartoon.</p>
   </div>
   <div class="card" style="--c:var(--learn)">
-    <div class="n">03 / TRANSFER</div>
-    <h2>Reuse, then regress</h2>
+    <div class="n">03 / MODEL</div>
+    <h2>Describe, then regress</h2>
     <p>Frozen MACE features summarise each residue’s atomic neighbourhood. A small trainable head combines them into one half-life prediction.</p>
   </div>
 </div>

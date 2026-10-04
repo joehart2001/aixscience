@@ -18,8 +18,8 @@ from disk, dropped into a slide, or published behind a link.
 
 | Page | What it shows |
 |---|---|
-| `dist/pipeline.html` | A plain-language walkthrough: measurements → Boltz-2 complex → frozen MACE descriptors → trainable regression head. |
-| `dist/levels.html` | A like-for-like comparison of the direct MLP, SE variants, transformer, and frozen Boltz-2 representation across four held-out splits. |
+| `dist/pipeline.html` | How pretrained 3D and atomistic representations become a task-specific stability predictor. |
+| `dist/levels.html` | Sequence-only baseline → transferred Boltz-2 representation → main result → can atomistic MACE descriptors improve further? → feature spaces. |
 
 **Live: [https://joehart2001.github.io/aixscience/](https://joehart2001.github.io/aixscience/)** — published from `main` by
 `.github/workflows/pages.yml`, which runs the build and every check below and
