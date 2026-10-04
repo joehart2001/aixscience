@@ -2,7 +2,7 @@
  *
  *   node verify.js
  *
- * 1. every metric in the page is parsed back out of summary_all75_test_metrics.md
+ * 1. every metric in the page is parsed back out of summary_test_metrics.md
  * 2. scene count, rail entries and chips agree, and each chip lands in its scene
  * 3. nothing is still revealing when its scene is cut (the "flashing" bug)
  * 4. the cartoon's secondary structure and bonds are what the chemistry demands
@@ -29,7 +29,7 @@ function literal(name) {
   throw new Error(`unterminated ${name}`);
 }
 const M = literal("M");
-const METRICS = path.join(__dirname, "../mlp-embeds/figs/compare/summary_all75_test_metrics.md");
+const METRICS = path.join(__dirname, "../mlp-embeds/figs/compare/summary_test_metrics.md");
 const md = fs.readFileSync(METRICS, "utf8");   // read in place, never copied
 const KEY = { "direct (MLP)": "direct", transformer: "transformer", "SE+MLP": "semlp", "SE+XGB": "sexgb", "boltz2 (frozen)": "boltz2" };
 let split = null, n = 0, bad = 0;

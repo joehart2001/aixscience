@@ -37,8 +37,8 @@ This repository first splits peptide-allele information using several clustering
 
 **Frozen Boltz-2 complex embeddings beat every from-scratch sequence model, and
 the margin grows with how hard the split is.** On the cluster split, where no
-peptide group leaks between train and test, they are the only representation
-left above chance.
+groove group leaks between train and test, every sequence model goes negative
+and Boltz-2 is the only one left predicting anything.
 
 <p align="center">
   <picture>
@@ -55,11 +55,12 @@ left above chance.
 | A | nothing (shuffled) | 0.728 | 0.634 | 0.749 | 0.741 | **0.794** |
 | B | peptides | 0.696 | 0.596 | 0.712 | 0.729 | **0.761** |
 | C | alleles | 0.570 | 0.375 | 0.592 | 0.487 | **0.714** |
-| C2 | allele clusters | −0.065 | −0.098 | −0.108 | −0.075 | **0.425** |
+| C2 | clusters | −0.065 | −0.098 | −0.108 | −0.075 | **0.425** |
 
-<sub>Pearson r on held-out test, 9,031 embedded rows across 54 alleles. Full
-table in `mlp-embeds/figs/compare/summary_all75_test_metrics.md`. C2e holds only
-2 test clusters, so read that row as a spread rather than a point value.</sub>
+<sub>Pearson r on held-out test, ~14,500 embedded rows spanning 75 alleles and
+22 clusters. Full table in `mlp-embeds/figs/compare/summary_test_metrics.md`.
+C2 puts about 3 of its 22 clusters in test, so read that row as a spread rather
+than a point value.</sub>
 
 - **`mlp-embeds/`** — the models: four `*-network/` frameworks (direct,
   transformer, squeeze-boost, boltz) sharing flat modules, plus a cross-network

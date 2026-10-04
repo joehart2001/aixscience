@@ -16,15 +16,15 @@ const SPLITS=[
  {k:'A',  short:'random',  plain:'rows shuffled',      tiny:'shuffled'},
  {k:'B',  short:'peptide', plain:'unseen peptides',    tiny:'new peptide'},
  {k:'C',  short:'allele',  plain:'unseen alleles',     tiny:'new allele'},
- {k:'C2e',short:'cluster', plain:'unseen grooves',     tiny:'new groove'}];
+ {k:'C2', short:'cluster', plain:'unseen grooves',     tiny:'new groove'}];
 const M={
- direct:{A:[0.757,0.736,0.520,4.366,11.391],B:[0.715,0.718,0.433,4.982,13.051],C:[0.584,0.501,0.387,4.359,8.355],C2e:[-0.034,0.024,0.017,3.215,6.680]},
- transformer:{A:[0.655,0.653,0.378,4.851,11.932],B:[0.643,0.667,0.381,5.214,12.803],C:[0.379,0.365,0.143,4.841,9.126],C2e:[0.158,0.216,0.027,3.192,6.471]},
- semlp:{A:[0.773,0.745,0.564,4.252,11.019],B:[0.723,0.724,0.457,4.783,12.200],C:[0.663,0.607,0.434,4.269,8.296],C2e:[0.116,0.144,0.026,3.198,6.312]},
- sexgb:{A:[0.773,0.739,0.552,4.198,11.014],B:[0.720,0.720,0.468,4.633,11.768],C:[0.666,0.654,0.353,4.203,7.645],C2e:[0.014,0.103,0.059,3.279,6.380]},
- boltz2:{A:[0.792,0.766,0.576,4.196,11.297],B:[0.764,0.761,0.566,4.525,11.337],C:[0.792,0.773,0.578,3.252,6.479],C2e:[0.511,0.545,0.279,2.912,5.777]}};
+ direct:{A:[0.728,0.701,0.49,3.7,9.993],B:[0.696,0.689,0.461,4.303,12.49],C:[0.57,0.543,0.256,3.77,6.688],C2:[-0.065,-0.054,0.015,3.468,6.835]},
+ transformer:{A:[0.634,0.636,0.34,4.104,10.582],B:[0.596,0.621,0.305,4.474,10.672],C:[0.375,0.304,0.123,4.167,8.054],C2:[-0.098,-0.127,0.041,3.397,6.911]},
+ semlp:{A:[0.749,0.718,0.521,3.489,9.342],B:[0.712,0.714,0.461,4.563,17.082],C:[0.592,0.562,0.206,3.605,6.271],C2:[-0.108,-0.184,0.069,3.506,6.891]},
+ sexgb:{A:[0.741,0.719,0.547,3.535,9.701],B:[0.729,0.728,0.528,3.808,10.207],C:[0.487,0.481,0.139,4.156,7.94],C2:[-0.075,-0.177,-0.047,3.303,6.594]},
+ boltz2:{A:[0.794,0.776,0.595,3.374,9.545],B:[0.761,0.758,0.58,3.699,9.951],C:[0.714,0.703,0.548,3.164,6.368],C2:[0.425,0.485,0.44,3.03,6.548]}};
 /* feature-ablation run, src/data/mace_feature_blocks.md — a separate experiment
-   from the A/B/C/C2e table, so these are shown on their own terms */
+   from the A/B/C/C2 table, so these are shown on their own terms */
 const MACE={boltz:0.603, boltzNode:0.571, node:0.020, nodeTrain:0.768,
             energy:0.430, dims:{node:11520, edge:14450, energy:430}};
 const MODELS=[{id:'direct',l:'direct (MLP)',ck:'dir'},{id:'transformer',l:'transformer',ck:'tf'},
@@ -321,8 +321,8 @@ function s2(p,pan){
   txt('two heads on the recalibrated vector — MLP, and XGBoost',pan.x,reg.y+reg.h+(narrow?22:26),
     {s:narrow?10:11.5,c:P.ink,al:gate});
   resultStrip('semlp',p,pan,reg.y+reg.h+(narrow?22:26)+38,.48,'SE+MLP',
-    ['Helps on new alleles. Not on new grooves.',
-     'Helps on alleles, not grooves.']);
+    ['About +0.02 where it is already easy. Worse where it is not.',
+     '+0.02 when easy, worse when not.']);
 }
 
 /* ---------- scene 3: attention ---------- */
@@ -353,11 +353,11 @@ function s3(p,pan){
     ctx.beginPath();ctx.moveTo(ax,reg.y-2);ctx.quadraticCurveTo((ax+bx)/2,top,bx,reg.y-2);ctx.stroke();
   }
   ctx.restore();
-  txt('all-pairs attention over 44 tokens, trained from scratch on 9,031 rows',
+  txt('all-pairs attention over 44 tokens, trained from scratch on 14.5k rows',
     pan.x,reg.y+reg.h+(narrow?30:34),{s:narrow?10:11.5,c:P.ink,al:mix});
   resultStrip('transformer',p,pan,reg.y+reg.h+(narrow?30:34)+38,.48,null,
-    ['Attention from scratch underfits 9,031 rows.',
-     'Underfits 9,031 rows.']);
+    ['Attention from scratch: below the plain MLP on every split.',
+     'Below the plain MLP everywhere.']);
 }
 
 /* ---------- scene 4: boltz-2 ---------- */
@@ -403,8 +403,8 @@ function s4(p,pan,ang){
     txt('backbone frozen',pan.x+pan.w,reg.y+reg.h+(narrow?32:20),{s:narrow?9.5:10.5,c:P.bz,ta:narrow?'left':'right',al:sub(vec,.45,.75)});
   }
   resultStrip('boltz2',p,pan,reg.y+reg.h+(narrow?46:44)+24,.56,null,
-    ['0.792 on random and on unseen alleles alike.',
-     'Same score, random or unseen allele.']);
+    ['0.714 on an unseen allele, against 0.592 for the best sequence model.',
+     '0.714 vs 0.592 on an unseen allele.']);
 }
 
 /* ---------- shared results strip ---------- */
@@ -600,7 +600,7 @@ function maceStrip(p,pan,top,at){
 /* ---------- scene 6: results ---------- */
 function s6(p,pan){
   txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
-  txt('Pearson r · 9,031 rows, 54 alleles · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('Pearson r · 14.5k rows, 75 alleles, 22 clusters · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
 
   const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?6:10);
   const Y0=pan.y+(narrow?62:70), Y1=pan.y+pan.h-(narrow?124:98);
@@ -647,9 +647,25 @@ function s6(p,pan){
     if(lead&&grow>=3)pts.forEach((q,i)=>
       txt(M[id][SPLITS[i].k][0].toFixed(3),q[0],q[1]-(narrow?10:13),
         {s:narrow?10:11.5,w:600,c:P.bz,ta:i===3?'right':'center',al:sub(p,.44,.54)}));
-    if(grow>=3)txt(m.l,pts[3][0]+(narrow?0:6),pts[3][1]+(lead?(narrow?20:24):4),
-      {s:narrow?8.5:10.5,c:P[m.ck],ta:'right',al:lead?1:.6,w:lead?600:400});
+
   });
+
+  // end labels, separated so models that finish close together stay legible
+  if(sub(p,.44,.54)>0){
+    const gap=narrow?12:14;
+    const ls=['transformer','direct','sexgb','semlp','boltz2'].map(id=>{
+      const m=MODELS.find(q=>q.id===id);
+      return {m,lead:id==='boltz2',y:yOf(M[id]['C2'][0])};});
+    ls.sort((a,b2)=>a.y-b2.y);
+    for(let i=1;i<ls.length;i++)
+      if(ls[i].y-ls[i-1].y<gap) ls[i].y=ls[i-1].y+gap;
+    const shift=Math.max(0,ls[ls.length-1].y-(Y1-4));
+    ls.forEach(l=>{
+      const y=l.y-shift;
+      txt(l.m.l,xOf(3)+(narrow?0:6),y+(l.lead?(narrow?30:34):4),
+        {s:narrow?8.5:10.5,c:P[l.m.ck],ta:'right',al:(l.lead?1:.6)*sub(p,.44,.54),
+         w:l.lead?600:400});});
+  }
 
   const k=sub(p,.54,.64);
   if(k>0){
@@ -658,11 +674,11 @@ function s6(p,pan){
     ctx.beginPath();ctx.moveTo(pan.x,by);ctx.lineTo(pan.x+pan.w*ease(k),by);ctx.stroke();ctx.restore();
     txt('Only the Boltz-2 embeddings generalise to an unseen allele.',pan.x,by+(narrow?19:24),
       {s:narrow?11:15,c:P.ink,f:'s',w:600,al:k});
-    txt('0.792 on held-out alleles, the same score it gets on random rows. Every sequence',
+    txt('0.714 on held-out alleles against 0.592 for the best sequence model, and on unseen',
       pan.x,by+(narrow?34:44),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.60,.70)});
-    txt('model drops, and on unseen clusters they sit at chance. Atomistic features did not close it.',
+    txt('clusters every sequence model goes negative while Boltz-2 holds 0.425.',
       pan.x,by+(narrow?47:60),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.66,.76)});
-    txt('C2e has only 2 test clusters, so treat the size of that gap cautiously.',
+    txt('C2 puts ~3 of 22 clusters in test, so treat the size of that gap cautiously.',
       pan.x,by+(narrow?62:78),{s:narrow?9:11,c:P.wrn,f:'s',al:sub(p,.72,.82)});
   }
 }
@@ -710,7 +726,7 @@ new ResizeObserver(resize).observe(cv.parentElement);
 
 /* ---------- table ---------- */
 const COLS=['Pearson r','Spearman ρ','within-allele ρ','MAE (h)','RMSE (h)'], LOWER=[0,0,0,1,1];
-let tab='C2e';
+let tab='C2';
 function buildTable(){
   document.getElementById('tabs').innerHTML=SPLITS.map(s=>
     `<button class="tab" data-k="${s.k}" aria-current="${s.k===tab}">${s.k} · ${s.short} — ${s.plain}</button>`).join('');

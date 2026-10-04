@@ -125,11 +125,11 @@ td.best::after{content:"▌";color:var(--boltz);margin-left:5px;font-size:9px;ve
 
 <div class="notes">
   <h3>Reading the splits</h3>
-  <p><strong style="color:var(--ink)">A · random</strong> is the easiest: rows are shuffled. <strong style="color:var(--ink)">B · peptide</strong> asks the model to handle unseen peptides. <strong style="color:var(--ink)">C · allele</strong> holds out whole alleles. <strong style="color:var(--ink)">C2e · cluster</strong> is the strictest, holding out groups of similar HLA grooves. All five models are evaluated on the same 9,031 rows across 54 alleles.</p>
+  <p><strong style="color:var(--ink)">A · random</strong> is the easiest: rows are shuffled. <strong style="color:var(--ink)">B · peptide</strong> asks the model to handle unseen peptides. <strong style="color:var(--ink)">C · allele</strong> holds out whole alleles. <strong style="color:var(--ink)">C2 · cluster</strong> is the strictest, holding out groups of similar HLA grooves. All five models are evaluated on the same ~14,500 rows spanning 75 alleles and 22 clusters.</p>
   <p>The main pattern is simple: the sequence models are competitive on shuffled rows, then lose correlation as the holdout becomes less familiar. The frozen Boltz-2 representation degrades less sharply. Use the tabs above to check that story against Pearson, rank correlation, and error in hours.</p>
 
   <h3>Two caveats</h3>
-  <p class="flag"><strong>C2e has only 2 test clusters.</strong> Treat that column as a strong signal worth following up, not as a precise estimate of generalisation to every unseen groove.</p>
+  <p class="flag"><strong>C2 puts about 3 of its 22 clusters in test.</strong> Treat that column as a strong signal worth following up, not as a precise estimate of generalisation to every unseen groove.</p>
   <p class="flag"><strong>SE changes feature weighting, not the raw input.</strong> It starts from the direct model’s same 704 channels, learns a gate over them, then feeds either an MLP or XGBoost. It is best read as a baseline variant rather than a separate rung in a hierarchy.</p>
 </div>
 </div>

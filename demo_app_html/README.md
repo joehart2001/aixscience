@@ -41,25 +41,24 @@ directly shows mojibake for every degree sign and Greek letter.
 ## Where the numbers come from
 
 Every value in `levels.html` comes from
-`../mlp-embeds/figs/compare/summary_all75_test_metrics.md`. `verify.js` reads
+`../mlp-embeds/figs/compare/summary_test_metrics.md`. `verify.js` reads
 that file **in place** — no copy — re-parses it and compares all 100 cells
 against the page, so the two cannot drift apart silently. Regenerate the
 metrics, re-run `node verify.js`, and it will tell you which cells moved.
 
 Five models over four splits, ordered by decreasing leakage:
 
-| split | held out | direct | transformer | SE+MLP | SE+XGB | **boltz2** |
+| split | held out | direct (MLP) | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
 |---|---|---|---|---|---|---|
-| A | nothing (shuffled) | 0.757 | 0.655 | 0.773 | 0.773 | **0.792** |
-| B | peptides | 0.715 | 0.643 | 0.723 | 0.720 | **0.764** |
-| C | alleles | 0.584 | 0.379 | 0.663 | 0.666 | **0.792** |
-| C2e | clusters | −0.034 | 0.158 | 0.116 | 0.014 | **0.511** |
+| A | nothing (shuffled) | 0.728 | 0.634 | 0.749 | 0.741 | **0.794** |
+| B | peptides | 0.696 | 0.596 | 0.712 | 0.729 | **0.761** |
+| C | alleles | 0.570 | 0.375 | 0.592 | 0.487 | **0.714** |
+| C2 | clusters | −0.065 | −0.098 | −0.108 | −0.075 | **0.425** |
 
-Frozen Boltz-2 takes every metric on every split except RMSE on A, where
-`SE+XGB` wins 11.014 to 11.297.
+Frozen Boltz-2 takes every metric on every split.
 
-**Two caveats the pages carry on their face.** C2e holds only 2 test clusters,
-so the size of that gap should be treated cautiously. And SE is presented as a
+**Two caveats the pages carry on their face.** C2 puts about 3 of its 22
+clusters in test, so the size of that gap should be treated cautiously. And SE is presented as a
 variant of the direct baseline because it reweights the same 704 input channels
 rather than introducing a different raw representation.
 
@@ -162,7 +161,7 @@ dist/                         generated, safe to delete
 ```
 
 Metrics are not vendored here; `verify.js` reads
-`../mlp-embeds/figs/compare/summary_all75_test_metrics.md` directly.
+`../mlp-embeds/figs/compare/summary_test_metrics.md` directly.
 
 `levels.html` is assembled rather than written directly because the structure
 constant has to be inlined inside the IIFE before `ATOMS` and `TRACE` are

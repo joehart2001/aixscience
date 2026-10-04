@@ -2,8 +2,8 @@
 
 Spearman-style correlation, GBM and MLP heads, each block set evaluated on the
 same train/val/test partition. Pasted from the feature-ablation run; this is a
-separate experiment from summary_all75_test_metrics.md and the numbers are not
-cell-for-cell comparable to the A/B/C/C2e splits.
+separate experiment from summary_test_metrics.md and the numbers are not
+cell-for-cell comparable to the A/B/C/C2 splits.
 
 | blocks | dim | GBM train | GBM val | GBM test | MLP train | MLP val | MLP test |
 |---|---|---|---|---|---|---|---|
