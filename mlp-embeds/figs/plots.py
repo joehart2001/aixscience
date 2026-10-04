@@ -303,12 +303,12 @@ def final_summary_bars(all_tests: dict[str, dict[str, dict]], path: str) -> None
         "A" : "Random \nndistribution",
         "B" : "Exclude \npeptide",
         "C" : "Exclude \nallele",
-        "C2e" : "Exclude allele \ncluster"
+        "C2" : "Exclude allele \ncluster"
     }
 
-
-
     splits = list(all_tests)
+
+    splits_names = [splits_to_name_fancy[spls.split(" ")[0]] for spls in splits]
 
     # Union of model labels, in first-seen order, so a model missing from one
     # split (e.g. boltz has no C/C2) simply has no bar there.
@@ -321,6 +321,8 @@ def final_summary_bars(all_tests: dict[str, dict[str, dict]], path: str) -> None
     fig, axes = plt.subplots(1, len(metrics), sharey = "row", figsize=(5.5 * len(metrics), 5.2))
     width = 0.8 / max(len(models), 1)
     for ax, (key, name) in zip(np.atleast_1d(axes), metrics):
+        if key in ("pearson", "spearman"):
+            _add_reference(key, ax)  # SOTA stability reference
         for i, model in enumerate(models):
             # NaN leaves a gap rather than a misleading zero-height bar.
             values = [
@@ -328,12 +330,9 @@ def final_summary_bars(all_tests: dict[str, dict[str, dict]], path: str) -> None
             ]
             offset = (i - (len(models) - 1) / 2) * width
             ax.bar([x + offset for x in range(len(splits))], values, width, label=model)
-        if key in ("pearson", "spearman"):
-            _add_reference(key, ax)  # SOTA stability reference
-            ax.legend(fontsize = 10)
         ax.axhline(0, color="k", linewidth=2)
         ax.set_xticks(range(len(splits)))
-        ax.set_xticklabels(splits_to_name_fancy[splits.split(" ")[0]], ha="center")
+        ax.set_xticklabels(splits_names, ha="center")
         ax.set_ylabel(f"{name}")
         ax.set_title(name)
         ax.grid(True, axis="y", alpha=0.3)
