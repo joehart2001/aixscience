@@ -17,6 +17,12 @@ models:
   - label: transformer
     figs_dir: ../transformer-network/figs
     run: split B (peptide)
+  - label: SE+MLP
+    figs_dir: ../squeeze-boost-network/figs/split_B
+    run: split B (peptide) (SE+MLP)
+  - label: SE+XGB
+    figs_dir: ../squeeze-boost-network/figs/split_B
+    run: split B (peptide) (SE+XGB)
 
 # NOTE: boltz-network is deliberately absent. Its runs cover HLA-A*02:01 rows
 # only, so its test set is a different set of rows and its bars would not be

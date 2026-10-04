@@ -23,7 +23,7 @@ figs/
 
 | Templates | Models | Rows | Splits |
 |---|---|---|---|
-| `split_*.yaml` | direct, transformer | full dataset (~28k) | A, B, C, C2 |
+| `split_*.yaml` | direct, transformer, SE+MLP, SE+XGB | full dataset (~28k) | A, B, C, C2 |
 | `a0201_split_*.yaml` | direct, transformer, **boltz2 (frozen)** | HLA-A\*02:01 with embeddings (~945 peptides) | A, B |
 
 They are separate on purpose: boltz2 embeddings exist for one allele only, so a
