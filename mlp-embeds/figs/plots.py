@@ -268,7 +268,6 @@ def save_summary_bars(all_tests: dict[str, dict[str, dict]], path: str) -> None:
     fig.savefig(path, dpi=150)
     plt.close(fig)
 
-
 def save_summary_table(all_tests: dict[str, dict[str, dict]], path: str) -> None:
     """Write the same numbers as a markdown table, for pasting into notes."""
     lines = ["# Test-set metrics by split and model", ""]
@@ -286,6 +285,64 @@ def save_summary_table(all_tests: dict[str, dict[str, dict]], path: str) -> None
     with open(path, "w") as f:
         f.write("\n".join(lines))
 
+
+# --- Final production across-split summary -------------------------------------
+def final_summary_bars(all_tests: dict[str, dict[str, dict]], path: str) -> None:
+    """One panel per metric; x = split, one bar colour per model.
+
+    This is the headline figure: it answers "which architecture wins, and does
+    the answer change as the split gets harder?" in a single read.
+    """
+
+    # Fixed values for this plot
+    metrics = [
+        ("pearson", r"Pearson $r$"),
+        ("within_allele_spearman", r"Within-allele Spearman $\rho$")
+    ]
+    splits_to_name_fancy = {
+        "A" : "Random \nndistribution",
+        "B" : "Exclude \npeptide",
+        "C" : "Exclude \nallele",
+        "C2e" : "Exclude allele \ncluster"
+    }
+
+
+
+    splits = list(all_tests)
+
+    # Union of model labels, in first-seen order, so a model missing from one
+    # split (e.g. boltz has no C/C2) simply has no bar there.
+    models: list[str] = []
+    for tests in all_tests.values():
+        for label in tests:
+            if label not in models:
+                models.append(label)
+
+    fig, axes = plt.subplots(1, len(metrics), sharey = "row", figsize=(5.5 * len(metrics), 5.2))
+    width = 0.8 / max(len(models), 1)
+    for ax, (key, name) in zip(np.atleast_1d(axes), metrics):
+        for i, model in enumerate(models):
+            # NaN leaves a gap rather than a misleading zero-height bar.
+            values = [
+                all_tests[s].get(model, {}).get(key, float("nan")) for s in splits
+            ]
+            offset = (i - (len(models) - 1) / 2) * width
+            ax.bar([x + offset for x in range(len(splits))], values, width, label=model)
+        if key in ("pearson", "spearman"):
+            _add_reference(key, ax)  # SOTA stability reference
+            ax.legend(fontsize = 10)
+        ax.axhline(0, color="k", linewidth=2)
+        ax.set_xticks(range(len(splits)))
+        ax.set_xticklabels(splits_to_name_fancy[splits.split(" ")[0]], ha="center")
+        ax.set_ylabel(f"{name}")
+        ax.set_title(name)
+        ax.grid(True, axis="y", alpha=0.3)
+    ax.legend(fontsize=10)
+
+    fig.suptitle("Test-set performance by architecture and split")
+    fig.tight_layout()
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
 
 def main() -> None:
     p = argparse.ArgumentParser(
@@ -320,6 +377,7 @@ def main() -> None:
         stem = os.path.join(args.out, f"{args.summary_prefix}_test_metrics")
         save_summary_bars(all_tests, f"{stem}.png")
         save_summary_table(all_tests, f"{stem}.md")
+        final_summary_bars(all_tests, f"{os.path.join(args.out, f"final_test_metrics")}.png")
         print(f"  summary across {len(all_tests)} splits -> {args.out}/")
     print(f"Done. Figures in {args.out}/")
 

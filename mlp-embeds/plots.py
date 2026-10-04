@@ -29,8 +29,8 @@ import numpy as np  # noqa: E402
 # Keyed by metric so each panel gets the comparable line; set a value to None or
 # remove the key to hide it.
 REFERENCES = {
-    "pearson": (0.76, "SOTA PLM stability (r=0.76, 2026)"),
-    "spearman": (0.79, "SOTA PLM stability (ρ=0.79, 2026)"),
+    "pearson": (0.76, r"MINT stability $r=0.76$ (Karthikeyan et. al, 2026)"),
+    "spearman": (0.79, r"MINT stability $ρ=0.79$ (Karthikeyan et. al, 2026)"),
     # no directly-comparable published within-allele ρ, so none is drawn there
 }
 
@@ -42,7 +42,7 @@ def _add_reference(metric: str, ax=None) -> None:
         return
     value, label = ref
     (ax or plt).axhline(
-        value, color="black", linestyle="--", linewidth=1.2, label=label
+        value, color="black", linestyle="--", linewidth=3, label=label
     )
 
 
