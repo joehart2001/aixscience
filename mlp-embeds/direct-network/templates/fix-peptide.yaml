@@ -1,0 +1,6 @@
+label: fix peptide
+csv: ../../Data/rasmussen_et_al_dataset.csv
+splits_csv: ../../Data/subsets/splits.csv
+split: B
+hla_col: hla_pseudoseq
+figs_dir: figs/fix-peptide

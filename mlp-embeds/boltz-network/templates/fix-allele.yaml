@@ -1,0 +1,6 @@
+label: fix allele
+csv: ../../Data/rasmussen_et_al_dataset.csv
+splits_csv: ../../Data/subsets/embedded_splits.csv
+split: C
+embeddings_dir: ../../Data/boltz2/boltz_embeddings/all75
+figs_dir: figs/fix-allele

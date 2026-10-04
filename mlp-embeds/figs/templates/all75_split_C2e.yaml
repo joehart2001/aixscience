@@ -1,0 +1,32 @@
+# all75 Boltz2 subset: all four architectures on grouped by allele cluster, re-assigned for this subset.
+#
+# Every model here is trained and scored on the SAME 9,031 rows - the sequence
+# networks are restricted to them via `embeddings_dir`, and boltz-network can
+# only see them anyway. Train them with:
+#
+#   for net in direct-network transformer-network boltz-network; do
+#     (cd ../$net && $PY train.py templates/all75_split_C2e.yaml); done
+#   (cd ../squeeze-boost-network && $PY boost.py templates/all75_split_C2e.yaml)
+
+label: C2e (cluster)
+out: all75_split_C2e
+
+models:
+  - label: direct (MLP)
+    figs_dir: ../direct-network/figs/all75_split_C2e
+    run: split C2e (cluster)
+  - label: transformer
+    figs_dir: ../transformer-network/figs/all75_split_C2e
+    run: split C2e (cluster)
+  - label: SE+MLP
+    figs_dir: ../squeeze-boost-network/figs/all75_split_C2e
+    run: split C2e (cluster) (SE+MLP)
+  - label: SE+XGB
+    figs_dir: ../squeeze-boost-network/figs/all75_split_C2e
+    run: split C2e (cluster) (SE+XGB)
+  - label: boltz2 (frozen)
+    figs_dir: ../boltz-network/figs/all75_split_C2e
+    run: split C2e (cluster)
+
+caption: >-
+  Only 13 clusters survive the embedding restriction, 2 of them in test: read C2e as a spread, not a point value.

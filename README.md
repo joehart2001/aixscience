@@ -1,8 +1,13 @@
 # aixscience
 
 Peptide–MHC class I binding **half-life (stability)** prediction (Serova Protein
-Engineering Track Challenge). See `direct-network/` (sequence-based models) and
-`boltz-network/` (Boltz2-embedding models).
+Engineering Track Challenge).
+
+- **`mlp-embeds/`** — the models: four `*-network/` frameworks (direct,
+  transformer, squeeze-boost, boltz) sharing flat modules, plus a cross-network
+  comparison harness in `mlp-embeds/figs/`. See `mlp-embeds/README.md`.
+- **`Data/`** — dataset, precomputed splits, and Boltz2 embeddings (source of
+  truth; models read from it, never write to it).
 
 ## References
 
