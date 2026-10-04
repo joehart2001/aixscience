@@ -300,7 +300,7 @@ def final_summary_bars(all_tests: dict[str, dict[str, dict]], path: str) -> None
         ("within_allele_spearman", r"Within-allele Spearman $\rho$")
     ]
     splits_to_name_fancy = {
-        "A" : "Random \nndistribution",
+        "A" : "Random \ndistribution",
         "B" : "Exclude \npeptide",
         "C" : "Exclude \nallele",
         "C2" : "Exclude allele \ncluster"
