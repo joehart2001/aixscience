@@ -79,7 +79,7 @@ From the above table and graph, we can see that of all the lighter archictecture
 We also report the inter-allele Spearman correlation, which measures how well the models actually learned the peptide's influence on the lifetime as opposed to reading out exclusively for given allele types. This also shows a significant decline in correlation values, suggesting that further works need to consider these individual-allele benchmarks to truly evaluate the peptide learning task.
 
 ### Extension to MACE architecture
-We also try a one-shot attempt to use the MACE-OFF (https://github.com/ACEsuit/mace-off) machine-learned interatomic potential on the Boltz-2 structure outputs. However, due to time and resource constraints, we were unable to run larger simulations which include electrostatics and the solvated environment, leading to no significant improvement from the MACE readouts.
+We also try a one-shot attempt to use the MACE-OFF (https://github.com/ACEsuit/mace-off) machine-learned interatomic potential on the Boltz-2 structure outputs, however, we saw no signigicant effects by including MACE features to inform the prediction. Due to time and resource constraints, we were unable to run larger simulations with explicit solvent which account for electrostatic and entropic effects, which is the real advantage of using MLIPs.
 
 <p align="center">
   <picture>
