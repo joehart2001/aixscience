@@ -4,7 +4,7 @@ Peptide–MHC class I binding **half-life (stability)** prediction (Serova Prote
 Engineering Track Challenge).
 
 <p align="center">
-  <a href="https://joehart2001.github.io/aixscience/" target="_blank" rel="noopener">
+  <a href="https://joehart2001.github.io/aixscience/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="demo_app_html/docs/protein.gif">
       <img src="demo_app_html/docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="460">
@@ -13,7 +13,7 @@ Engineering Track Challenge).
 </p>
 
 <p align="center">
-  <a href="https://joehart2001.github.io/aixscience/" target="_blank" rel="noopener"><strong>▶&nbsp; Watch the interactive demo</strong></a><br>
+  <a href="https://joehart2001.github.io/aixscience/"><strong>▶&nbsp; Watch the interactive demo</strong></a><br>
   <sub>Six scenes, 66 s. How four representations of a peptide–HLA pair are built,
   and where each one breaks. Scrub it, or jump to any scene.</sub>
 </p>
