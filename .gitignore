@@ -42,3 +42,6 @@ uv.lock.from-origin-main
 # Figures: drop per-run parity/training plots (~170 MB), keep all other figures
 fig_parity.png
 fig_training.png
+
+# macOS
+.DS_Store
