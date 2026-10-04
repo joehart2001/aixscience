@@ -1,10 +1,10 @@
-# aixscience
+# Boltz-τ: HLA–Peptide Stability from Foundational Protein Embeddings
 
 Peptide–MHC class I binding **half-life (stability)** prediction (Serova Protein
 Engineering Track Challenge).
 
 <p align="center">
-  <a href="https://joehart2001.github.io/aixscience/">
+  <a href="https://joehart2001.github.io/boltz-tau/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="demo_app_html/docs/protein.gif">
       <img src="demo_app_html/docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="460">
@@ -13,9 +13,9 @@ Engineering Track Challenge).
 </p>
 
 <p align="center">
-  <a href="https://joehart2001.github.io/aixscience/"><strong>▶&nbsp; Watch the interactive demo</strong></a><br>
-  <sub>Six scenes, 66 s. How four representations of a peptide–HLA pair are built,
-  and where each one breaks. Scrub it, or jump to any scene.</sub>
+  <a href="https://joehart2001.github.io/boltz-tau/"><strong>▶&nbsp; Watch the interactive demo</strong></a><br>
+  <sub>Five scenes, 68 s. Sequence baselines, transferred Boltz-2 embeddings,
+  held-out results, and the MACE extension. Scrub it, or jump to any scene.</sub>
 </p>
 
 <p align="center">
@@ -74,7 +74,7 @@ We also report the inter-allele Spearman correlation, which measures how well th
 - **`Data/`** — dataset, precomputed splits, and Boltz2 embeddings (embeddings gitignored here due to file size constraints).
 - **`demo_app_html/`** — the demo above, plus the structure pipeline explainer
   and the renderer behind the rotating complex. Each builds to one
-  dependency-free HTML file; published to [Pages](https://joehart2001.github.io/aixscience/) by
+  dependency-free HTML file; published to [Pages](https://joehart2001.github.io/boltz-tau/) by
   `.github/workflows/pages.yml`, which gates the deploy on the build checks.
   See `demo_app_html/README.md`.
 

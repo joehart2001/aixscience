@@ -1,4 +1,4 @@
-<title>Four Levels of Representation</title>
+<title>Boltz-τ: HLA–Peptide Stability from Foundational Protein Embeddings</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap">
 <style>
@@ -90,8 +90,8 @@ td.best::after{content:"▌";color:var(--boltz);margin-left:5px;font-size:9px;ve
       <a href="levels.html" aria-current="page">Compare models</a>
     </nav>
   </div>
-  <h1>The Advantage Is the Representation</h1>
-  <p class="sub">Most approaches learn from sequence alone. We bring experience with atomistic machine learning: instead of asking a small labelled dataset to rediscover molecular interactions, we reuse rich 3D representations learned by foundation models.</p>
+  <h1>Boltz-τ: HLA–Peptide Stability from Foundational Protein Embeddings</h1>
+  <p class="sub">Most approaches learn from sequence alone. We bring atomistic modelling experience and reuse rich 3D representations learned by protein foundation models.</p>
 </header>
 
 <div class="thesis">
@@ -102,7 +102,7 @@ td.best::after{content:"▌";color:var(--boltz);margin-left:5px;font-size:9px;ve
 <figure>
   <div class="frame">
     <canvas id="stage" role="img" aria-describedby="alt"></canvas>
-    <p id="alt" class="vh">A five-part animation. First, three sequence models read the same peptide and HLA indices. Second, Boltz-2 replaces those learned sequence features with a frozen structural embedding. Third, the main comparison shows Pearson correlation across four held-out splits. Fourth, a separate extension asks whether descriptors from the MACE atomistic-simulation foundation model can improve the result further. Finally, feature-space projections compare the Boltz-2 and MACE representations.</p>
+    <p id="alt" class="vh">A five-part animation. First, three sequence models read the same peptide and HLA indices. Second, Boltz-2 replaces those learned sequence features with a frozen structural embedding. Third, the main comparison shows Pearson correlation across four held-out splits. Fourth, a separate extension asks whether descriptors from the MACE atomistic-simulation foundation model can improve the result further. They do not in this experiment: adding MACE lowers held-out Pearson correlation from 0.603 to 0.571, while MACE alone overfits with train correlation 0.768 and test correlation 0.020. Finally, feature-space projections compare the Boltz-2 and MACE representations.</p>
     <div class="transport">
       <button class="play" id="play" aria-label="Pause animation"><svg id="icon" viewBox="0 0 12 12"><rect x="1.5" y="1" width="3" height="10" rx="1"/><rect x="7.5" y="1" width="3" height="10" rx="1"/></svg></button>
       <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Animation timeline">
@@ -789,18 +789,18 @@ function s4(p,pan){
   maceStrip(p,pan,ly+(narrow?54:64),.50);
 }
 
-/* three numbers that say whether the atomistic blocks earned their place */
+/* explicit answer to whether the atomistic blocks earned their place */
 function maceStrip(p,pan,top,at){
   const a=sub(p,at,at+.12); if(a<=0)return;
   ctx.save();ctx.globalAlpha=a*.6;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(pan.x,top);ctx.lineTo(pan.x+pan.w,top);ctx.stroke();ctx.restore();
-  txt('FEATURE ABLATION  ·  HELD-OUT TEST  ·  GBM HEAD  ·  SEPARATE RUN',pan.x,top-7,
+  txt('DO MACE FEATURES IMPROVE HELD-OUT PEARSON r?',pan.x,top-7,
     {s:narrow?8.5:10,c:P.mut,w:500,al:a});
 
   const cols=[
-    ['Boltz-2 alone',        MACE.boltz,     'structure only',  P.bz],
-    ['+ MACE node',          MACE.boltzNode, '− 0.032',    P.se],
-    ['MACE only, no Boltz',  MACE.node,      'at chance',       P.wrn]];
+    ['Boltz-2 only',   MACE.boltz,     'reference',   P.bz],
+    ['Boltz-2 + MACE', MACE.boltzNode, '↓ 0.032',      P.se],
+    ['MACE only',      MACE.node,      'train 0.768', P.wrn]];
   const w=pan.w/3;
   cols.forEach(([lab,v,sub2,col],i)=>{
     const aa=sub(p,at+i*.03,at+.1+i*.03), x=pan.x+i*w;
@@ -811,12 +811,15 @@ function maceStrip(p,pan,top,at){
   const g=sub(p,at+.14,at+.26);
   if(g>0){
     const ny=top+(narrow?76:70);
-    ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.se;
+    ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.wrn;
     ctx.beginPath();ctx.moveTo(pan.x,ny-7);ctx.lineTo(pan.x+6,ny-3.5);ctx.lineTo(pan.x,ny);
     ctx.closePath();ctx.fill();ctx.restore();
-    txt(narrow?'Tried. Did not add to Boltz-2.'
-              :'Tried, and it did not add. Trains to 0.768, tests at 0.020.',
+    txt(narrow?'NO — MACE does not improve test r.'
+              :'NO — MACE does not improve the held-out result.',
       pan.x+14,ny,{s:narrow?12:18,c:P.ink,f:'s',w:600,al:g});
+    txt(narrow?'combined 0.603 → 0.571 · MACE-only test 0.020'
+              :'Boltz-2 + MACE drops 0.603 → 0.571; MACE alone overfits (train 0.768, test 0.020).',
+      pan.x+14,ny+(narrow?15:19),{s:narrow?9:11.5,c:P.mut,f:'s',al:g});
   }
 }
 

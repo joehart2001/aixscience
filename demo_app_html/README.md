@@ -1,4 +1,4 @@
-# demo_app_html
+# Boltz-τ: HLA–Peptide Stability from Foundational Protein Embeddings
 
 <p align="center">
   <picture>
@@ -19,9 +19,9 @@ from disk, dropped into a slide, or published behind a link.
 | Page | What it shows |
 |---|---|
 | `dist/pipeline.html` | How pretrained 3D and atomistic representations become a task-specific stability predictor. |
-| `dist/levels.html` | Sequence-only baseline → transferred Boltz-2 representation → main result → can atomistic MACE descriptors improve further? → feature spaces. |
+| `dist/levels.html` | Sequence-only baseline → transferred Boltz-2 representation → main result → MACE extension (no improvement in this setup) → feature spaces. |
 
-**Live: [https://joehart2001.github.io/aixscience/](https://joehart2001.github.io/aixscience/)** — published from `main` by
+**Live: [https://joehart2001.github.io/boltz-tau/](https://joehart2001.github.io/boltz-tau/)** — published from `main` by
 `.github/workflows/pages.yml`, which runs the build and every check below and
 refuses to deploy if any of them fail.
 

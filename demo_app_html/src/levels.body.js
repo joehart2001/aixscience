@@ -645,18 +645,18 @@ function s4(p,pan){
   maceStrip(p,pan,ly+(narrow?54:64),.50);
 }
 
-/* three numbers that say whether the atomistic blocks earned their place */
+/* explicit answer to whether the atomistic blocks earned their place */
 function maceStrip(p,pan,top,at){
   const a=sub(p,at,at+.12); if(a<=0)return;
   ctx.save();ctx.globalAlpha=a*.6;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(pan.x,top);ctx.lineTo(pan.x+pan.w,top);ctx.stroke();ctx.restore();
-  txt('FEATURE ABLATION  ·  HELD-OUT TEST  ·  GBM HEAD  ·  SEPARATE RUN',pan.x,top-7,
+  txt('DO MACE FEATURES IMPROVE HELD-OUT PEARSON r?',pan.x,top-7,
     {s:narrow?8.5:10,c:P.mut,w:500,al:a});
 
   const cols=[
-    ['Boltz-2 alone',        MACE.boltz,     'structure only',  P.bz],
-    ['+ MACE node',          MACE.boltzNode, '− 0.032',    P.se],
-    ['MACE only, no Boltz',  MACE.node,      'at chance',       P.wrn]];
+    ['Boltz-2 only',   MACE.boltz,     'reference',   P.bz],
+    ['Boltz-2 + MACE', MACE.boltzNode, '↓ 0.032',      P.se],
+    ['MACE only',      MACE.node,      'train 0.768', P.wrn]];
   const w=pan.w/3;
   cols.forEach(([lab,v,sub2,col],i)=>{
     const aa=sub(p,at+i*.03,at+.1+i*.03), x=pan.x+i*w;
@@ -667,12 +667,15 @@ function maceStrip(p,pan,top,at){
   const g=sub(p,at+.14,at+.26);
   if(g>0){
     const ny=top+(narrow?76:70);
-    ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.se;
+    ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.wrn;
     ctx.beginPath();ctx.moveTo(pan.x,ny-7);ctx.lineTo(pan.x+6,ny-3.5);ctx.lineTo(pan.x,ny);
     ctx.closePath();ctx.fill();ctx.restore();
-    txt(narrow?'Tried. Did not add to Boltz-2.'
-              :'Tried, and it did not add. Trains to 0.768, tests at 0.020.',
+    txt(narrow?'NO — MACE does not improve test r.'
+              :'NO — MACE does not improve the held-out result.',
       pan.x+14,ny,{s:narrow?12:18,c:P.ink,f:'s',w:600,al:g});
+    txt(narrow?'combined 0.603 → 0.571 · MACE-only test 0.020'
+              :'Boltz-2 + MACE drops 0.603 → 0.571; MACE alone overfits (train 0.768, test 0.020).',
+      pan.x+14,ny+(narrow?15:19),{s:narrow?9:11.5,c:P.mut,f:'s',al:g});
   }
 }
 
