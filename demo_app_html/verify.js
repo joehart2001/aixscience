@@ -49,17 +49,16 @@ const rail = eval(src.slice(src.indexOf("const RAIL=") + 11, src.indexOf("];", s
 const chips = [...page.matchAll(/data-at="([\d.]+)"/g)].map(m => +m[1]);
 const bounds = [0, ...cuts, 1];
 console.log("\nscenes");
-check(cuts.length + 1 === rail.length && rail.length === chips.length,
+check(cuts.length + 1 === rail.length,
   `${cuts.length + 1} scenes, ${rail.length} rail entries, ${chips.length} chips`);
-chips.forEach((a, i) => {
-  const s = bounds.findIndex((_, k) => a >= bounds[k] && a < bounds[k + 1]);
-  check(s === i, `chip ${i} at t=${a} lands in scene ${s}`);
-});
+const landed = chips.map((a) => bounds.findIndex((_, k) => a >= bounds[k] && a < bounds[k + 1]));
+check(landed.every((s, i) => i === 0 || s >= landed[i - 1]), `chips run in order: ${landed.join(",")}`);
+check(new Set(landed).size === rail.length, `every scene is reachable from a chip`);
 
 /* 3 ------------------------------------------------------------- dwell times */
 const DUR = +src.match(/const DUR=(\d+)/)[1];
 console.log("\ndwell (each scene ends on a conclusion, which must be readable)");
-["s1", "s2", "s3", "s4", "s5", "s6"].forEach((name, i) => {
+["s1", "s2", "s3", "s4"].forEach((name, i) => {
   const from = src.indexOf(`function ${name}(`);
   const body = src.slice(from, src.indexOf("\n/* ---", from));
   const ends = [...body.matchAll(/sub\(p,[\d.]+,([\d.]+)\)/g)].map(m => +m[1]);

@@ -3,7 +3,7 @@ const cv=document.getElementById('stage'), ctx=cv.getContext('2d');
 const scrub=document.getElementById('scrub'), playBtn=document.getElementById('play');
 const icon=document.getElementById('icon'), clock=document.getElementById('clock');
 const chips=[...document.querySelectorAll('.chip')];
-const DUR=66000;
+const DUR=58000;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let VW=1000,VH=520,narrow=false,P=pal(),t=reduce?.94:0,playing=!reduce,last=0;
 
@@ -218,7 +218,7 @@ function L(){
    ? {rail:{x:16,y:34,w:368,h:22,horiz:true}, pan:{x:16,y:80,w:368,h:438}}
    : {rail:{x:30,y:54,w:122,h:426,horiz:false}, pan:{x:188,y:52,w:782,h:428}};
 }
-const RAIL=[['MODEL','DIRECT'],['VARIANT','SE GATE'],['MODEL','ATTENTION'],['MODEL','BOLTZ-2'],['MODEL','MACE'],['','RESULTS']];
+const RAIL=[['MODELS','SEQUENCE'],['MODEL','BOLTZ-2'],['MODEL','MACE'],['','RESULTS']];
 function drawRail(idx,r){
   const N=RAIL.length;
   if(r.horiz){
@@ -243,125 +243,118 @@ function gridRect(i,n,reg,rows,gap){
   return {x:reg.x+c*(w+gap), y:reg.y+r*(h+gap), w, h};
 }
 
-/* ---------- scene 1: the real baseline ---------- */
+/* ---------- scene 1: the three sequence models, side by side ---------- */
+const SEQCOLS=[
+ {id:'direct', name:'Direct MLP', ck:'dir', kind:'bars',
+  input:'34 pocket residues + 9 peptide + allele',
+  note:'embeddings, flattened, 3-layer MLP'},
+ {id:'semlp',  name:'SE gate',    ck:'se',  kind:'gate',
+  input:'the same 704 channels, recalibrated',
+  note:'learned per-channel gate, MLP and XGBoost heads'},
+ {id:'transformer', name:'Transformer', ck:'tf', kind:'attn',
+  input:'the same indices + [CLS]',
+  note:'all-pairs attention, d_model 64, trained from scratch'}];
+
 function s1(p,pan){
-  txt('DIRECT MLP · THE REFERENCE MODEL',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.dir,f:'d'});
-  txt('34 groove residues + 9 peptide residues + allele identity',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('SEQUENCE MODELS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
+  txt('three ways to read the same amino-acid indices',pan.x,pan.y+(narrow?30:34),
+    {s:narrow?9.5:11,c:P.mut});
 
-  const rows=narrow?4:2, gap=narrow?1:1.5;
-  const AW=narrow?44:70;                     // allele block sits to the right
-  const regA={x:pan.x,y:pan.y+(narrow?92:120),w:pan.w,h:narrow?78:58};
-  const regB={x:pan.x,y:pan.y+(narrow?100:128),w:pan.w-AW-(narrow?8:14),h:narrow?32:42};
-  const drop=ease(sub(p,.03,.18)), move=ease(sub(p,.12,.32)), grow=sub(p,.26,.40);
-  const survSet=new Set(SURV);
+  // each column is lit in turn, then all three together for the comparison
+  const beats=[[.06,.30],[.30,.52],[.52,.72]];
+  const focus=p<.30?0:p<.52?1:p<.72?2:-1;
+  const GAP=narrow?10:22, cw=narrow?pan.w:(pan.w-2*GAP)/3;
 
-  for(let i=0;i<NALL;i++){
-    const A=gridRect(i,NALL,regA,rows,gap);
-    if(!survSet.has(i)){
-      const a=1-drop; if(a<=.01)continue;
-      ctx.save();ctx.globalAlpha=a*.4;ctx.fillStyle=i>=NHLA?P.dir:P.ln;
-      ctx.fillRect(A.x,A.y+(1-a)*18,A.w,A.h);ctx.restore();continue;
+  SEQCOLS.forEach((col,ci)=>{
+    if(narrow&&focus>=0&&focus!==ci)return;          // phone shows one at a time
+    if(narrow&&focus<0)return;                       // replaced by the summary below
+    const x=narrow?pan.x:pan.x+ci*(cw+GAP), on=focus===ci||focus<0;
+    const [b0,b1]=beats[ci], u=sub(p,b0,b1), done=p>=b1;
+    const al=on?1:.26;
+    const top=pan.y+(narrow?50:58);
+
+    if(focus===ci){
+      ctx.save();ctx.globalAlpha=.9;ctx.fillStyle=P[col.ck];
+      rr(x-(narrow?5:8),top-10,2.5,narrow?118:150,1.5);ctx.fill();ctx.restore();
     }
-    const k=SURV.indexOf(i), B=gridRect(k,SURV.length,regB,1,narrow?2:3);
-    const x=lerp(A.x,B.x,move), y=lerp(A.y,B.y,move), w=lerp(A.w,B.w,move);
-    const hh=lerp(A.h,B.h*(.3+JIT[k]*.7),Math.max(move,grow));
-    ctx.save();ctx.globalAlpha=.55+JIT[k]*.45;ctx.fillStyle=i>=NHLA?P.dir:P.mut;
-    ctx.fillRect(x,y+(B.h-hh)*move,w,hh);ctx.restore();
+    txt(col.name,x,top,{s:narrow?10.5:13,w:600,c:P[col.ck],f:'d',al});
+    txt(col.input,x,top+(narrow?13:16),{s:narrow?8:9.5,c:P.mut,al:al*.95});
+
+    // a compact picture of what this model consumes
+    const vy=top+(narrow?24:32), vh=narrow?30:40, N=narrow?16:22;
+    const bw=cw/N;
+    for(let i=0;i<N;i++){
+      const pep=i>=N-5, base=.28+JIT[ci*30+i]*.7;
+      let h=base, c2=pep?P.dir:P.mut;
+      if(col.kind==='gate'){
+        const g=.25+Math.abs(Math.sin(i*.9+ci))*1.1;
+        h=cl(lerp(base,base*g,done?1:ease(u)),.08,1);
+        c2=(done||u>.1)?(g>1?P.se:hex(P.se,.4)):P.mut;
+      }else if(col.kind==='attn'){
+        h=lerp(base,.28+Math.abs(Math.sin(i*1.7))*.7,done?1:ease(u));
+        c2=pep?P.dir:P.tf;
+      }else{
+        h=base*(done?1:ease(sub(u,i/N*.5,.4+i/N*.5)));
+      }
+      ctx.save();ctx.globalAlpha=al*(.45+JIT[ci*30+i+15]*.5);ctx.fillStyle=c2;
+      ctx.fillRect(x+i*bw,vy+vh-vh*h,Math.max(1,bw-1),vh*h);ctx.restore();
+    }
+    if(col.kind==='attn'){
+      ctx.save();ctx.lineWidth=1;
+      for(let q=0;q<N;q+=3)for(let k=q+4;k<N;k+=7){
+        const w=Math.exp(-Math.pow(((q/N+k/N)/2-((done?.5:ease(u))*1.4-.2))/.2,2));
+        if(w<.05)continue;
+        const ax=x+(q+.5)*bw, bx2=x+(k+.5)*bw;
+        ctx.strokeStyle=hex(P.tf,w*.45*al);
+        ctx.beginPath();ctx.moveTo(ax,vy-2);
+        ctx.quadraticCurveTo((ax+bx2)/2,vy-Math.min(26,(bx2-ax)*.5),bx2,vy-2);ctx.stroke();}
+      ctx.restore();
+    }
+    txt(col.note,x,vy+vh+(narrow?12:15),{s:narrow?7.5:9,c:P.mut,al:al*.9});
+
+    // its four held-out scores, each on the same -0.2 to 1.0 track
+    const sy=vy+vh+(narrow?26:34);
+    SPLITS.forEach((s,si)=>{
+      const v=M[col.id][s.k][0], ry=sy+si*(narrow?17:21);
+      const sa=al*(done||u>.5?1:sub(u,.45+si*.05,.7+si*.05));
+      txt(s.k,x,ry,{s:narrow?8:9.5,c:P.mut,al:sa});
+      txt(s.short,x+(narrow?16:20),ry,{s:narrow?8:9.5,c:P.mut,al:sa*.85});
+      txt(v.toFixed(3),x+(narrow?62:78),ry,{s:narrow?9.5:12,w:600,
+        c:v>0?P.ink:P.wrn,al:sa});
+      const tw=cw-(narrow?104:132), tx=x+(narrow?100:128), th=narrow?3:4;
+      const zx=tx+tw*(0.2/1.2), vx=tx+tw*((v+0.2)/1.2);
+      ctx.save();ctx.globalAlpha=sa*.45;ctx.fillStyle=P.ln;
+      ctx.fillRect(tx,ry-th-1,tw,th);ctx.restore();
+      ctx.save();ctx.globalAlpha=sa;ctx.fillStyle=v<0?P.wrn:P[col.ck];
+      ctx.fillRect(Math.min(zx,vx),ry-th-1,Math.max(1.5,Math.abs(vx-zx)),th);ctx.restore();
+    });
+  });
+
+  if(narrow&&focus<0){
+    const sy=pan.y+(narrow?232:0);
+    SEQCOLS.forEach((col,ci)=>{
+      const ry=sy+ci*58;
+      txt(col.name,pan.x,ry,{s:10.5,w:600,c:P[col.ck]});
+      SPLITS.forEach((s,si)=>{
+        const v=M[col.id][s.k][0], vx=pan.x+si*(pan.w/4);
+        txt(s.k,vx,ry+16,{s:8,c:P.mut});
+        txt(v.toFixed(3),vx,ry+32,{s:11,w:600,c:v>0?P.ink:P.wrn});});});
   }
-  // the third input: a learned per-allele vector
-  const ae=sub(p,.30,.44);
-  if(ae>0){
-    const ax=pan.x+pan.w-AW;
-    for(let k=0;k<6;k++){const w=AW/6;
-      ctx.save();ctx.globalAlpha=ae*(.35+JIT[k+90]*.6);ctx.fillStyle=P.bz;
-      const hh=regB.h*(.3+JIT[k+90]*.65);
-      ctx.fillRect(ax+k*w,regB.y+regB.h-hh,w-1,hh);ctx.restore();}
-    txt('allele',ax,regB.y+regB.h+(narrow?12:14),{s:narrow?8.5:9.5,c:P.bz,al:ae});
+
+  const g=sub(p,.78,.88);
+  if(g>0){
+    const ny=pan.y+pan.h-(narrow?26:22);
+    ctx.save();ctx.globalAlpha=g*.5;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pan.x,ny-30);ctx.lineTo(pan.x+pan.w*ease(g),ny-30);
+    ctx.stroke();ctx.restore();
+    txt(narrow?'All three collapse on a new groove.'
+              :'Within 0.115 of each other on shuffled rows. All three go negative on an unseen groove.',
+      pan.x,ny,{s:narrow?10:14,c:P.ink,f:'s',w:600,al:g});
   }
-  const ly=regB.y+regB.h+(narrow?12:14);
-  txt('34 pocket residues',pan.x,ly,{s:narrow?9:10.5,c:P.mut,al:move});
-  txt('peptide 9',pan.x+regB.w,ly,{s:narrow?9:10.5,c:P.dir,ta:'right',al:move});
-  txt('shared AA embedding → flatten → concat allele → MLP head',pan.x,ly+(narrow?20:24),
-    {s:narrow?10:11.5,c:P.ink,al:grow});
-  resultStrip('direct',p,pan,ly+(narrow?44:52)+38,.48,null,
-    ['Learns the motif. Lost on an unseen groove.',
-     'Lost on an unseen groove.']);
 }
 
-/* ---------- scene 2: squeeze-and-excitation ---------- */
-function s2(p,pan){
-  txt('SE GATE · REWEIGHT THE SAME FEATURES',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.se,f:'d'});
-  txt(narrow?'704 channels · example-dependent weights':'same 704 channels as the direct model · weights depend on the example',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
-
-  const N=narrow?48:72, gap=narrow?2:3;
-  const reg={x:pan.x,y:pan.y+(narrow?150:166),w:pan.w,h:narrow?40:52};
-  const show=sub(p,.02,.12), squeeze=sub(p,.08,.28), gate=sub(p,.24,.42);
-  for(let i=0;i<N;i++){
-    const R=gridRect(i,N,reg,1,gap);
-    const base=.25+JIT[i+120]*.7;
-    const g=.2+Math.abs(Math.sin(i*.55+1.1))*1.05;      // learned per-channel multiplier
-    const hh=R.h*cl(lerp(base,base*g,gate),.06,1);
-    ctx.save();ctx.globalAlpha=show*(.35+JIT[i+150]*.6);
-    ctx.fillStyle=gate>.1&&g>1?P.se:(gate>.1&&g<.6?P.ln:P.mut);
-    ctx.fillRect(R.x,R.y+R.h-hh,R.w,hh);ctx.restore();
-  }
-  // the squeeze: mean/var per field
-  if(squeeze>0){
-    const fy=reg.y-(narrow?34:42), fw=pan.w/3;
-    ['peptide','HLA','allele'].forEach((f,i)=>{
-      const a=sub(squeeze,i*.12,.5+i*.12);
-      ctx.save();ctx.globalAlpha=a*.5;ctx.strokeStyle=P.se;ctx.lineWidth=1;
-      rr(pan.x+i*fw,fy,fw-(narrow?6:12),narrow?22:26,4);ctx.stroke();ctx.restore();
-      txt(f+'  μ σ²',pan.x+i*fw+(narrow?6:12),fy+(narrow?15:17),{s:narrow?8.5:10,c:P.se,al:a});
-      ctx.save();ctx.globalAlpha=a*.3;ctx.strokeStyle=P.se;ctx.lineWidth=1;ctx.setLineDash([2,3]);
-      ctx.beginPath();ctx.moveTo(pan.x+i*fw+fw/2-6,fy+(narrow?24:28));
-      ctx.lineTo(pan.x+i*fw+fw/2-6,reg.y-4);ctx.stroke();ctx.restore();});
-    txt('squeeze: 6 summary statistics steer the gate',pan.x,fy-(narrow?10:14),{s:narrow?9:10.5,c:P.mut,al:squeeze});
-  }
-  txt('two heads on the recalibrated vector — MLP, and XGBoost',pan.x,reg.y+reg.h+(narrow?22:26),
-    {s:narrow?10:11.5,c:P.ink,al:gate});
-  resultStrip('semlp',p,pan,reg.y+reg.h+(narrow?22:26)+38,.48,'SE+MLP',
-    ['About +0.02 where it is already easy. Worse where it is not.',
-     '+0.02 when easy, worse when not.']);
-}
-
-/* ---------- scene 3: attention ---------- */
-function s3(p,pan){
-  txt('TRANSFORMER · LET POSITIONS INTERACT',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.tf,f:'d'});
-  txt('[CLS] + peptide + groove residues · 64-wide attention, 4 heads',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
-
-  const N=44, gap=narrow?2:3;
-  const reg={x:pan.x,y:pan.y+(narrow?152:168),w:pan.w,h:narrow?34:46};
-  const ins=ease(sub(p,.03,.12)), arcs=sub(p,.08,.70), mix=sub(p,.18,.38);
-  for(let i=0;i<N;i++){
-    const R=gridRect(i,N,reg,1,gap);
-    const isCls=i===0, isPep=i>=N-NPEP;
-    const base=.3+JIT[i]*.7, ctxd=.3+Math.abs(Math.sin(i*1.9))*.7;
-    const hh=R.h*lerp(base,ctxd,mix);
-    ctx.save();ctx.globalAlpha=(isCls?ins:1)*(.4+JIT[i+40]*.55);
-    ctx.fillStyle=isCls?P.bz:(isPep?P.dir:P.tf);
-    ctx.fillRect(R.x,R.y+R.h-hh,R.w,hh);ctx.restore();
-  }
-  txt('[CLS]',gridRect(0,N,reg,1,gap).x,reg.y+reg.h+(narrow?13:15),{s:narrow?8.5:9.5,c:P.bz,al:ins});
-  ctx.save();ctx.lineWidth=narrow?.8:1;
-  for(let q=0;q<N;q+=2)for(let k=q+3;k<N;k+=5){
-    const u=(q/N+k/N)/2, w=Math.exp(-Math.pow((u-(arcs*1.45-.22))/.17,2));
-    if(w<.04)continue;
-    const A=gridRect(q,N,reg,1,gap), B=gridRect(k,N,reg,1,gap);
-    const ax=A.x+A.w/2, bx=B.x+B.w/2, top=reg.y-Math.min(narrow?48:76,(bx-ax)*.42);
-    ctx.strokeStyle=hex(P.tf,w*.5);
-    ctx.beginPath();ctx.moveTo(ax,reg.y-2);ctx.quadraticCurveTo((ax+bx)/2,top,bx,reg.y-2);ctx.stroke();
-  }
-  ctx.restore();
-  txt('all-pairs attention over 44 tokens, trained from scratch on 14.5k rows',
-    pan.x,reg.y+reg.h+(narrow?30:34),{s:narrow?10:11.5,c:P.ink,al:mix});
-  resultStrip('transformer',p,pan,reg.y+reg.h+(narrow?30:34)+38,.48,null,
-    ['Attention from scratch: below the plain MLP on every split.',
-     'Below the plain MLP everywhere.']);
-}
-
-/* ---------- scene 4: boltz-2 ---------- */
-function s4(p,pan,ang){
+/* ---------- scene 2: boltz-2 ---------- */
+function s2(p,pan,ang){
   txt('BOLTZ-2 · START FROM A STRUCTURAL EMBEDDING',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.bz,f:'d'});
   txt('precomputed complex embedding · frozen · standardised on train only',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
   txt('\u03b11/\u03b12 platform \u00b7 2 helices, 9 strands \u00b7 ALLENIHRV in the groove',
@@ -451,8 +444,8 @@ function resultStrip(id,p,pan,top,at,name,note){
   }
 }
 
-/* ---------- scene 5: MACE, atomistic descriptors ---------- */
-function s5(p,pan){
+/* ---------- scene 3: MACE, atomistic descriptors ---------- */
+function s3(p,pan){
   txt('LEVEL 4 — ATOMISTIC DESCRIPTORS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.se,f:'d'});
   txt('MACE-MH-1 · an equivariant message-passing net over the complex',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
 
@@ -559,11 +552,11 @@ function s5(p,pan){
       const w=pan.w*(dm/tot)*ease(bw);
       ctx.save();ctx.globalAlpha=bw*(i===2?.95:.5);ctx.fillStyle=i===2?P.se:hex(P.se,.45);
       ctx.fillRect(x,by,Math.max(1,w-2),narrow?9:11);ctx.restore();
-      if(w>(narrow?74:46))txt(n+'  '+dm.toLocaleString(),x+2,by+(narrow?20:23),
+      if(w>(narrow?74:96))txt(n+'  '+dm.toLocaleString(),x+2,by+(narrow?20:23),
         {s:narrow?8.5:9.5,c:P.mut,al:bw});
       x+=w;});
   }
-  maceStrip(p,pan,ly+(narrow?54:64),.58);
+  maceStrip(p,pan,ly+(narrow?54:64),.50);
 }
 
 /* three numbers that say whether the atomistic blocks earned their place */
@@ -597,8 +590,8 @@ function maceStrip(p,pan,top,at){
   }
 }
 
-/* ---------- scene 6: results ---------- */
-function s6(p,pan){
+/* ---------- scene 4: results ---------- */
+function s4(p,pan){
   txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
   txt('Pearson r · 14.5k rows, 75 alleles, 22 clusters · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
 
@@ -684,12 +677,12 @@ function s6(p,pan){
 }
 
 /* ---------- compose ---------- */
-const CUT=[.155,.275,.395,.585,.80];
-const SCENES=[s1,s2,s3,s4,s5,s6];
+const CUT=[.33,.57,.78];
+const SCENES=[s1,s2,s3,s4];
 function frame(){
   ctx.clearRect(0,0,VW,VH);ctx.fillStyle=P.sf;ctx.fillRect(0,0,VW,VH);
   const g=L(), ang=t*Math.PI*2.6;
-  let idx=CUT.findIndex(c=>t<c); if(idx<0)idx=5;
+  let idx=CUT.findIndex(c=>t<c); if(idx<0)idx=3;
   drawRail(idx,g.rail);
   const bounds=[0,...CUT,1], seg=[bounds[idx],bounds[idx+1]];
   SCENES[idx](sub(t,seg[0],seg[1]),g.pan,ang);
