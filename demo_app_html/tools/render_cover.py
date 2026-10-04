@@ -95,17 +95,18 @@ def main() -> None:
     y += 26
     d.text((x0, y), "Boltz-τ", font=font(SANS, 92, 1), fill=ink)
     y += 118
-    for part, col in ((" peptide–HLA binding stability from a", mute),):
-        d.text((x0, y), "Predicting" + part, font=font(SANS, 25), fill=col)
-    d.text((x0, y + 34), "frozen structural foundation model.", font=font(SANS, 25), fill=mute)
+    d.text((x0, y), "A shallow readout on frozen Boltz-2 embeddings",
+           font=font(SANS, 25), fill=mute)
+    d.text((x0, y + 34), "predicts peptide–HLA binding half-life.",
+           font=font(SANS, 25), fill=mute)
 
     y += 92
     d.line([(x0, y), (x0 + 108, y)], fill=accent, width=3)
 
     # --- the headline: the split where the sequence models stop working
-    y += 38
-    d.text((x0, y), "On held-out allele clusters", font=font(SANS, 21, 1), fill=ink)
-    y += 42
+    y += 34
+    d.text((x0, y), "PEARSON r", font=font(MONO, 15), fill=accent)
+    y += 40
 
     best_seq = {s: max(m[(mod, s)] for mod in SEQ_MODELS) for s, _ in SPLITS}
     pairs = [("Boltz-τ readout", m[("boltz2 (frozen)", "C2")], accent),
@@ -114,11 +115,13 @@ def main() -> None:
         d.text((x0, y + 2), f"{val:+.3f}".replace("-", "−"),
                font=font(MONO, 46, 1), fill=col)
         d.text((x0 + 212, y + 22), label, font=font(SANS, 20), fill=mute)
-        y += 66
+        if val < 0:
+            d.text((x0 + 212, y + 44), "0 = chance", font=font(MONO, 13), fill=mute)
+        y += 60
 
     # --- the four splits, as a strip
-    y += 4
-    d.text((x0, y), "PEARSON r BY HELD-OUT SPLIT", font=font(MONO, 12), fill=mute)
+    y += 26
+    d.text((x0, y), "BOLTZ-\u03c4 ACROSS ALL FOUR HELD-OUT SPLITS", font=font(MONO, 12), fill=mute)
     y += 20
     cw = 112
     for i, (key, name) in enumerate(SPLITS):
