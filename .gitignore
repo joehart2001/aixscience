@@ -20,12 +20,8 @@ results/*
 uv.lock.conflicted-*
 
 
-main.py                            
 pyproject.toml.from-origin-main                  
-uv.lock                       
 uv.lock.worktree-backup
-pyproject.toml                     
-README.md                                         
 uv.lock.conflicted-22blocks
 pyproject.toml.conflicted-backup  
 'Serova Protein Engineering Track Challenge.pdf'   
