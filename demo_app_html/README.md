@@ -156,6 +156,7 @@ tools/
   extract_structure.py        ModelCIF -> JSON
   pack_structure.py           JSON -> inline constant
   render_protein.py           the rotating GIF above
+  render_cover.py             docs/cover.png, the repository social preview
 docs/                         rendered GIFs, committed
 dist/                         generated, safe to delete
 ```

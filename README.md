@@ -45,7 +45,7 @@ sequence model goes negative while the Boltz-τ readout remains predictive.
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="mlp-embeds/figs/compare/final_test_metrics.png">
-    <img src="demo_app_html/docs/protein-light.gif" alt="Graph comparing performance of each model on Pearson correlation across alleles and Spearman correlation within individual alleles" width="920">
+    <img src="mlp-embeds/figs/compare/final_test_metrics.png" alt="Graph comparing performance of each model on Pearson correlation across alleles and Spearman correlation within individual alleles" width="920">
   </picture>
 </p>
 <p align="center">
