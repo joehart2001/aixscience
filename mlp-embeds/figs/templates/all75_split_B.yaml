@@ -1,12 +1,9 @@
 # all75 Boltz2 subset: all four architectures on grouped by peptide.
 #
-# Every model here is trained and scored on the SAME 9,031 rows - the sequence
-# networks are restricted to them via `embeddings_dir`, and boltz-network can
-# only see them anyway. Train them with:
-#
-#   for net in direct-network transformer-network boltz-network; do
-#     (cd ../$net && $PY train.py templates/all75_split_B.yaml); done
-#   (cd ../squeeze-boost-network && $PY boost.py templates/all75_split_B.yaml)
+# Every model here is trained and scored on the SAME ~14.5k rows (every row
+# with an all75 Boltz2 embedding) - the sequence networks are restricted to
+# them via `embeddings_dir`, and boltz-network can only see them anyway.
+# Train them with `make all` (or `make make_model <net> ...`) from mlp-embeds/.
 
 label: B (peptide)
 out: all75_split_B
@@ -29,4 +26,4 @@ models:
     run: split B (peptide)
 
 caption: >-
-  All four networks trained and scored on the identical 9,031 Boltz2-embedded rows (54 alleles).
+  All four networks trained and scored on the identical ~14.5k all75 Boltz2-embedded rows.

@@ -25,7 +25,7 @@ figs/
 |---|---|---|---|
 | `split_*.yaml` | direct, transformer, SE+MLP, SE+XGB | full dataset (~28k) | A, B, C, C2 |
 | `a0201_split_*.yaml` | direct, transformer, **boltz2 (frozen)** | HLA-A\*02:01 with embeddings (~945 peptides) | A, B |
-| `all75_split_*.yaml` | direct, transformer, SE+MLP, SE+XGB, **boltz2 (frozen)** | all Boltz2-embedded rows (9,031 / 54 alleles) | A, B, C, **C2e** |
+| `all75_split_*.yaml` | direct, transformer, SE+MLP, SE+XGB, **boltz2 (frozen)** | all all75 Boltz2-embedded rows (~14.5k) | A, B, C, C2 |
 
 They are separate on purpose: boltz2 embeddings exist for one allele only, so a
 three-way comparison is possible only on that subset, and that subset cannot
@@ -163,27 +163,21 @@ floor, not a verdict on the architecture.
 
 ## all75 — all four architectures, all four splits
 
-The `all75` embedding set covers **9,031 rows across 54 alleles**, so for the
-first time every network can be scored on the same rows *and* on the
-allele-grouped splits. The sequence networks are restricted to those rows via
-`embeddings_dir`; boltz-network only sees them anyway.
-
-`split_C2e` is a **re-assigned** cluster split: the original C2 leaves 0 test
-rows on this subset, so `Data/scripts/make_embedded_splits.py` re-runs the same
-stratified cluster assignment over the embedded rows. It is not the same
-partition as `split_C2` — compare C2e only against other all75 runs.
+The `all75` embedding set now covers all 75 alleles / 22 clusters (~14.5k
+rows), so every network can be scored on the same rows *and* on the standard
+splits from `splits.csv`, C2 included. The sequence networks are restricted to
+those rows via `embeddings_dir`; boltz-network only sees them anyway.
 
 ```bash
-PY=../../.venv/bin/python
-for s in A B C C2e; do
-  for net in direct-network transformer-network boltz-network; do
-    (cd ../$net && $PY train.py templates/all75_split_$s.yaml); done
-  (cd ../squeeze-boost-network && $PY boost.py templates/all75_split_$s.yaml)
-done
-$PY plots.py templates/all75_split_*.yaml --summary-prefix summary_all75
+cd .. && make all        # or: make make_model <net> ...  -> <net>/figs/all75_split_*/
+make compare             # = plots.py templates/all75_split_*.yaml --summary-prefix summary_all75
 ```
 
-### Result (Pearson r / within-allele rho)
+### Earlier result: 9,031-row all75 subset (Pearson r / within-allele rho)
+
+From before the embedding set was extended; C2e was a cluster split
+re-assigned over those rows (`embedded_splits.csv`). Superseded once
+`make all` has been rerun on the ~14.5k-row set.
 
 | split | direct | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
 |---|---|---|---|---|---|
