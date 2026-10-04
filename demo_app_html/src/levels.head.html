@@ -1,0 +1,113 @@
+<title>Four Levels of Representation</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: a played-through demo of four representations, then the tabulated metrics it was built from. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --sunk:#e4e9ee;
+  --ink:#16202b; --muted:#5d6b7a; --line:#d2d9e0; --faint:#eaeef2;
+  --direct:#c9752f; --tf:#6d7f91; --se:#2f8f6b; --boltz:#6558c4; --warn:#a33a3a;
+  --disp:"Chivo",system-ui,sans-serif;
+  --body:"Source Sans 3",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f151c; --surface:#161e27; --sunk:#111922;
+    --ink:#e6ecf2; --muted:#8a99a8; --line:#273442; --faint:#1b2530;
+    --direct:#e4a062; --tf:#93a2b2; --se:#4fb98d; --boltz:#9b8ff0; --warn:#d66a6a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f151c; --surface:#161e27; --sunk:#111922;
+  --ink:#e6ecf2; --muted:#8a99a8; --line:#273442; --faint:#1b2530;
+  --direct:#e4a062; --tf:#93a2b2; --se:#4fb98d; --boltz:#9b8ff0; --warn:#d66a6a;
+  color-scheme:dark;
+}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55;}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:30px 60px;}
+header{display:flex;flex-direction:column;gap:6px;margin-bottom:22px;}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+h1{font-family:var(--disp);font-weight:800;font-size:clamp(28px,5.4vw,46px);line-height:1.04;margin:0;letter-spacing:-.025em;text-wrap:balance;}
+.sub{color:var(--muted);max-width:66ch;margin:0;font-size:15.5px;}
+h2.sec{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:44px 0 14px;}
+
+figure{margin:0;}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+canvas{display:block;width:100%;}
+.transport{display:flex;align-items:center;gap:14px;padding:12px 14px;border-top:1px solid var(--line);background:var(--sunk);}
+button.play{all:unset;cursor:pointer;width:34px;height:34px;flex:none;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;}
+button.play:focus-visible{outline:2px solid var(--boltz);outline-offset:2px;}
+button.play svg{width:13px;height:13px;fill:currentColor;}
+input[type=range]{flex:1;min-width:0;accent-color:var(--boltz);height:20px;cursor:pointer;}
+.clock{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+button.chip{all:unset;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);}
+button.chip[aria-current="true"]{color:var(--surface);background:var(--ink);border-color:var(--ink);}
+button.chip:focus-visible{outline:2px solid var(--boltz);outline-offset:2px;}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+button.tab{all:unset;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:6px 12px;border:1px solid var(--line);border-radius:5px;color:var(--muted);}
+button.tab[aria-current="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink);}
+button.tab:focus-visible{outline:2px solid var(--boltz);outline-offset:2px;}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);}
+table{border-collapse:collapse;width:100%;min-width:540px;font-variant-numeric:tabular-nums;}
+th,td{text-align:right;padding:9px 14px;font-family:var(--mono);font-size:12.5px;border-bottom:1px solid var(--line);}
+th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+td:first-child,th:first-child{text-align:left;}
+tbody tr:last-child td{border-bottom:none;}
+td.best{font-weight:600;}
+td.best::after{content:"▌";color:var(--boltz);margin-left:5px;font-size:9px;vertical-align:1px;}
+.mk{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:8px;}
+
+.notes{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);}
+.notes h3{font-family:var(--disp);font-size:15px;font-weight:600;margin:0 0 10px;}
+.notes p{font-size:14px;color:var(--muted);max-width:70ch;margin:0 0 12px;}
+.notes code{font-family:var(--mono);font-size:12.5px;color:var(--ink);}
+.flag{border-left:3px solid var(--warn);padding-left:14px;}
+.flag strong{color:var(--ink);}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">all75 held-out test · 4 splits · Pearson r</span>
+  <h1>Four Levels of Representation</h1>
+  <p class="sub">The same half-life target, learned from increasingly structured views of a peptide–HLA pair. The head barely changes across the ladder, so what separates these models is what goes into it. Every value shown is read from <code style="font-family:var(--mono);font-size:13px">mlp-embeds/figs/compare/summary_all75_test_metrics.md</code>.</p>
+</header>
+
+<figure>
+  <div class="frame">
+    <canvas id="stage" role="img" aria-describedby="alt"></canvas>
+    <p id="alt" class="vh">A five-part animation. Level 1 prunes the 182-residue chain to the 34 NetMHCpan pocket positions, pairs them with nine peptide residues and a learned allele vector, and feeds the lot to the direct MLP baseline the others are measured against. Level 1b applies a squeeze-and-excitation gate to those same features and splits into an MLP head and an XGBoost head. Level 2 prepends a classification token and adds all-pairs self-attention over the same indices. Level 3 replaces the sequence entirely with a 1,547-dimensional frozen Boltz-2 co-folding embedding. The final scene charts Pearson correlation for all five tabulated models across four held-out splits ordered by decreasing leakage, where every sequence model falls to chance on the cluster split and only the Boltz-2 embedding stays predictive.</p>
+    <div class="transport">
+      <button class="play" id="play" aria-label="Pause animation"><svg id="icon" viewBox="0 0 12 12"><rect x="1.5" y="1" width="3" height="10" rx="1"/><rect x="7.5" y="1" width="3" height="10" rx="1"/></svg></button>
+      <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Animation timeline">
+      <span class="clock" id="clock">00:00</span>
+    </div>
+  </div>
+  <div class="chips">
+    <button class="chip" data-at="0.005">1 · Baseline</button>
+    <button class="chip" data-at="0.24">1b · SE gate</button>
+    <button class="chip" data-at="0.40">2 · Attention</button>
+    <button class="chip" data-at="0.57">3 · Boltz-2</button>
+    <button class="chip" data-at="0.76">4 · Results</button>
+  </div>
+</figure>
+
+<h2 class="sec">Full test metrics</h2>
+<div class="tabs" id="tabs"></div>
+<div class="tablewrap"><table id="tbl"></table></div>
+
+<div class="notes">
+  <h3>Reading the splits</h3>
+  <p><strong style="color:var(--ink)">A (random)</strong> shuffles rows, so a peptide's allele and near-neighbours are usually in train. <strong style="color:var(--ink)">B (peptide)</strong> holds out peptides. <strong style="color:var(--ink)">C (allele)</strong> holds out whole alleles. <strong style="color:var(--ink)">C2e (cluster)</strong> holds out sequence-similarity clusters, re-assigned over the embedded rows because the original C2 leaves zero test rows on this subset. All five models see the identical 9,031 rows across 54 alleles.</p>
+  <p>The ladder starts at Level 1 because there is no Level 0 run. <code>direct-network</code> defaults to <code>hla_col: hla_seq</code>, but every committed template overrides it to <code>hla_pseudoseq</code>, so the full 182-residue path exists in code and was never trained. Frozen Boltz-2 embeddings take every metric on every split but one: on the random split <code>SE+XGB</code> edges RMSE, 11.014 against 11.297. Everywhere else the ordering is unambiguous, and on C2e it is the only representation above chance.</p>
+
+  <h3>Two caveats worth carrying</h3>
+  <p class="flag"><strong>C2e rests on 2 test clusters.</strong> The repo's own note calls it a spread rather than a point value, and the weakest-powered cell in the table. It is also the most important one, which is an argument for embedding the remaining alleles rather than leaning on the number as it stands.</p>
+  <p class="flag"><strong>SE is squeeze-and-excitation, not a new representation.</strong> <code>squeeze-boost-network</code> takes the direct-network feature vector unchanged — 704 channels — recalibrates it with a learned per-channel gate, then fits an MLP and an XGBoost head on the result. It belongs beside the baseline rather than above it.</p>
+</div>
+</div>
