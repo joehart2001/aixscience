@@ -1,0 +1,35 @@
+
+>>> training direct_A (direct-network)
+    [direct-net A] split=A train rows = 669, val rows = 130, test rows = 146
+    [direct-net A] TEST | loss 0.7219 | MAE 5.84 h | RMSE 9.21 h | pearson 0.691 | spearman 0.687 | within_rho 0.687
+
+>>> training transformer_A (transformer-network)
+    [transformer-net A] split=A train rows = 669, val rows = 130, test rows = 146
+    [transformer-net A] TEST | loss 1.3170 | MAE 7.79 h | RMSE 11.89 h | pearson 0.163 | spearman 0.149 | within_rho 0.149
+
+>>> training boltz_A (boltz-network)
+    [boltz-net A] split=A train rows = 669, val rows = 130, test rows = 146
+    [boltz-net A] TEST | loss 0.7607 | MAE 6.05 h | RMSE 10.32 h | pearson 0.658 | spearman 0.685 | within_rho 0.685
+
+>>> training direct_B (direct-network)
+    [direct-net B] split=B train rows = 670, val rows = 130, test rows = 145
+    [direct-net B] TEST | loss 0.9184 | MAE 5.17 h | RMSE 7.99 h | pearson 0.550 | spearman 0.520 | within_rho 0.520
+
+>>> training transformer_B (transformer-network)
+    [transformer-net B] split=B train rows = 670, val rows = 130, test rows = 145
+    [transformer-net B] TEST | loss 1.0123 | MAE 6.11 h | RMSE 9.55 h | pearson 0.403 | spearman 0.408 | within_rho 0.408
+
+>>> training boltz_B (boltz-network)
+    [boltz-net B] split=B train rows = 670, val rows = 130, test rows = 145
+    [boltz-net B] TEST | loss 0.7838 | MAE 4.82 h | RMSE 7.51 h | pearson 0.601 | spearman 0.583 | within_rho 0.583
+
+[compare_networks] saved to ../figs/matched-a0201/ (compare/, test/, data/)
+
+model                | test_Pearson | test_Spearman | within-allele_rho | test_MAE(h) | test_RMSE(h)
+--------------------------------------------------------------------------------------------------
+direct-net A         |        0.691 |         0.687 |             0.687 |        5.84 |         9.21
+transformer-net A    |        0.163 |         0.149 |             0.149 |        7.79 |        11.89
+boltz-net A          |        0.658 |         0.685 |             0.685 |        6.05 |        10.32
+direct-net B         |        0.550 |         0.520 |             0.520 |        5.17 |         7.99
+transformer-net B    |        0.403 |         0.408 |             0.408 |        6.11 |         9.55
+boltz-net B          |        0.601 |         0.583 |             0.583 |        4.82 |         7.51

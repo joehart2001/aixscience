@@ -1,0 +1,29 @@
+# Three-way architecture comparison on split B (grouped by peptide), restricted to the
+# HLA-A*02:01 rows that have a Boltz2 embedding — the only rows all three
+# networks can be scored on. Produced by:
+#
+#   cd ../boltz-network && $PY compare_networks.py --out ../figs/matched-a0201
+#
+# which trains all three on identical rows and writes one shared run-data dir,
+# so the three `models` entries below share a `figs_dir` and differ by `run`.
+#
+# Only splits A and B apply: with a single allele, C and C2 collapse to one fold.
+# Note within-allele rho == global Spearman here, since there is one allele.
+
+label: A*02:01 split B (grouped by peptide)
+out: a0201_split_B
+
+models:
+  - label: direct (MLP)
+    figs_dir: matched-a0201
+    run: direct-net B
+  - label: transformer
+    figs_dir: matched-a0201
+    run: transformer-net B
+  - label: boltz2 (frozen)
+    figs_dir: matched-a0201
+    run: boltz-net B
+
+caption: >-
+  HLA-A*02:01 rows with Boltz2 embeddings only (~945 peptides); boltz2 features
+  are frozen, the other two train their encoders from scratch.
