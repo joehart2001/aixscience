@@ -12,11 +12,12 @@ from config_common import build_results, print_summary
 from config_common import load_config as _load_config
 
 # Defaults applied when a YAML omits a key, so configs can stay minimal.
-# The `all75` embedding set spans many alleles, so every split (A/B/C/C2e) is
-# meaningful; `embedded_splits.csv` carries the embedded-cluster split C2e.
+# The `all75` embedding set now spans all 75 alleles / 22 clusters, so every
+# split (A/B/C/C2) works on the embedded subset — same `splits.csv` as the
+# sequence nets (the old embedded-cluster workaround split C2e is retired).
 DEFAULTS = {
-    "splits_csv": "../../Data/subsets/embedded_splits.csv",
-    "split": "A",          # which split strategy: A, B, C, or C2e
+    "splits_csv": "../../Data/subsets/splits.csv",
+    "split": "A",          # which split strategy: A, B, C, or C2
     "embeddings_dir": "../../Data/boltz2/boltz_embeddings/all75",
     "feature_key": "features",         # which Boltz embedding vector to use
     "allele": None,                    # None = every allele that has an embedding
