@@ -256,8 +256,8 @@ const SEQCOLS=[
   note:'all-pairs attention, d_model 64, trained from scratch'}];
 
 function s1(p,pan){
-  txt('SEQUENCE MODELS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
-  txt('three ways to read the same amino-acid indices',pan.x,pan.y+(narrow?30:34),
+  txt('SEQUENCE MODELS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
+  txt('three ways to read the same amino-acid indices',pan.x,pan.y+(narrow?32:42),
     {s:narrow?9.5:11,c:P.mut});
 
   // each column is lit in turn, then all three together for the comparison
@@ -277,7 +277,7 @@ function s1(p,pan){
       ctx.save();ctx.globalAlpha=.9;ctx.fillStyle=P[col.ck];
       rr(x-(narrow?5:8),top-10,2.5,narrow?118:150,1.5);ctx.fill();ctx.restore();
     }
-    txt(col.name,x,top,{s:narrow?10.5:13,w:600,c:P[col.ck],f:'d',al});
+    txt(col.name,x,top,{s:narrow?13:18,w:600,c:P[col.ck],f:'d',al});
     txt(col.input,x,top+(narrow?13:16),{s:narrow?8:9.5,c:P.mut,al:al*.95});
 
     // a compact picture of what this model consumes
@@ -349,14 +349,14 @@ function s1(p,pan){
     ctx.stroke();ctx.restore();
     txt(narrow?'All three collapse on a new groove.'
               :'Within 0.115 of each other on shuffled rows. All three go negative on an unseen groove.',
-      pan.x,ny,{s:narrow?10:14,c:P.ink,f:'s',w:600,al:g});
+      pan.x,ny,{s:narrow?12:18,c:P.ink,f:'s',w:600,al:g});
   }
 }
 
 /* ---------- scene 2: boltz-2 ---------- */
 function s2(p,pan,ang){
-  txt('BOLTZ-2 · START FROM A STRUCTURAL EMBEDDING',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.bz,f:'d'});
-  txt('precomputed complex embedding · frozen · standardised on train only',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('BOLTZ-2 · A STRUCTURAL EMBEDDING',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.bz,f:'d'});
+  txt('precomputed complex embedding · frozen · standardised on train only',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
   txt('\u03b11/\u03b12 platform \u00b7 2 helices, 9 strands \u00b7 ALLENIHRV in the groove',
     pan.x,pan.y+pan.h-(narrow?76:72),{s:narrow?9:10.5,c:P.mut,al:sub(p,.14,.26)*(1-sub(p,.34,.46))});
 
@@ -440,14 +440,14 @@ function resultStrip(id,p,pan,top,at,name,note){
     ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.bz;
     ctx.beginPath();ctx.moveTo(pan.x,ny-7);ctx.lineTo(pan.x+6,ny-3.5);ctx.lineTo(pan.x,ny);
     ctx.closePath();ctx.fill();ctx.restore();
-    txt(narrow?note[1]:note[0],pan.x+12,ny,{s:narrow?9.5:12.5,c:P.ink,f:'s',w:600,al:g});
+    txt(narrow?note[1]:note[0],pan.x+14,ny,{s:narrow?12:18,c:P.ink,f:'s',w:600,al:g});
   }
 }
 
 /* ---------- scene 3: MACE, atomistic descriptors ---------- */
 function s3(p,pan){
-  txt('LEVEL 4 — ATOMISTIC DESCRIPTORS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.se,f:'d'});
-  txt('MACE-MH-1 · an equivariant message-passing net over the complex',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('MACE · ATOMISTIC DESCRIPTORS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.se,f:'d'});
+  txt('MACE-MH-1 · an equivariant message-passing net over the complex',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
 
   const box={x:pan.x,y:pan.y+(narrow?50:54),w:narrow?pan.w:pan.w*.54,h:narrow?150:190};
   const L=fragLayout(box);
@@ -586,7 +586,7 @@ function maceStrip(p,pan,top,at){
     ctx.closePath();ctx.fill();ctx.restore();
     txt(narrow?'Memorises. Never reaches Boltz.'
               :'Trains to 0.768, tests at 0.020. It memorises, and it never reaches Boltz.',
-      pan.x+12,ny,{s:narrow?9.5:12.5,c:P.ink,f:'s',w:600,al:g});
+      pan.x+14,ny,{s:narrow?12:18,c:P.ink,f:'s',w:600,al:g});
   }
 }
 
@@ -596,12 +596,12 @@ const UCOLS=[['boltz','Boltz-2 complex','1,547-d','bz'],
              ['edge','MACE edge','14,450-d','se']];
 
 function s4(p,pan){
-  txt('WHAT THE FEATURE SPACES LOOK LIKE',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
+  txt('WHAT THE FEATURE SPACES LOOK LIKE',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
   txt('UMAP of all 14,997 complexes, thinned to 1,800 · coloured by the C2 cluster split',
-    pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+    pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
 
   const GAP=narrow?0:20, cw=narrow?pan.w:(pan.w-2*GAP)/3;
-  const top=pan.y+(narrow?56:66), ph=narrow?150:Math.min(cw,250);
+  const top=pan.y+(narrow?80:100), ph=narrow?150:Math.min(cw,240);
   const SPC={t:[P.mut,.22,1.3],v:[P.bz,.75,1.6],e:[P.wrn,.85,1.7]};
   const show=narrow?(p<.38?0:p<.68?1:2):-1;      // phone takes them one at a time
 
@@ -610,8 +610,8 @@ function s4(p,pan){
     const x=narrow?pan.x:pan.x+ci*(cw+GAP);
     const u=sub(p,.06+ci*(narrow?.30:.17),.42+ci*(narrow?.30:.17));
     if(u<=0)return;
-    txt(name,x,top-(narrow?16:20),{s:narrow?10:12,w:600,c:P[ck],f:'d',al:u});
-    txt(dim,x+cw,top-(narrow?16:20),{s:narrow?8.5:10,c:P.mut,ta:'right',al:u});
+    txt(name,x,top-(narrow?26:32),{s:narrow?16:22,w:600,c:P[ck],f:'d',al:u});
+    txt(dim,x,top-(narrow?11:14),{s:narrow?9:10.5,c:P.mut,al:u*.9});
 
     ctx.save();ctx.globalAlpha=u*.5;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
     rr(x,top,cw,ph,5);ctx.stroke();ctx.restore();
@@ -651,8 +651,8 @@ function s4(p,pan){
 
 /* ---------- scene 5: results ---------- */
 function s5(p,pan){
-  txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
-  txt('Pearson r · 14.5k rows, 75 alleles, 22 clusters · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+  txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
+  txt('Pearson r · 14.5k rows, 75 alleles, 22 clusters · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
 
   const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?6:10);
   const Y0=pan.y+(narrow?62:70), Y1=pan.y+pan.h-(narrow?124:98);
@@ -725,7 +725,7 @@ function s5(p,pan){
     ctx.save();ctx.globalAlpha=k*.5;ctx.strokeStyle=P.bz;ctx.lineWidth=1.5;
     ctx.beginPath();ctx.moveTo(pan.x,by);ctx.lineTo(pan.x+pan.w*ease(k),by);ctx.stroke();ctx.restore();
     txt('Only the Boltz-2 embeddings generalise to an unseen allele.',pan.x,by+(narrow?19:24),
-      {s:narrow?11:15,c:P.ink,f:'s',w:600,al:k});
+      {s:narrow?14:24,c:P.ink,f:'s',w:600,al:k});
     txt('0.714 on held-out alleles against 0.592 for the best sequence model, and on unseen',
       pan.x,by+(narrow?34:44),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.60,.70)});
     txt('clusters every sequence model goes negative while Boltz-2 holds 0.425.',
