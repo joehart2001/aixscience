@@ -50,8 +50,8 @@ this small without the warmup schedule post-LN would need.
 ## Run
 
 ```bash
-# all four splits -> figs/   (or: make transformer  from mlp-embeds/)
-../../../.venv/bin/python compare.py templates/*.yaml
+# all four splits -> figs/all75_split_*/   (or: make make_model transformer-network  from mlp-embeds/)
+for t in templates/*.yaml; do ../../../.venv/bin/python train.py $t; done
 ```
 
 Templates are `random` / `fix-peptide` / `fix-allele` / `fix-allele-group`.

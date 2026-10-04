@@ -11,8 +11,8 @@ Unique files: `model.py` (`DirectAffinityNet`), `config.py` (`DEFAULTS` +
 shared from `mlp-embeds/`.
 
 ```bash
-# train all four splits -> figs/   (or: make direct  from mlp-embeds/)
-../../../.venv/bin/python compare.py templates/*.yaml
+# all four splits -> figs/all75_split_*/   (or: make make_model direct-network  from mlp-embeds/)
+for t in templates/*.yaml; do ../../../.venv/bin/python train.py $t; done
 ```
 
 See [`../README.md`](../README.md) for the splits, figures, and shared layout.

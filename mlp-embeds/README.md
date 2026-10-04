@@ -46,33 +46,31 @@ at the top of each entry point.
 | `random.yaml` | A | nothing (random 70/15/15) |
 | `fix-peptide.yaml` | B | whole peptides |
 | `fix-allele.yaml` | C | whole alleles |
-| `fix-allele-group.yaml` | C2 (C2e for boltz) | whole allele clusters (unseen groove) |
+| `fix-allele-group.yaml` | C2 | whole allele clusters (unseen groove) |
 
-Sequence nets use the full dataset (`Data/subsets/splits.csv`); boltz uses the
-`all75` embeddings + `Data/subsets/embedded_splits.csv`. `Data/` at the repo root
-is the source of truth and is never written to.
+Every network trains on the same rows: those with an `all75` Boltz2 embedding
+(~14.5k), via `embeddings_dir` in each template, with the splits from
+`Data/subsets/splits.csv`. `Data/` at the repo root is the source of truth and
+is never written to.
 
 ## Running
 
 ```bash
-make direct          # or transformer / squeeze-boost / boltz
-make all             # all four
-make compare         # cross-network summary (figs/)
-# equivalently, from a network dir:
-cd direct-network && ../../../.venv/bin/python compare.py templates/*.yaml
+make all                                            # all four networks
+make make_model direct-network transformer-network  # just the named ones
+make compare                                        # cross-network summary (figs/)
+# equivalently, one split from a network dir:
+cd direct-network && ../../../.venv/bin/python train.py templates/random.yaml
 ```
 
-Each `compare.py templates/*.yaml` trains the four splits and writes that
-network's own `figs/`:
+Each template trains one split and writes `<net>/figs/all75_split_<X>/`
+(X = A, B, C, C2). squeeze-boost is trained with `boost.py`, so its folders hold
+both the SE+MLP and SE+XGB runs. In each folder:
 
-- `figs/compare/compare_val_{loss,mae}.png` — loss & MAE per split
-- `figs/compare/compare_val_pearson.png` — global Pearson r per split
-- `figs/compare/compare_val_within_rho.png` — within-allele ρ per split
-- `figs/test/<split>_test_pred_vs_actual.png` — half-life parity on the test set
-- `figs/test/compare_test_metrics.png` — grouped bars (Pearson / Spearman /
-  within-allele ρ + MAE / RMSE), with SOTA reference lines
-- `figs/data/` — `runs.json` + per-run `.npz`; rebuild any figure without
-  retraining via `python plots.py --figs-dir figs`
+- `compare/{loss_curve,val_mae,val_pearson,val_spearman,val_within_rho}.png`
+- `test/test_pred_vs_actual.png`, `test_residuals.png`, `test_residual_hist.png`
+- `data/` — `runs.json` + per-run `.npz`; rebuild the figures without
+  retraining via `python plots.py --figs-dir figs/all75_split_A`
 
 ## Compute
 

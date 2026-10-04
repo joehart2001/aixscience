@@ -1,6 +1,7 @@
-label: fix allele group
+label: split C2 (cluster)
 csv: ../../Data/rasmussen_et_al_dataset.csv
 splits_csv: ../../Data/subsets/splits.csv
 split: C2
 hla_col: hla_pseudoseq
-figs_dir: figs/fix-allele-group
+embeddings_dir: ../../Data/boltz2/boltz_embeddings/all75
+figs_dir: figs/all75_split_C2

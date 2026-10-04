@@ -54,8 +54,8 @@ PY=../../../.venv/bin/python
 
 $PY boost.py templates/fix-allele.yaml  # SE network + XGBoost, both scored
 $PY train.py templates/fix-allele.yaml  # SE network alone (no boost stage)
-$PY compare.py templates/*.yaml         # SE network across all four splits
-$PY plots.py --figs-dir figs/fix-allele # rebuild figures from saved data
+for t in templates/*.yaml; do $PY boost.py $t; done   # all four splits (= make make_model squeeze-boost-network)
+$PY plots.py --figs-dir figs/all75_split_C # rebuild figures from saved data
 ```
 
 `boost.py` writes **two labelled runs** into one figs dir — `<label> (SE+MLP)`
@@ -118,7 +118,7 @@ little on A, and costs a lot on C (0.602 vs 0.700). The C case is instructive:
 XGBoost reaches a *better* validation loss than the network (1.256 vs 1.341) but
 a worse test score, and early stopping fired at 38 rounds against 1893 on A.
 With only ~60 training alleles, the trees fit the validation fold that is
-selecting them. See `figs/fix-allele/compare/boost_val_loss.png`.
+selecting them. See `figs/all75_split_C/compare/boost_val_loss.png`.
 
 **C2 remains at chance for every architecture**, and SE+XGB is the worst of
 them. Nothing here touches the unseen-groove problem.
