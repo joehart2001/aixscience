@@ -1,0 +1,45 @@
+# Split C2 — GROUP BY ALLELE CLUSTER: alleles sharing >=30 of their 34 contact
+# positions are one unit (75 alleles -> 22 clusters), so near-identical grooves
+# cannot be split across folds. Tests a genuinely unseen binding groove.
+#
+# NOTE: only 22 groups, so val/test hold ~3 clusters each and estimates are
+# noisy — read C2 results as a spread, not a point value.
+#
+# Compare all four splits:
+#   python compare.py templates/split_A.yaml templates/split_B.yaml \
+#                      templates/split_C.yaml templates/split_C2.yaml
+
+label: split C2 (cluster)
+csv: ../Data/rasmussen_et_al_dataset.csv   # sequence source (joined by row_id)
+splits_csv: ../Data/subsets/splits.csv     # precomputed split assignments
+split: C2                                  # which split_* column to use
+hla_col: hla_pseudoseq                     # HLA representation fed to the model
+
+# --- split label values inside the split_<X> column ---
+train_value: train
+val_value: val
+
+# --- training hyperparameters ---
+epochs: 30
+batch_size: 128
+lr: 0.001
+weight_decay: 0.00001
+seed: 0
+
+# --- transformer encoder (omit any key to use the model's default) ---
+model:
+  d_model: 64            # width of the residual stream
+  nhead: 4               # attention heads per layer
+  num_layers: 3          # encoder blocks
+  dim_feedforward: 256   # width of each block's feedforward
+  allele_embed_dim: 16   # allele vector, concatenated at the head
+  hidden_dim: 256        # head width (matches direct-network's MLP)
+  dropout: 0.1
+
+# --- compute ---
+device: auto        # auto = CUDA if available (prod GPU), else CPU (local); or force cpu/cuda
+num_workers: 0      # raise on a production GPU box for faster data loading
+
+# --- outputs ---
+figs_dir: figs/split_C2
+out: null

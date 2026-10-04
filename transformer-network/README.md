@@ -1,0 +1,98 @@
+# transformer-network
+
+Same task and same inputs as `direct-network` (predict peptide–MHC half-life
+`thalf_hours` from `peptide` + HLA sequence + `allele`), but the sequences are
+encoded by a **transformer encoder** instead of being flattened into an MLP.
+A brute-force bet that self-attention learns a richer representation of the
+peptide–groove pair than fixed per-position weights can.
+
+Everything except `model.py` is copied verbatim from `direct-network` — the
+inputs are already integer amino-acid indices, which is exactly what a
+transformer consumes, so `data.py` needed no changes at all.
+
+## What's different from direct-network
+
+| | direct-network | transformer-network |
+|---|---|---|
+| Encoder | flatten per-residue embeddings → concat | [CLS] + peptide + HLA as one token stream → self-attention |
+| Residue interactions | one fixed weight per (position, position) pair | content-dependent attention, per example |
+| Position information | implicit in the flattened layout | learned positional + segment embeddings |
+| Head | 2×256 ReLU MLP | 2×256 ReLU MLP (**unchanged**, deliberately) |
+| Params | ~850K | ~242K at the default `d_model: 64` |
+| `data.py` | — | identical |
+
+The head is kept identical on purpose: any difference in results is
+attributable to the encoder, not to head capacity. Note the transformer is the
+*smaller* model — the flattened MLP spends most of its parameters on the first
+Linear layer.
+
+### Token stream
+
+```
+[CLS] p1 p2 ... p9   h1 h2 ... h34
+  |   \_________/    \__________/
+  |    segment 1       segment 2
+  pooled -> concat with allele embedding -> MLP head
+```
+
+Three embeddings are summed per token: the **shared amino-acid embedding** (a
+leucine is the same vector in the peptide and in the groove), a **learned
+positional embedding** (attention is order-blind without it, and anchor
+position is most of what determines binding), and a **segment embedding**
+(which sequence the residue came from). Padded positions are masked out of
+attention. The allele embedding is concatenated onto the pooled `[CLS]` vector
+rather than inserted as a token, mirroring how direct-network feeds it.
+
+Blocks are **pre-LN** (`norm_first=True`), which trains stably on a dataset
+this small without the warmup schedule post-LN would need.
+
+## Quick start
+
+```bash
+PY=../../.venv/bin/python
+
+# Train one model (the split strategy is chosen inside the YAML).
+$PY train.py templates/split_C.yaml
+
+# Train + compare the four split strategies on shared plots.
+$PY compare.py templates/split_A.yaml templates/split_B.yaml \
+               templates/split_C.yaml templates/split_C2.yaml
+
+# Rebuild all figures from saved run data, no retraining.
+$PY plots.py --figs-dir figs/split_C2
+```
+
+For a fast smoke test, copy a template and lower `epochs`.
+
+## Config
+
+Identical to direct-network's schema plus one extra block — `model:`, whose
+keys are passed straight to `DirectAffinityNet`. Omit any key to use the
+model's own default:
+
+```yaml
+model:
+  d_model: 64            # width of the residual stream
+  nhead: 4               # attention heads per layer
+  num_layers: 3          # encoder blocks
+  dim_feedforward: 256   # width of each block's feedforward
+  allele_embed_dim: 16   # allele vector, concatenated at the head
+  hidden_dim: 256        # head width (matches direct-network's MLP)
+  dropout: 0.1
+```
+
+`hla_col: hla_pseudoseq` (the 34-aa contact-residue pseudosequence) is the
+default in the templates, as in direct-network — it generalizes better than the
+full 182-aa sequence, and it also keeps the token stream at 44 positions
+instead of 192, which matters for attention's quadratic cost.
+
+## Figures
+
+Same suite as direct-network, written by the same `plots.py`:
+
+- `figs/split_<X>/` — training curves + val predicted-vs-actual per run.
+- `figs/compare/` — overlaid comparison across splits.
+- `figs/test/` — per-split test scatter / residuals / residual histogram, plus
+  `compare_test_metrics.png`.
+- `figs/data/` — `runs.json` + per-run `.npz` so `plots.py` can regenerate
+  every figure without retraining.
