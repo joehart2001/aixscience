@@ -4,13 +4,22 @@ Peptide–MHC class I binding **half-life (stability)** prediction (Serova Prote
 Engineering Track Challenge).
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="demo_app_html/docs/protein.gif">
-    <img src="demo_app_html/docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="460">
-  </picture>
+  <a href="https://joehart2001.github.io/aixscience/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="demo_app_html/docs/protein.gif">
+      <img src="demo_app_html/docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="460">
+    </picture>
+  </a>
 </p>
+
 <p align="center">
-  <em>HLA-A*02:01 with <code>ALLENIHRV</code> in the groove — the real Boltz-2
+  <a href="https://joehart2001.github.io/aixscience/"><strong>▶&nbsp; Watch the interactive demo</strong></a><br>
+  <sub>Six scenes, 66 s. How four representations of a peptide–HLA pair are built,
+  and where each one breaks. Scrub it, or jump to any scene.</sub>
+</p>
+
+<p align="center">
+  <em>Above: HLA-A*02:01 with <code>ALLENIHRV</code> in the groove — the real Boltz-2
   prediction, t½ 44.7 h, complex pLDDT 0.988.</em>
 </p>
 
@@ -35,10 +44,11 @@ table in `mlp-embeds/figs/compare/summary_all75_test_metrics.md`. C2e holds only
   comparison harness in `mlp-embeds/figs/`. See `mlp-embeds/README.md`.
 - **`Data/`** — dataset, precomputed splits, and Boltz2 embeddings (source of
   truth; models read from it, never write to it).
-- **`demo_app_html/`** — animated explainers of the representation ladder and
-  the structure pipeline, each building to one dependency-free HTML file, plus
-  the renderer that produced the animation above. Live at
-  **[https://joehart2001.github.io/aixscience/](https://joehart2001.github.io/aixscience/)**; see `demo_app_html/README.md`.
+- **`demo_app_html/`** — the demo above, plus the structure pipeline explainer
+  and the renderer behind the rotating complex. Each builds to one
+  dependency-free HTML file; published to [Pages](https://joehart2001.github.io/aixscience/) by
+  `.github/workflows/pages.yml`, which gates the deploy on the build checks.
+  See `demo_app_html/README.md`.
 
 ## References
 
