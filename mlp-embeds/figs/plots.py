@@ -323,6 +323,7 @@ def final_summary_bars(all_tests: dict[str, dict[str, dict]], path: str) -> None
     for ax, (key, name) in zip(np.atleast_1d(axes), metrics):
         if key in ("pearson", "spearman"):
             _add_reference(key, ax)  # SOTA stability reference
+            ax.legend(fontsize = 10)
         for i, model in enumerate(models):
             # NaN leaves a gap rather than a misleading zero-height bar.
             values = [
