@@ -3,7 +3,7 @@ const cv=document.getElementById('stage'), ctx=cv.getContext('2d');
 const scrub=document.getElementById('scrub'), playBtn=document.getElementById('play');
 const icon=document.getElementById('icon'), clock=document.getElementById('clock');
 const chips=[...document.querySelectorAll('.chip')];
-const DUR=58000;
+const DUR=68000;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let VW=1000,VH=520,narrow=false,P=pal(),t=reduce?.94:0,playing=!reduce,last=0;
 
@@ -218,7 +218,7 @@ function L(){
    ? {rail:{x:16,y:34,w:368,h:22,horiz:true}, pan:{x:16,y:80,w:368,h:438}}
    : {rail:{x:30,y:54,w:122,h:426,horiz:false}, pan:{x:188,y:52,w:782,h:428}};
 }
-const RAIL=[['MODELS','SEQUENCE'],['MODEL','BOLTZ-2'],['MODEL','MACE'],['','RESULTS']];
+const RAIL=[['MODELS','SEQUENCE'],['MODEL','BOLTZ-2'],['MODEL','MACE'],['','FEATURE SPACE'],['','RESULTS']];
 function drawRail(idx,r){
   const N=RAIL.length;
   if(r.horiz){
@@ -590,8 +590,67 @@ function maceStrip(p,pan,top,at){
   }
 }
 
-/* ---------- scene 4: results ---------- */
+/* ---------- scene 4: the feature spaces ---------- */
+const UCOLS=[['boltz','Boltz-2 complex','1,547-d','bz'],
+             ['node','MACE node','11,520-d','se'],
+             ['edge','MACE edge','14,450-d','se']];
+
 function s4(p,pan){
+  txt('WHAT THE FEATURE SPACES LOOK LIKE',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
+  txt('UMAP of all 14,997 complexes, thinned to 1,800 · coloured by the C2 cluster split',
+    pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
+
+  const GAP=narrow?0:20, cw=narrow?pan.w:(pan.w-2*GAP)/3;
+  const top=pan.y+(narrow?56:66), ph=narrow?150:Math.min(cw,250);
+  const SPC={t:[P.mut,.22,1.3],v:[P.bz,.75,1.6],e:[P.wrn,.85,1.7]};
+  const show=narrow?(p<.38?0:p<.68?1:2):-1;      // phone takes them one at a time
+
+  UCOLS.forEach(([tag,name,dim,ck],ci)=>{
+    if(narrow&&show!==ci)return;
+    const x=narrow?pan.x:pan.x+ci*(cw+GAP);
+    const u=sub(p,.06+ci*(narrow?.30:.17),.42+ci*(narrow?.30:.17));
+    if(u<=0)return;
+    txt(name,x,top-(narrow?16:20),{s:narrow?10:12,w:600,c:P[ck],f:'d',al:u});
+    txt(dim,x+cw,top-(narrow?16:20),{s:narrow?8.5:10,c:P.mut,ta:'right',al:u});
+
+    ctx.save();ctx.globalAlpha=u*.5;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
+    rr(x,top,cw,ph,5);ctx.stroke();ctx.restore();
+
+    const D=UMAP[tag], n=D.s.length, pad=narrow?10:12;
+    const sx=(cw-2*pad)/999, sy=(ph-2*pad)/999;
+    // train first, so the held-out points are not buried under it
+    for(const want of ['t','v','e']){
+      const [col,al,r]=SPC[want];
+      ctx.save();ctx.fillStyle=col;
+      for(let i=0;i<n;i++){
+        if(D.s[i]!==want)continue;
+        if(sub(u,(i/n)*.5,.3+(i/n)*.5)<=0)continue;
+        ctx.globalAlpha=al*u;
+        ctx.beginPath();
+        ctx.arc(x+pad+D.xy[i*2]*sx, top+pad+D.xy[i*2+1]*sy, r, 0, 7);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  });
+
+  // legend
+  const ly=top+ph+(narrow?22:26), lg=sub(p,.20,.34);
+  if(lg>0){
+    let lx=pan.x;
+    [['train','t'],['val','v'],['test','e']].forEach(([lbl,k])=>{
+      const [col,al,r]=SPC[k];
+      ctx.save();ctx.globalAlpha=lg*Math.max(al,.5);ctx.fillStyle=col;
+      ctx.beginPath();ctx.arc(lx+3,ly-4,3.4,0,7);ctx.fill();ctx.restore();
+      txt(lbl,lx+10,ly,{s:narrow?9:10.5,c:P.mut,al:lg});
+      lx+=narrow?48:58;});
+    txt('held out by sequence-similarity cluster',pan.x+pan.w,ly,
+      {s:narrow?8.5:10,c:P.mut,ta:'right',al:lg});
+  }
+}
+
+/* ---------- scene 5: results ---------- */
+function s5(p,pan){
   txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+14,{s:narrow?11:13,w:600,c:P.ink,f:'d'});
   txt('Pearson r · 14.5k rows, 75 alleles, 22 clusters · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?30:34),{s:narrow?9.5:11,c:P.mut});
 
@@ -677,12 +736,12 @@ function s4(p,pan){
 }
 
 /* ---------- compose ---------- */
-const CUT=[.33,.57,.78];
-const SCENES=[s1,s2,s3,s4];
+const CUT=[.27,.47,.65,.82];
+const SCENES=[s1,s2,s3,s4,s5];
 function frame(){
   ctx.clearRect(0,0,VW,VH);ctx.fillStyle=P.sf;ctx.fillRect(0,0,VW,VH);
   const g=L(), ang=t*Math.PI*2.6;
-  let idx=CUT.findIndex(c=>t<c); if(idx<0)idx=3;
+  let idx=CUT.findIndex(c=>t<c); if(idx<0)idx=4;
   drawRail(idx,g.rail);
   const bounds=[0,...CUT,1], seg=[bounds[idx],bounds[idx+1]];
   SCENES[idx](sub(t,seg[0],seg[1]),g.pan,ang);

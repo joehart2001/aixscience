@@ -58,7 +58,7 @@ check(new Set(landed).size === rail.length, `every scene is reachable from a chi
 /* 3 ------------------------------------------------------------- dwell times */
 const DUR = +src.match(/const DUR=(\d+)/)[1];
 console.log("\ndwell (each scene ends on a conclusion, which must be readable)");
-["s1", "s2", "s3", "s4"].forEach((name, i) => {
+["s1", "s2", "s3", "s4", "s5"].forEach((name, i) => {
   const from = src.indexOf(`function ${name}(`);
   const body = src.slice(from, src.indexOf("\n/* ---", from));
   const ends = [...body.matchAll(/sub\(p,[\d.]+,([\d.]+)\)/g)].map(m => +m[1]);
@@ -148,6 +148,27 @@ check(EMB.labels.reduce((a, [, n]) => a + n, 0) + 128 + 2 + 9 === EMB.n ||
 const uniq = new Set(EMB.z.map((x) => Math.round(x * 1000))).size;
 check(uniq > EMB.z.length * 0.9, `${uniq}/${EMB.z.length} distinct values (real data, not a waveform)`);
 check(!/Math\.sin\(i\*\.41\)/.test(src), "no synthetic sine-wave vector left in the Boltz scene");
+
+/* 8 ------------------------------------------------------------ UMAP panels */
+const UMAP = literal("UMAP");
+console.log("\nUMAP point clouds");
+for (const tag of ["boltz", "node", "edge"]) {
+  const d = UMAP[tag];
+  const n = d.s.length;
+  check(d.xy.length === n * 2, `${tag}: ${n} points, ${d.xy.length} coordinates`);
+  const counts = { t: 0, v: 0, e: 0 };
+  for (const c of d.s) counts[c]++;
+  check(counts.t > 0 && counts.v > 0 && counts.e > 0,
+    `${tag}: train ${counts.t}, val ${counts.v}, test ${counts.e}`);
+  const uniq = new Set(d.xy).size;
+  check(uniq > 400, `${tag}: ${uniq} distinct coordinate values (real embedding, not generated)`);
+}
+const spread = ["boltz", "node", "edge"].map((t) => {
+  const d = UMAP[t], te = [];
+  for (let i = 0; i < d.s.length; i++) if (d.s[i] === "e") te.push(d.xy[i * 2]);
+  return Math.round(Math.max(...te) - Math.min(...te));
+});
+check(spread.every((x) => x > 50), `test points are spread, not collapsed: x-range ${spread.join(", ")}`);
 
 console.log(fail ? `\n${fail} FAILED\n` : "\nall checks passed\n");
 process.exit(fail ? 1 : 0);
