@@ -1,0 +1,11 @@
+  dropping 6307 rows without structure charges
+  1,000/8,691
+  2,000/8,691
+  3,000/8,691
+  4,000/8,691
+  5,000/8,691
+  6,000/8,691
+  7,000/8,691
+  8,000/8,691
+wrote /share/ijp30/hackathons/aixscience/workflow/split_B_arch/tokens.npz  P (8691, 9, 384)  R (8691, 48, 384)  D (8691, 9, 48)
+  contact distance: median 8.2 A, furthest kept token 10.5 A

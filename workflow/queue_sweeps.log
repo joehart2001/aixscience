@@ -1,0 +1,5 @@
+[07:59:12] START split_C2_mace gbm
+[08:17:43] DONE  split_C2_mace gbm (exit 0)
+[08:17:43] START split_C2_mace mlp
+[08:43:12] DONE  split_C2_mace mlp (exit 0)
+[08:43:12] START split_B_mace gbm

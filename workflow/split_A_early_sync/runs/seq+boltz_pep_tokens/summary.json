@@ -1,0 +1,25 @@
+{
+  "representation": "seq+boltz_pep_tokens",
+  "description": "sequence baseline concatenated with the Boltz peptide tokens",
+  "input_dim": 4316,
+  "n_parameters": 556737,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 95.0,
+  "spearman_train_mean": 0.9728160663490997,
+  "spearman_val_mean": 0.7386787891637134,
+  "spearman_test_mean": 0.69110840226303,
+  "spearman_test_sd": 0.004188713847705098,
+  "spearman_test_per_seed": [
+    0.6844400808873999,
+    0.6959773633098825,
+    0.6952080934057174,
+    0.6901819537007574,
+    0.6897345200113927
+  ]
+}

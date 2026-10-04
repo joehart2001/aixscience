@@ -1,0 +1,55 @@
+{
+  "representation": "boltz_pooled",
+  "description": "Boltz pooled blocks, the hook's own feature vector",
+  "seed": 1,
+  "input_dim": 1547,
+  "n_parameters": 202305,
+  "architecture": "Linear(n_in,128) -> GELU -> Dropout(0.3) -> Linear(128,32) -> GELU -> Dropout(0.3) -> Linear(32,1)",
+  "activation": "GELU",
+  "dropout": 0.3,
+  "hidden_layers": [
+    128,
+    32
+  ],
+  "n_weight_layers": 3,
+  "optimiser": "Adam",
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "batch_size": 32,
+  "loss": "MSE on standardised log10 half-life",
+  "max_epochs": 300,
+  "early_stopping_patience": 40,
+  "epochs_run": 57,
+  "restored_epoch": 17,
+  "best_val_mse": 0.433146595954895,
+  "seconds": 5.7,
+  "device": "cuda",
+  "spearman": {
+    "train": 0.9611590365266832,
+    "val": 0.765250927135043,
+    "test": 0.7570901442406986
+  },
+  "dataset": {
+    "split_column": "split_B",
+    "split_note": "peptides held out: a test 9-mer appears nowhere in train, under any allele. A real generalisation estimate for a NEW PEPTIDE on a SEEN allele; it does not test a new allele (that is split_C2)",
+    "n_total": 9398,
+    "n_train": 6558,
+    "n_val": 1416,
+    "n_test": 1424,
+    "n_alleles": 54,
+    "n_clusters": 13,
+    "n_not_yet_predicted": 5600,
+    "target": "thalf_hours, log10, zeros floored at half the smallest positive value",
+    "y_mean_log10_train": 0.08494854718446732,
+    "y_std_log10_train": 0.9054909944534302,
+    "standardisation": "feature means and s.d. from the TRAIN fold only",
+    "source": "Boltz-2 embeddings, /share/ijp30/hackathons/aixscience2026/boltz_inputs_and_predictions/embeddings/all75"
+  },
+  "environment": {
+    "torch": "2.14.1+cu130",
+    "python": "3.12.3",
+    "host": "phy-tcm-pc75",
+    "gpu": "NVIDIA GeForce RTX 4090"
+  },
+  "written_utc": "2026-10-04T02:40:49Z"
+}

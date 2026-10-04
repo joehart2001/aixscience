@@ -1,0 +1,33 @@
+  dropping 6307 rows without structure charges
+gbm_seq                        dim   860  trees   1397  best  1397  train +0.944  val +0.763  test +0.755 +/- 0.002   [    8s]
+gbm_boltz_pooled               dim  1547  trees   1046  best  1046  train +0.996  val +0.742  test +0.748 +/- 0.003   [   40s]
+gbm_charge_all                 dim    79  trees    338  best   338  train +0.867  val +0.631  test +0.611 +/- 0.002   [   43s]
+gbm_seq+boltz_pooled           dim  2407  trees    869  best   869  train +0.996  val +0.747  test +0.753 +/- 0.003   [   72s]
+gbm_seq+boltz_pooled+charge    dim  2486  trees   1111  best  1111  train +0.997  val +0.756  test +0.760 +/- 0.006   [  107s]
+gbm_boltz_pep_tokens           dim  3456  trees   1064  best  1064  train +0.996  val +0.555  test +0.534 +/- 0.007   [  176s]
+
+gain by pooled Boltz block (gbm_boltz_pooled):
+  peptide_s_mean                11.6%   per-feature  0.030%
+  peptide_s_max                 10.2%   per-feature  0.027%
+  contact_receptor_s_mean       20.2%   per-feature  0.053%
+  cross_z_mean                  11.4%   per-feature  0.089%
+  cross_z_max                   19.7%   per-feature  0.154%
+  cross_z_distance_weighted     26.6%   per-feature  0.207%
+  n_peptide_tokens               0.0%   per-feature  0.000%
+  n_contact_receptor_tokens      0.0%   per-feature  0.013%
+  confidence                     0.3%   per-feature  0.031%
+Traceback (most recent call last):
+  File "/share/ijp30/hackathons/aixscience/workflow/split_B_arch/trees.py", line 178, in <module>
+    np.savez_compressed(os.path.join(RUNS, "_summary", "tree_importances.npz"),
+  File "/share/ijp30/hackathons/aixscience/.venv/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 753, in savez_compressed
+    _savez(file, args, kwds, True)
+  File "/share/ijp30/hackathons/aixscience/.venv/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 779, in _savez
+    zipf = zipfile_factory(file, mode="w", compression=compression)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/share/ijp30/hackathons/aixscience/.venv/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 103, in zipfile_factory
+    return zipfile.ZipFile(file, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/zipfile/__init__.py", line 1347, in __init__
+    self.fp = io.open(file, filemode)
+              ^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/share/ijp30/hackathons/aixscience/workflow/split_B_arch/runs/_summary/tree_importances.npz'

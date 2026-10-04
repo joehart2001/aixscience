@@ -1,0 +1,25 @@
+{
+  "representation": "boltz_pooled+charge_struct",
+  "description": "pooled Boltz plus the structure-derived charges only",
+  "input_dim": 1567,
+  "n_parameters": 204865,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 63.2,
+  "spearman_train_mean": 0.9625470637640262,
+  "spearman_val_mean": 0.7601979147944767,
+  "spearman_test_mean": 0.7554894348312567,
+  "spearman_test_sd": 0.002542668314421968,
+  "spearman_test_per_seed": [
+    0.7549975836565443,
+    0.7579813063470916,
+    0.7515388624617104,
+    0.7544195799326032,
+    0.758509841758334
+  ]
+}

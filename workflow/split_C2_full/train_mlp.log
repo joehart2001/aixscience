@@ -1,0 +1,4 @@
+froze 14,998 complexes -> /share/ijp30/hackathons/aixscience/workflow/split_C2_full/frozen_ids.txt
+mlp_seq                      params   114,369  ep    77  train +0.749  val +0.138  test +0.097 +/- 0.078   [   74s]
+mlp_boltz_pooled             params   202,305  ep    46  train +0.897  val +0.448  test +0.489 +/- 0.023   [  114s]
+mlp_seq+boltz_pooled         params   312,385  ep    45  train +0.879  val +0.464  test +0.510 +/- 0.033   [  154s]

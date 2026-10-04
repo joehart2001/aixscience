@@ -13,12 +13,32 @@ results/*
 !results/pilot_scores.csv
 !results/pilot_summary.md
 
-# Large boltz2 embeddings
-boltz2/
+# local scratch / backups
+*.conflicted-backup
+*.from-origin-main
+*.worktree-backup
+uv.lock.conflicted-*
 
-# Outdated attempts
-old-*
-run.log
 
-# demo site build output
-demo_app_html/dist/
+pyproject.toml.from-origin-main                  
+uv.lock.worktree-backup
+uv.lock.conflicted-22blocks
+pyproject.toml.conflicted-backup  
+'Serova Protein Engineering Track Challenge.pdf'   
+uv.lock.from-origin-main
+
+# Large experiment binaries — keep local, too big for git
+*.pt
+*.npz
+
+*.corrupt_backup
+
+# Serialized gradient-boosting model dumps (~655 MB); keep small result tables
+*.txt
+!frozen_ids.txt
+!summary_table.txt
+!permutation_table.txt
+
+# Figures: drop per-run parity/training plots (~170 MB), keep all other figures
+fig_parity.png
+fig_training.png

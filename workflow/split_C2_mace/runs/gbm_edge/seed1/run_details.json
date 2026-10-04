@@ -1,0 +1,62 @@
+{
+  "representation": "gbm_edge",
+  "description": "boosted trees on edge",
+  "seed": 1,
+  "input_dim": 14450,
+  "model_family": "gradient boosted trees",
+  "n_parameters": 26,
+  "n_trees": 26,
+  "architecture": "LightGBM gradient-boosted trees, objective l2, lr 0.05, num_leaves 31, min_data_in_leaf 20, feature_fraction 0.3, bagging 0.8, lambda_l2 1.0, up to 3000 rounds, early stopping 100 on validation l2",
+  "lightgbm": "4.7.0",
+  "params": {
+    "objective": "l2",
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "min_data_in_leaf": 20,
+    "feature_fraction": 0.3,
+    "bagging_fraction": 0.8,
+    "bagging_freq": 1,
+    "lambda_l2": 1.0,
+    "verbose": -1,
+    "num_threads": 16,
+    "seed": 1,
+    "bagging_seed": 1,
+    "feature_fraction_seed": 1
+  },
+  "max_epochs": 3000,
+  "early_stopping_patience": 100,
+  "epochs_run": 126,
+  "restored_epoch": 26,
+  "best_val_mse": 0.721388559724028,
+  "seconds": 14.4,
+  "device": "cpu",
+  "spearman": {
+    "train": 0.7650124731525929,
+    "val": 0.13203231769917945,
+    "test": -0.11328427993604781
+  },
+  "dropout": null,
+  "optimiser": "gradient boosting",
+  "lr": 0.05,
+  "weight_decay": 1.0,
+  "batch_size": null,
+  "loss": "l2 on standardised log10 half-life",
+  "dataset": {
+    "split_column": "split_C2",
+    "frozen_row_set": "frozen_ids.txt",
+    "split_note": "peptides held out",
+    "n_total": 14997,
+    "n_train": 10000,
+    "n_val": 2498,
+    "n_test": 2499,
+    "n_alleles": 75,
+    "n_clusters": 22,
+    "target": "thalf_hours, log10, zeros floored",
+    "standardisation": "none needed; trees split on order"
+  },
+  "environment": {
+    "python": "3.12.3",
+    "host": "phy-tcm-pc75"
+  },
+  "written_utc": "2026-10-04T06:37:17Z"
+}

@@ -1,0 +1,51 @@
+{
+  "representation": "mlp_charge_all",
+  "description": "sequence and structure charge blocks",
+  "seed": 0,
+  "input_dim": 79,
+  "input_shapes": [
+    [
+      79
+    ]
+  ],
+  "n_parameters": 14401,
+  "architecture": "Linear(n_in,128) -> GELU -> Dropout(0.3) -> Linear(128,32) -> GELU -> Dropout(0.3) -> Linear(32,1)",
+  "dropout": 0.3,
+  "optimiser": "Adam",
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "batch_size": 32,
+  "loss": "MSE on standardised log10 half-life",
+  "max_epochs": 300,
+  "early_stopping_patience": 40,
+  "epochs_run": 100,
+  "restored_epoch": 60,
+  "best_val_mse": 0.6196037530899048,
+  "seconds": 9.5,
+  "device": "cuda",
+  "spearman": {
+    "train": 0.7515964465375775,
+    "val": 0.6132340329463959,
+    "test": 0.6038396556153219
+  },
+  "dataset": {
+    "split_column": "split_B",
+    "split_note": "peptides held out: a test 9-mer appears nowhere in train, under any allele",
+    "frozen_row_set": "frozen_ids.txt",
+    "n_total": 8691,
+    "n_train": 6071,
+    "n_val": 1303,
+    "n_test": 1317,
+    "n_alleles": 45,
+    "n_clusters": 10,
+    "target": "thalf_hours, log10, zeros floored at half the smallest positive value",
+    "standardisation": "train fold only"
+  },
+  "environment": {
+    "torch": "2.14.1+cu130",
+    "python": "3.12.3",
+    "host": "phy-tcm-pc75",
+    "gpu": "NVIDIA GeForce RTX 4090"
+  },
+  "written_utc": "2026-10-04T03:19:23Z"
+}

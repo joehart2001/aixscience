@@ -1,0 +1,5 @@
+  dropping 6307 rows without structure charges
+attn_d64                     params   129,414  ep    47  train +0.862  val +0.646  test +0.623 +/- 0.008   [  131s]
+attn_d128                    params   385,542  ep    48  train +0.854  val +0.642  test +0.616 +/- 0.020   [  269s]
+attn_d128_L1                 params   253,062  ep    50  train +0.865  val +0.654  test +0.624 +/- 0.015   [  360s]
+attn_d128+seq+pooled+charge  params   703,750  ep    88  train +0.979  val +0.783  test +0.786 +/- 0.005   [  609s]

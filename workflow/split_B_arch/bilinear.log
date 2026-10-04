@@ -1,0 +1,7 @@
+  dropping 707 rows without structure charges
+bilinear_seq_r16             params    24,193  ep    50  train +0.894  val +0.710  test +0.687 +/- 0.008   [   35s]
+bilinear_seq_r64             params    83,905  ep    48  train +0.924  val +0.729  test +0.698 +/- 0.005   [   67s]
+bilinear_seq_r128            params   163,521  ep    48  train +0.936  val +0.727  test +0.692 +/- 0.003   [  100s]
+bilinear_boltz_r64           params    78,017  ep    43  train +0.815  val +0.627  test +0.611 +/- 0.015   [  128s]
+bilinear_seq_r64+boltz_pooled params   281,921  ep    52  train +0.959  val +0.775  test +0.772 +/- 0.003   [  164s]
+bilinear_seq_r64+boltz_pooled+charge params   292,033  ep    49  train +0.957  val +0.779  test +0.773 +/- 0.003   [  198s]

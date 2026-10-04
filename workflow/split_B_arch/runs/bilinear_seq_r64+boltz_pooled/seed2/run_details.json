@@ -1,0 +1,59 @@
+{
+  "representation": "bilinear_seq_r64+boltz_pooled",
+  "description": "rank-64 sequence bilinear, with the pooled Boltz blocks in the head",
+  "seed": 2,
+  "input_dim": 2407,
+  "input_shapes": [
+    [
+      180
+    ],
+    [
+      680
+    ],
+    [
+      1547
+    ]
+  ],
+  "n_parameters": 281921,
+  "architecture": "u=Linear(d_pep,64,bias=False); v=Linear(d_groove,64,bias=False); concat[u,v,u*v] + 1547 extra -> Linear(1739,128) -> GELU -> Dropout(0.3) -> Linear(128,32) -> GELU -> Dropout(0.3) -> Linear(32,1)",
+  "dropout": 0.3,
+  "optimiser": "Adam",
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "batch_size": 32,
+  "loss": "MSE on standardised log10 half-life",
+  "max_epochs": 300,
+  "early_stopping_patience": 40,
+  "epochs_run": 49,
+  "restored_epoch": 9,
+  "best_val_mse": 0.4222691059112549,
+  "seconds": 6.1,
+  "device": "cuda",
+  "spearman": {
+    "train": 0.9566450359181524,
+    "val": 0.7758689822343948,
+    "test": 0.7704476397878759
+  },
+  "dataset": {
+    "split_column": "split_B",
+    "split_note": "peptides held out: a test 9-mer appears nowhere in train, under any allele",
+    "frozen_row_set": "frozen_ids.txt",
+    "n_total": 8691,
+    "n_train": 6071,
+    "n_val": 1303,
+    "n_test": 1317,
+    "n_alleles": 45,
+    "n_clusters": 10,
+    "target": "thalf_hours, log10, zeros floored at half the smallest positive value",
+    "standardisation": "train fold only"
+  },
+  "environment": {
+    "torch": "2.14.1+cu130",
+    "python": "3.12.3",
+    "host": "phy-tcm-pc75",
+    "gpu": "NVIDIA GeForce RTX 4090"
+  },
+  "written_utc": "2026-10-04T03:40:55Z",
+  "rank": 64,
+  "extra": "boltz_pooled"
+}

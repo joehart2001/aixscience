@@ -1,0 +1,25 @@
+{
+  "representation": "seq+charge",
+  "description": "sequence baseline plus both charge blocks: does charge add to sequence?",
+  "input_dim": 939,
+  "n_parameters": 124481,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 62.0,
+  "spearman_train_mean": 0.9404027290579833,
+  "spearman_val_mean": 0.7513930982265821,
+  "spearman_test_mean": 0.73575578385162,
+  "spearman_test_sd": 0.004744312303798232,
+  "spearman_test_per_seed": [
+    0.7375710966039195,
+    0.7420306603852661,
+    0.7355628095112814,
+    0.7362033576327061,
+    0.7274109951249267
+  ]
+}

@@ -1,0 +1,37 @@
+  dropping 707 rows without structure charges
+seq_peptide            dim   180  params    27,329  ep    46  train +0.628  val +0.461  test +0.443 +/- 0.006   [   29s]
+seq_hla_pseudo         dim   680  params    91,329  ep    91  train +0.540  val +0.514  test +0.503 +/- 0.003   [   78s]
+seq                    dim   860  params   114,369  ep    60  train +0.935  val +0.734  test +0.718 +/- 0.008   [  111s]
+boltz_conf             dim     9  params     5,441  ep   108  train +0.480  val +0.451  test +0.442 +/- 0.004   [  164s]
+boltz_pep_mean         dim   384  params    53,441  ep    49  train +0.863  val +0.616  test +0.585 +/- 0.003   [  190s]
+boltz_receptor         dim   384  params    53,441  ep    53  train +0.839  val +0.622  test +0.590 +/- 0.009   [  218s]
+boltz_pooled           dim  1547  params   202,305  ep    74  train +0.970  val +0.757  test +0.751 +/- 0.004   [  257s]
+boltz_pep_tokens       dim  3456  params   446,657  ep    61  train +0.946  val +0.656  test +0.615 +/- 0.005   [  293s]
+charge_seq             dim    59  params    11,841  ep   104  train +0.683  val +0.600  test +0.585 +/- 0.003   [  346s]
+charge_struct          dim    20  params     6,849  ep   167  train +0.690  val +0.548  test +0.528 +/- 0.009   [  431s]
+charge_all             dim    79  params    14,401  ep    89  train +0.735  val +0.618  test +0.611 +/- 0.008   [  477s]
+seq+boltz_pooled       dim  2407  params   312,385  ep    58  train +0.961  val +0.770  test +0.777 +/- 0.002   [  510s]
+seq+charge             dim   939  params   124,481  ep    62  train +0.940  val +0.751  test +0.736 +/- 0.005   [  545s]
+boltz_pooled+charge    dim  1626  params   212,417  ep    71  train +0.966  val +0.768  test +0.761 +/- 0.004   [  584s]
+boltz_pooled+charge_struct dim  1567  params   204,865  ep    63  train +0.963  val +0.760  test +0.755 +/- 0.003   [  618s]
+seq+boltz_pooled+charge dim  2486  params   322,497  ep    68  train +0.968  val +0.777  test +0.778 +/- 0.004   [  656s]
+
+                       rep  dim  params   epochs  rho_train  rho_val  rho_test  rho_test_sd  delta_vs_seq  ci_lo  ci_hi  beats_sequence
+   seq+boltz_pooled+charge 2486  322497  +67.800     +0.968   +0.777    +0.778       +0.004        +0.053 +0.033 +0.076            True
+          seq+boltz_pooled 2407  312385  +58.200     +0.961   +0.770    +0.777       +0.002        +0.053 +0.031 +0.075            True
+       boltz_pooled+charge 1626  212417  +70.600     +0.966   +0.768    +0.761       +0.004        +0.037 +0.014 +0.060            True
+boltz_pooled+charge_struct 1567  204865  +63.200     +0.963   +0.760    +0.755       +0.003        +0.031 +0.007 +0.055            True
+              boltz_pooled 1547  202305  +74.400     +0.970   +0.757    +0.751       +0.004        +0.028 +0.004 +0.053            True
+                seq+charge  939  124481  +62.000     +0.940   +0.751    +0.736       +0.005        +0.017 +0.007 +0.028            True
+                       seq  860  114369  +60.200     +0.935   +0.734    +0.718       +0.008        +0.000 +0.000 +0.000           False
+          boltz_pep_tokens 3456  446657  +61.200     +0.946   +0.656    +0.615       +0.005        -0.108 -0.138 -0.081           False
+                charge_all   79   14401  +88.600     +0.735   +0.618    +0.611       +0.008        -0.123 -0.153 -0.094           False
+            boltz_receptor  384   53441  +53.200     +0.839   +0.622    +0.590       +0.009        -0.130 -0.161 -0.100           False
+                charge_seq   59   11841 +104.200     +0.683   +0.600    +0.585       +0.003        -0.151 -0.185 -0.120           False
+            boltz_pep_mean  384   53441  +48.600     +0.863   +0.616    +0.585       +0.003        -0.134 -0.168 -0.101           False
+             charge_struct   20    6849 +167.200     +0.690   +0.548    +0.528       +0.009        -0.202 -0.238 -0.166           False
+            seq_hla_pseudo  680   91329  +91.400     +0.540   +0.514    +0.503       +0.003        -0.237 -0.273 -0.202           False
+               seq_peptide  180   27329  +46.400     +0.628   +0.461    +0.443       +0.006        -0.284 -0.324 -0.243           False
+                boltz_conf    9    5441 +108.200     +0.480   +0.451    +0.442       +0.004        -0.296 -0.341 -0.251           False
+
+wrote /share/ijp30/hackathons/aixscience/workflow/split_B_charge/runs in 11.5 min

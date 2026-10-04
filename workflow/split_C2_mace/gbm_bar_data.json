@@ -1,0 +1,321 @@
+{
+ "legend": {
+  "B": "Boltz-2 embeddings",
+  "S": "Sequence one-hot",
+  "E": "Atomic energy (MACE)",
+  "N": "Node features (MACE)",
+  "G": "Edge features (MACE)"
+ },
+ "rows": [
+  {
+   "code": "BS",
+   "blocks": "seq+boltz",
+   "dim": 2407,
+   "test": 0.6192,
+   "sd": 0.0036,
+   "val": 0.409,
+   "train": 0.9384,
+   "hasB": true
+  },
+  {
+   "code": "BE",
+   "blocks": "boltz+energy",
+   "dim": 1977,
+   "test": 0.6145,
+   "sd": 0.011,
+   "val": 0.4216,
+   "train": 0.9648,
+   "hasB": true
+  },
+  {
+   "code": "BES",
+   "blocks": "seq+boltz+energy",
+   "dim": 2837,
+   "test": 0.6106,
+   "sd": 0.0031,
+   "val": 0.4299,
+   "train": 0.9622,
+   "hasB": true
+  },
+  {
+   "code": "B",
+   "blocks": "boltz",
+   "dim": 1547,
+   "test": 0.603,
+   "sd": 0.0035,
+   "val": 0.4003,
+   "train": 0.9559,
+   "hasB": true
+  },
+  {
+   "code": "BN",
+   "blocks": "boltz+node",
+   "dim": 13067,
+   "test": 0.5709,
+   "sd": 0.0037,
+   "val": 0.4567,
+   "train": 0.9334,
+   "hasB": true
+  },
+  {
+   "code": "BENS",
+   "blocks": "seq+boltz+node+energy",
+   "dim": 14357,
+   "test": 0.5644,
+   "sd": 0.0073,
+   "val": 0.471,
+   "train": 0.962,
+   "hasB": true
+  },
+  {
+   "code": "BEN",
+   "blocks": "boltz+node+energy",
+   "dim": 13497,
+   "test": 0.5589,
+   "sd": 0.0111,
+   "val": 0.4404,
+   "train": 0.9393,
+   "hasB": true
+  },
+  {
+   "code": "BEG",
+   "blocks": "boltz+energy+edge",
+   "dim": 16427,
+   "test": 0.5583,
+   "sd": 0.0068,
+   "val": 0.4357,
+   "train": 0.9528,
+   "hasB": true
+  },
+  {
+   "code": "BEGS",
+   "blocks": "seq+boltz+energy+edge",
+   "dim": 17287,
+   "test": 0.5564,
+   "sd": 0.0114,
+   "val": 0.4374,
+   "train": 0.9084,
+   "hasB": true
+  },
+  {
+   "code": "BGN",
+   "blocks": "boltz+node+edge",
+   "dim": 27517,
+   "test": 0.5557,
+   "sd": 0.0136,
+   "val": 0.4308,
+   "train": 0.9118,
+   "hasB": true
+  },
+  {
+   "code": "BG",
+   "blocks": "boltz+edge",
+   "dim": 15997,
+   "test": 0.5521,
+   "sd": 0.0029,
+   "val": 0.4148,
+   "train": 0.9066,
+   "hasB": true
+  },
+  {
+   "code": "BNS",
+   "blocks": "seq+boltz+node",
+   "dim": 13927,
+   "test": 0.5494,
+   "sd": 0.0063,
+   "val": 0.4482,
+   "train": 0.9427,
+   "hasB": true
+  },
+  {
+   "code": "BEGNS",
+   "blocks": "seq+boltz+node+energy+edge",
+   "dim": 28807,
+   "test": 0.5477,
+   "sd": 0.0088,
+   "val": 0.4325,
+   "train": 0.9496,
+   "hasB": true
+  },
+  {
+   "code": "BEGN",
+   "blocks": "boltz+node+energy+edge",
+   "dim": 27947,
+   "test": 0.5438,
+   "sd": 0.0028,
+   "val": 0.4271,
+   "train": 0.946,
+   "hasB": true
+  },
+  {
+   "code": "BGNS",
+   "blocks": "seq+boltz+node+edge",
+   "dim": 28377,
+   "test": 0.5191,
+   "sd": 0.0178,
+   "val": 0.4246,
+   "train": 0.9215,
+   "hasB": true
+  },
+  {
+   "code": "BGS",
+   "blocks": "seq+boltz+edge",
+   "dim": 16857,
+   "test": 0.514,
+   "sd": 0.0067,
+   "val": 0.4093,
+   "train": 0.8951,
+   "hasB": true
+  },
+  {
+   "code": "EN",
+   "blocks": "node+energy",
+   "dim": 11950,
+   "test": 0.0292,
+   "sd": 0.0436,
+   "val": 0.1961,
+   "train": 0.922,
+   "hasB": false
+  },
+  {
+   "code": "ENS",
+   "blocks": "seq+node+energy",
+   "dim": 12810,
+   "test": 0.0272,
+   "sd": 0.0158,
+   "val": 0.1842,
+   "train": 0.9338,
+   "hasB": false
+  },
+  {
+   "code": "N",
+   "blocks": "node",
+   "dim": 11520,
+   "test": 0.0202,
+   "sd": 0.0181,
+   "val": 0.1804,
+   "train": 0.7676,
+   "hasB": false
+  },
+  {
+   "code": "GN",
+   "blocks": "node+edge",
+   "dim": 25970,
+   "test": -0.0526,
+   "sd": 0.0218,
+   "val": 0.1555,
+   "train": 0.7739,
+   "hasB": false
+  },
+  {
+   "code": "EGNS",
+   "blocks": "seq+node+energy+edge",
+   "dim": 27260,
+   "test": -0.062,
+   "sd": 0.1405,
+   "val": 0.1895,
+   "train": 0.9079,
+   "hasB": false
+  },
+  {
+   "code": "G",
+   "blocks": "edge",
+   "dim": 14450,
+   "test": -0.067,
+   "sd": 0.052,
+   "val": 0.1456,
+   "train": 0.7661,
+   "hasB": false
+  },
+  {
+   "code": "ES",
+   "blocks": "seq+energy",
+   "dim": 1290,
+   "test": -0.081,
+   "sd": 0.1341,
+   "val": 0.1445,
+   "train": 0.8107,
+   "hasB": false
+  },
+  {
+   "code": "EGN",
+   "blocks": "node+energy+edge",
+   "dim": 26400,
+   "test": -0.0991,
+   "sd": 0.0254,
+   "val": 0.174,
+   "train": 0.8688,
+   "hasB": false
+  },
+  {
+   "code": "EG",
+   "blocks": "energy+edge",
+   "dim": 14880,
+   "test": -0.1228,
+   "sd": 0.0355,
+   "val": 0.1329,
+   "train": 0.8507,
+   "hasB": false
+  },
+  {
+   "code": "NS",
+   "blocks": "seq+node",
+   "dim": 12380,
+   "test": -0.1254,
+   "sd": 0.0199,
+   "val": 0.1385,
+   "train": 0.8718,
+   "hasB": false
+  },
+  {
+   "code": "E",
+   "blocks": "energy",
+   "dim": 430,
+   "test": -0.1708,
+   "sd": 0.047,
+   "val": -0.0193,
+   "train": 0.6265,
+   "hasB": false
+  },
+  {
+   "code": "S",
+   "blocks": "seq",
+   "dim": 860,
+   "test": -0.189,
+   "sd": 0.0628,
+   "val": 0.0759,
+   "train": 0.7607,
+   "hasB": false
+  },
+  {
+   "code": "GNS",
+   "blocks": "seq+node+edge",
+   "dim": 26830,
+   "test": -0.2012,
+   "sd": 0.0806,
+   "val": 0.0975,
+   "train": 0.8306,
+   "hasB": false
+  },
+  {
+   "code": "EGS",
+   "blocks": "seq+energy+edge",
+   "dim": 15740,
+   "test": -0.2223,
+   "sd": 0.0592,
+   "val": 0.122,
+   "train": 0.8295,
+   "hasB": false
+  },
+  {
+   "code": "GS",
+   "blocks": "seq+edge",
+   "dim": 15310,
+   "test": -0.2256,
+   "sd": 0.0674,
+   "val": 0.0856,
+   "train": 0.7865,
+   "hasB": false
+  }
+ ]
+}

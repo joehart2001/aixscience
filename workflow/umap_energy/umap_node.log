@@ -1,0 +1,18 @@
+14,997 complexes, 75 alleles, 22 clusters
+reading MACE node ...
+  2,000/14,997
+  4,000/14,997
+  6,000/14,997
+  8,000/14,997
+  10,000/14,997
+  12,000/14,997
+  14,000/14,997
+  reduced to (14997, 50)  (PCA 50 first, 62.4% variance)
+node block (14997, 50) (PCA 50 first, 62.4% variance); fitting UMAP ...
+/share/ijp30/hackathons/aixscience/.venv/lib/python3.12/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+
+node:
+  neighbour purity   allele   9.6%   cluster  37.4%
+  half-life variance between alleles  31.6%  within  68.4%
+  extrapolation      test->train 0.025 vs train->train 0.020  (1x)

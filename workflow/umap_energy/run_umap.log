@@ -1,0 +1,14 @@
+14,997 complexes, 75 alleles, 22 clusters
+reading energies ...
+  2,000/14,997
+  4,000/14,997
+  6,000/14,997
+  8,000/14,997
+  10,000/14,997
+  12,000/14,997
+  14,000/14,997
+energy block (14997, 430)
+fitting UMAP ...
+/share/ijp30/hackathons/aixscience/.venv/lib/python3.12/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+wrote fig_umap_energy.png

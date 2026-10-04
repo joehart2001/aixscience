@@ -1,0 +1,25 @@
+{
+  "representation": "boltz_pooled+charge",
+  "description": "pooled Boltz plus both charge blocks",
+  "input_dim": 1626,
+  "n_parameters": 212417,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 70.6,
+  "spearman_train_mean": 0.9659214359845288,
+  "spearman_val_mean": 0.7683787756214882,
+  "spearman_test_mean": 0.7607314416927894,
+  "spearman_test_sd": 0.004274750155047248,
+  "spearman_test_per_seed": [
+    0.7684386759128919,
+    0.7572834068121919,
+    0.7612803780099928,
+    0.7563004765739879,
+    0.7603542711548824
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "representation": "seq_hla_pseudo",
+  "description": "NetMHCpan pseudosequence one-hot, 34 x 20",
+  "seed": 1,
+  "input_dim": 680,
+  "n_parameters": 91329,
+  "architecture": "Linear(n_in,128) -> GELU -> Dropout(0.3) -> Linear(128,32) -> GELU -> Dropout(0.3) -> Linear(32,1)",
+  "activation": "GELU",
+  "dropout": 0.3,
+  "hidden_layers": [
+    128,
+    32
+  ],
+  "n_weight_layers": 3,
+  "optimiser": "Adam",
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "batch_size": 32,
+  "loss": "MSE on standardised log10 half-life",
+  "max_epochs": 300,
+  "early_stopping_patience": 40,
+  "epochs_run": 90,
+  "restored_epoch": 50,
+  "best_val_mse": 0.6575728058815002,
+  "seconds": 9.9,
+  "device": "cuda",
+  "spearman": {
+    "train": 0.5565966597855655,
+    "val": 0.5612970044454134,
+    "test": 0.5287556918767615
+  },
+  "dataset": {
+    "split_column": "split_A",
+    "split_note": "random split; leaks because each allele recurs with an identical receptor sequence, so this is an optimistic ceiling, not a generalisation estimate",
+    "n_total": 9398,
+    "n_train": 6607,
+    "n_val": 1385,
+    "n_test": 1406,
+    "n_alleles": 54,
+    "n_clusters": 13,
+    "n_not_yet_predicted": 5600,
+    "target": "thalf_hours, log10, zeros floored at half the smallest positive value",
+    "y_mean_log10_train": 0.09520028531551361,
+    "y_std_log10_train": 0.903823733329773,
+    "standardisation": "feature means and s.d. from the TRAIN fold only",
+    "source": "Boltz-2 embeddings, /share/ijp30/hackathons/aixscience2026/boltz_inputs_and_predictions/embeddings/all75"
+  },
+  "environment": {
+    "torch": "2.14.1+cu130",
+    "python": "3.12.3",
+    "host": "phy-tcm-pc75",
+    "gpu": "NVIDIA GeForce RTX 4090"
+  },
+  "written_utc": "2026-10-04T02:09:48Z"
+}

@@ -1,0 +1,2 @@
+attn_d128                    params   385,542  ep    43  train +0.741  val +0.304  test +0.244 +/- 0.033   [  196s]
+attn_d128+seq+pooled+charge  params   703,750  ep    65  train +0.938  val +0.473  test +0.459 +/- 0.038   [  485s]

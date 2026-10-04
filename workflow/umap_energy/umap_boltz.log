@@ -1,0 +1,9 @@
+14,997 complexes, 75 alleles, 22 clusters
+boltz block (14997, 1547); fitting UMAP ...
+/share/ijp30/hackathons/aixscience/.venv/lib/python3.12/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+
+boltz:
+  neighbour purity   allele  47.6%   cluster  88.5%
+  half-life variance between alleles  31.6%  within  68.4%
+  extrapolation      test->train 0.294 vs train->train 0.017  (18x)

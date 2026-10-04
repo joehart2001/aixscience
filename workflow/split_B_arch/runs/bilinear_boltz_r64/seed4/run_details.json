@@ -1,0 +1,57 @@
+{
+  "representation": "bilinear_boltz_r64",
+  "description": "rank-64 bilinear between the Boltz peptide mean and the contacting-receptor mean",
+  "seed": 4,
+  "input_dim": 768,
+  "input_shapes": [
+    [
+      384
+    ],
+    [
+      384
+    ]
+  ],
+  "n_parameters": 78017,
+  "architecture": "u=Linear(d_pep,64,bias=False); v=Linear(d_groove,64,bias=False); concat[u,v,u*v] -> Linear(192,128) -> GELU -> Dropout(0.3) -> Linear(128,32) -> GELU -> Dropout(0.3) -> Linear(32,1)",
+  "dropout": 0.3,
+  "optimiser": "Adam",
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "batch_size": 32,
+  "loss": "MSE on standardised log10 half-life",
+  "max_epochs": 300,
+  "early_stopping_patience": 40,
+  "epochs_run": 43,
+  "restored_epoch": 3,
+  "best_val_mse": 0.6208270788192749,
+  "seconds": 5.2,
+  "device": "cuda",
+  "spearman": {
+    "train": 0.8307624967813318,
+    "val": 0.6269560032817163,
+    "test": 0.6097764930539892
+  },
+  "dataset": {
+    "split_column": "split_B",
+    "split_note": "peptides held out: a test 9-mer appears nowhere in train, under any allele",
+    "frozen_row_set": "frozen_ids.txt",
+    "n_total": 8691,
+    "n_train": 6071,
+    "n_val": 1303,
+    "n_test": 1317,
+    "n_alleles": 45,
+    "n_clusters": 10,
+    "target": "thalf_hours, log10, zeros floored at half the smallest positive value",
+    "standardisation": "train fold only"
+  },
+  "environment": {
+    "torch": "2.14.1+cu130",
+    "python": "3.12.3",
+    "host": "phy-tcm-pc75",
+    "gpu": "NVIDIA GeForce RTX 4090"
+  },
+  "written_utc": "2026-10-04T03:40:32Z",
+  "rank": 64,
+  "peptide_input": "peptide_s_mean",
+  "groove_input": "contact_receptor_s_mean"
+}

@@ -1,0 +1,25 @@
+{
+  "representation": "charge_all",
+  "description": "both charge blocks",
+  "input_dim": 79,
+  "n_parameters": 14401,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 88.6,
+  "spearman_train_mean": 0.7348089038630373,
+  "spearman_val_mean": 0.6175482711192398,
+  "spearman_test_mean": 0.6107764797873407,
+  "spearman_test_sd": 0.007935579382706774,
+  "spearman_test_per_seed": [
+    0.6038396556153219,
+    0.6022078122437524,
+    0.6245269379440991,
+    0.6104898795810094,
+    0.6128181135525211
+  ]
+}

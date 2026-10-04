@@ -1,0 +1,24 @@
+{
+  "n": 9398,
+  "n_alleles": 54,
+  "n_train": 6607,
+  "n_val": 1385,
+  "n_test": 1406,
+  "not_yet_predicted": 5600,
+  "split": "split_A",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "max_epochs": 300,
+  "patience": 40,
+  "batch": 32,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "dropout": 0.3,
+  "arch": "Linear(n,128) GELU Drop Linear(128,32) GELU Drop Linear(32,1)",
+  "written_utc": "2026-10-04T02:06:56Z"
+}
