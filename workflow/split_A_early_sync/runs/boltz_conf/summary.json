@@ -1,0 +1,25 @@
+{
+  "representation": "boltz_conf",
+  "description": "Boltz confidence metrics (ipTM, pTM, pLDDT, ...)",
+  "input_dim": 9,
+  "n_parameters": 5441,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 174.6,
+  "spearman_train_mean": 0.4820318820309858,
+  "spearman_val_mean": 0.45215504222486713,
+  "spearman_test_mean": 0.4283853572408236,
+  "spearman_test_sd": 0.0035747138808128152,
+  "spearman_test_per_seed": [
+    0.4300689337656833,
+    0.4278427305561234,
+    0.43409702884358015,
+    0.42648574560508595,
+    0.4234323474336451
+  ]
+}

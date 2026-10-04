@@ -1,0 +1,25 @@
+{
+  "representation": "seq+boltz_pooled+charge",
+  "description": "the full stack: sequence, pooled Boltz, and both charge blocks",
+  "input_dim": 2486,
+  "n_parameters": 322497,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 67.8,
+  "spearman_train_mean": 0.9675823664829124,
+  "spearman_val_mean": 0.7766030947252701,
+  "spearman_test_mean": 0.7784088259179469,
+  "spearman_test_sd": 0.004090897039453831,
+  "spearman_test_per_seed": [
+    0.7786088132577188,
+    0.7854742434757546,
+    0.775552227179146,
+    0.7790185062157391,
+    0.7733903394613766
+  ]
+}

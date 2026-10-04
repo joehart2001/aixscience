@@ -1,0 +1,25 @@
+{
+  "representation": "charge_seq",
+  "description": "sequence-derived charge: peptide per-position + summary, groove pseudosequence per-position + summary, and pair complementarity terms",
+  "input_dim": 59,
+  "n_parameters": 11841,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 104.2,
+  "spearman_train_mean": 0.6834424143697255,
+  "spearman_val_mean": 0.5998602460896746,
+  "spearman_test_mean": 0.5850700285705035,
+  "spearman_test_sd": 0.0027901628636973633,
+  "spearman_test_per_seed": [
+    0.5893395889514289,
+    0.5873759627107116,
+    0.5830708632158808,
+    0.5821071383062562,
+    0.5834565896682395
+  ]
+}

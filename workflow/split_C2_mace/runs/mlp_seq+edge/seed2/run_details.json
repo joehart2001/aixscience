@@ -1,0 +1,55 @@
+{
+  "representation": "mlp_seq+edge",
+  "description": "perceptron on seq+edge",
+  "seed": 2,
+  "input_dim": 15310,
+  "input_shapes": [
+    [
+      15310
+    ]
+  ],
+  "n_parameters": 1963969,
+  "architecture": "Linear(n_in,128) -> GELU -> Dropout(0.3) -> Linear(128,32) -> GELU -> Dropout(0.3) -> Linear(32,1)",
+  "dropout": 0.3,
+  "optimiser": "Adam",
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "batch_size": 32,
+  "loss": "MSE on standardised log10 half-life",
+  "max_epochs": 300,
+  "early_stopping_patience": 40,
+  "epochs_run": 128,
+  "restored_epoch": 88,
+  "best_val_mse": 0.6951908469200134,
+  "seconds": 20.6,
+  "device": "cuda",
+  "spearman": {
+    "train": 0.894151899785142,
+    "val": 0.2805262809429397,
+    "test": 0.2702088547113789
+  },
+  "dataset": {
+    "split_column": "split_C2",
+    "split_note": "pseudosequence clusters held out: every allele in the test fold is unseen in training, and so is its binding groove. The hardest and most honest split here",
+    "frozen_row_set": "frozen_ids.txt",
+    "n_total": 14997,
+    "n_train": 10000,
+    "n_val": 2498,
+    "n_test": 2499,
+    "n_alleles": 75,
+    "n_clusters": 22,
+    "target": "thalf_hours, log10, zeros floored at half the smallest positive value",
+    "standardisation": "train fold only"
+  },
+  "environment": {
+    "torch": "2.14.1+cu130",
+    "python": "3.12.3",
+    "host": "phy-tcm-pc75",
+    "gpu": "NVIDIA GeForce RTX 4090"
+  },
+  "written_utc": "2026-10-04T07:25:11Z",
+  "blocks": [
+    "seq",
+    "edge"
+  ]
+}

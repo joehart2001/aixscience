@@ -1,0 +1,24 @@
+seq_peptide            dim   180  params    27,329  ep    45  train +0.601  val +0.453  test +0.440 +/- 0.009   [   30s]
+seq_hla_pseudo         dim   680  params    91,329  ep   112  train +0.559  val +0.536  test +0.535 +/- 0.002   [   94s]
+seq                    dim   860  params   114,369  ep    88  train +0.963  val +0.742  test +0.735 +/- 0.008   [  143s]
+boltz_conf             dim     9  params     5,441  ep   135  train +0.481  val +0.444  test +0.445 +/- 0.002   [  214s]
+boltz_pep_mean         dim   384  params    53,441  ep    53  train +0.880  val +0.617  test +0.587 +/- 0.004   [  243s]
+boltz_receptor         dim   384  params    53,441  ep    56  train +0.859  val +0.631  test +0.619 +/- 0.006   [  274s]
+boltz_pooled           dim  1547  params   202,305  ep    84  train +0.967  val +0.758  test +0.758 +/- 0.005   [  322s]
+boltz_pep_tokens       dim  3456  params   446,657  ep    60  train +0.942  val +0.658  test +0.612 +/- 0.008   [  358s]
+seq+boltz_pooled       dim  2407  params   312,385  ep    68  train +0.966  val +0.772  test +0.782 +/- 0.003   [  397s]
+seq+boltz_pep_tokens   dim  4316  params   556,737  ep    69  train +0.958  val +0.704  test +0.666 +/- 0.006   [  437s]
+
+                 rep  dim  params   epochs  rho_train  rho_val  rho_test  rho_test_sd  delta_vs_seq  ci_lo  ci_hi  beats_sequence
+    seq+boltz_pooled 2407  312385  +68.400     +0.966   +0.772    +0.782       +0.003        +0.038 +0.019 +0.056            True
+        boltz_pooled 1547  202305  +84.000     +0.967   +0.758    +0.758       +0.005        +0.013 -0.008 +0.034           False
+                 seq  860  114369  +88.400     +0.963   +0.742    +0.735       +0.008        +0.000 +0.000 +0.000           False
+seq+boltz_pep_tokens 4316  556737  +68.600     +0.958   +0.704    +0.666       +0.006        -0.078 -0.101 -0.055           False
+      boltz_receptor  384   53441  +56.000     +0.859   +0.631    +0.619       +0.006        -0.122 -0.153 -0.093           False
+    boltz_pep_tokens 3456  446657  +59.800     +0.942   +0.658    +0.612       +0.008        -0.132 -0.161 -0.105           False
+      boltz_pep_mean  384   53441  +53.200     +0.880   +0.617    +0.587       +0.004        -0.148 -0.179 -0.118           False
+      seq_hla_pseudo  680   91329 +111.600     +0.559   +0.536    +0.535       +0.002        -0.224 -0.258 -0.191           False
+          boltz_conf    9    5441 +135.200     +0.481   +0.444    +0.445       +0.002        -0.315 -0.359 -0.271           False
+         seq_peptide  180   27329  +44.800     +0.601   +0.453    +0.440       +0.009        -0.310 -0.348 -0.271           False
+
+wrote /share/ijp30/hackathons/aixscience/workflow/split_B_early_sync/runs in 7.7 min

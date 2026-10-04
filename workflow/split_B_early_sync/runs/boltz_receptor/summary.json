@@ -1,0 +1,25 @@
+{
+  "representation": "boltz_receptor",
+  "description": "Boltz trunk single rep, mean over contacting receptor tokens",
+  "input_dim": 384,
+  "n_parameters": 53441,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 56.0,
+  "spearman_train_mean": 0.8589507332434341,
+  "spearman_val_mean": 0.631386324123584,
+  "spearman_test_mean": 0.6185104667932437,
+  "spearman_test_sd": 0.006310114441031533,
+  "spearman_test_per_seed": [
+    0.6177939698770801,
+    0.6154376087620067,
+    0.621470860619246,
+    0.609437472001982,
+    0.628412422705904
+  ]
+}

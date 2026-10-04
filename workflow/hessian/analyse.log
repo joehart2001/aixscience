@@ -1,0 +1,15 @@
+n = 129   alleles ['HLA-A*02:01']   unique peptides 129   zero half-life 4%
+/share/ijp30/hackathons/aixscience/workflow/hessian/analyse.py:92: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+  r = spearmanr(Xh[:, i], ly).statistic
+wrote fig_scatter.png
+
+out-of-fold Spearman, peptide-grouped 5-fold x 5 repeats
+representation    dim               ridge                 gbm
+hess             16  +0.261 +/- 0.101  +0.169 +/- 0.049
+seq             860  +0.231 +/- 0.058  +0.353 +/- 0.048
+boltz          1547  +0.447 +/- 0.045  +0.495 +/- 0.037
+hess+seq        876  +0.253 +/- 0.065  +0.271 +/- 0.055
+hess+boltz     1563  +0.447 +/- 0.045  +0.495 +/- 0.025
+seq+boltz      2407  +0.443 +/- 0.044  +0.495 +/- 0.038
+
+wrote oof_predictions.npz

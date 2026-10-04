@@ -1,0 +1,49 @@
+./queue_sweeps.sh: line 14: ../.venv/bin/python: No such file or directory
+14,998 rows with Boltz; 14,997 also have MACE features
+  train  10,000  clusters  12  alleles  50
+  val     2,498  clusters   5  alleles  14
+  test    2,499  clusters   5  alleles  11
+reading MACE features ...
+  2,000/14,997
+  4,000/14,997
+  6,000/14,997
+  8,000/14,997
+  10,000/14,997
+  12,000/14,997
+  14,000/14,997
+block dimensions: seq 860  boltz 1,547  node 11,520  energy 430  edge 14,450
+31 combinations x 3 seeds x 1 families
+
+mlp_seq                                  dim    860  train +0.787  val +0.174  test +0.077  [   56s]
+mlp_boltz                                dim  1,547  train +0.905  val +0.442  test +0.494  [   80s]
+mlp_node                                 dim 11,520  train +0.838  val +0.161  test +0.136  [  114s]
+mlp_energy                               dim    430  train +0.676  val +0.218  test +0.228  [  136s]
+mlp_edge                                 dim 14,450  train +0.879  val +0.249  test +0.116  [  194s]
+mlp_seq+boltz                            dim  2,407  train +0.904  val +0.466  test +0.511  [  218s]
+mlp_seq+node                             dim 12,380  train +0.810  val +0.148  test +0.167  [  256s]
+mlp_seq+energy                           dim  1,290  train +0.719  val +0.199  test +0.177  [  278s]
+mlp_seq+edge                             dim 15,310  train +0.892  val +0.302  test +0.216  [  332s]
+mlp_boltz+node                           dim 13,067  train +0.912  val +0.430  test +0.543  [  372s]
+mlp_boltz+energy                         dim  1,977  train +0.871  val +0.468  test +0.452  [  394s]
+mlp_boltz+edge                           dim 15,997  train +0.911  val +0.469  test +0.453  [  443s]
+mlp_node+energy                          dim 11,950  train +0.874  val +0.221  test +0.186  [  497s]
+mlp_node+edge                            dim 25,970  train +0.846  val +0.186  test +0.080  [  546s]
+mlp_energy+edge                          dim 14,880  train +0.890  val +0.306  test +0.186  [  601s]
+mlp_seq+boltz+node                       dim 13,927  train +0.890  val +0.437  test +0.541  [  634s]
+mlp_seq+boltz+energy                     dim  2,837  train +0.856  val +0.478  test +0.472  [  657s]
+mlp_seq+boltz+edge                       dim 16,857  train +0.917  val +0.483  test +0.470  [  713s]
+mlp_seq+node+energy                      dim 12,810  train +0.820  val +0.190  test +0.185  [  744s]
+mlp_seq+node+edge                        dim 26,830  train +0.833  val +0.189  test +0.091  [  810s]
+mlp_seq+energy+edge                      dim 15,740  train +0.834  val +0.272  test +0.149  [  869s]
+mlp_boltz+node+energy                    dim 13,497  train +0.902  val +0.443  test +0.488  [  923s]
+mlp_boltz+node+edge                      dim 27,517  train +0.890  val +0.454  test +0.460  [  975s]
+mlp_boltz+energy+edge                    dim 16,427  train +0.917  val +0.465  test +0.447  [ 1025s]
+mlp_node+energy+edge                     dim 26,400  train +0.742  val +0.181  test +0.134  [ 1067s]
+mlp_seq+boltz+node+energy                dim 14,357  train +0.917  val +0.456  test +0.465  [ 1108s]
+mlp_seq+boltz+node+edge                  dim 28,377  train +0.875  val +0.427  test +0.453  [ 1164s]
+mlp_seq+boltz+energy+edge                dim 17,287  train +0.917  val +0.493  test +0.412  [ 1212s]
+mlp_seq+node+energy+edge                 dim 27,260  train +0.841  val +0.276  test +0.167  [ 1283s]
+mlp_boltz+node+energy+edge               dim 27,947  train +0.901  val +0.455  test +0.434  [ 1348s]
+mlp_seq+boltz+node+energy+edge           dim 28,807  train +0.904  val +0.448  test +0.457  [ 1412s]
+
+done in 23.5 min

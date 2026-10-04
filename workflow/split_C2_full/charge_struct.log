@@ -1,0 +1,9 @@
+9,223 already computed
+15,646 structures on disk, 6,307 to do
+  1,000/6,307
+  2,000/6,307
+  3,000/6,307
+  4,000/6,307
+  5,000/6,307
+  6,000/6,307
+wrote /share/ijp30/hackathons/aixscience/workflow/split_C2_full/charge_struct.npz: (15530, 20), 0 errors

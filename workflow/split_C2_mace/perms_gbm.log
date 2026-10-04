@@ -1,0 +1,88 @@
+14,998 rows with Boltz; 14,997 also have MACE features
+  train  10,000  clusters  12  alleles  50
+  val     2,498  clusters   5  alleles  14
+  test    2,499  clusters   5  alleles  11
+reading MACE features ...
+  2,000/14,997
+  4,000/14,997
+  6,000/14,997
+  8,000/14,997
+  10,000/14,997
+  12,000/14,997
+  14,000/14,997
+block dimensions: seq 860  boltz 1,547  node 11,520  energy 430  edge 14,450
+31 combinations x 3 seeds x 1 families
+
+gbm_seq                                  already done, skipping
+gbm_boltz                                already done, skipping
+gbm_node                                 already done, skipping
+gbm_energy                               already done, skipping
+gbm_edge                                 dim 14,450  train +0.766  val +0.146  test -0.067  [   46s]
+gbm_seq+boltz                            dim  2,407  train +0.938  val +0.409  test +0.619  [   54s]
+gbm_seq+node                             dim 12,380  train +0.872  val +0.139  test -0.125  [  104s]
+gbm_seq+energy                           dim  1,290  train +0.811  val +0.144  test -0.081  [  108s]
+gbm_seq+edge                             dim 15,310  train +0.786  val +0.086  test -0.226  [  153s]
+gbm_boltz+node                           dim 13,067  train +0.933  val +0.457  test +0.571  [  222s]
+gbm_boltz+energy                         dim  1,977  train +0.965  val +0.422  test +0.615  [  234s]
+gbm_boltz+edge                           dim 15,997  train +0.907  val +0.415  test +0.552  [  306s]
+gbm_node+energy                          dim 11,950  train +0.922  val +0.196  test +0.029  [  366s]
+gbm_node+edge                            dim 25,970  train +0.774  val +0.156  test -0.053  [  461s]
+gbm_energy+edge                          dim 14,880  train +0.851  val +0.133  test -0.123  [  515s]
+gbm_seq+boltz+node                       dim 13,927  train +0.943  val +0.448  test +0.549  [  588s]
+gbm_seq+boltz+energy                     dim  2,837  train +0.962  val +0.430  test +0.611  [  601s]
+gbm_seq+boltz+edge                       dim 16,857  train +0.895  val +0.409  test +0.514  [  669s]
+gbm_seq+node+energy                      dim 12,810  train +0.934  val +0.184  test +0.027  [  733s]
+gbm_seq+node+edge                        dim 26,830  train +0.831  val +0.097  test -0.201  [  838s]
+gbm_seq+energy+edge                      dim 15,740  train +0.829  val +0.122  test -0.222  [  892s]
+gbm_boltz+node+energy                    dim 13,497  train +0.939  val +0.440  test +0.559  [  966s]
+gbm_boltz+node+edge                      dim 27,517  train +0.912  val +0.431  test +0.556  [ 1108s]
+gbm_boltz+energy+edge                    dim 16,427  train +0.953  val +0.436  test +0.558  [ 1209s]
+./queue_sweeps.sh: line 14: ../.venv/bin/python: No such file or directory
+14,998 rows with Boltz; 14,997 also have MACE features
+  train  10,000  clusters  12  alleles  50
+  val     2,498  clusters   5  alleles  14
+  test    2,499  clusters   5  alleles  11
+reading MACE features ...
+  2,000/14,997
+  4,000/14,997
+  6,000/14,997
+  8,000/14,997
+  10,000/14,997
+  12,000/14,997
+  14,000/14,997
+block dimensions: seq 860  boltz 1,547  node 11,520  energy 430  edge 14,450
+31 combinations x 3 seeds x 1 families
+
+gbm_seq                                  already done, skipping
+gbm_boltz                                already done, skipping
+gbm_node                                 already done, skipping
+gbm_energy                               already done, skipping
+gbm_edge                                 already done, skipping
+gbm_seq+boltz                            already done, skipping
+gbm_seq+node                             already done, skipping
+gbm_seq+energy                           already done, skipping
+gbm_seq+edge                             already done, skipping
+gbm_boltz+node                           already done, skipping
+gbm_boltz+energy                         already done, skipping
+gbm_boltz+edge                           already done, skipping
+gbm_node+energy                          already done, skipping
+gbm_node+edge                            already done, skipping
+gbm_energy+edge                          already done, skipping
+gbm_seq+boltz+node                       already done, skipping
+gbm_seq+boltz+energy                     already done, skipping
+gbm_seq+boltz+edge                       already done, skipping
+gbm_seq+node+energy                      already done, skipping
+gbm_seq+node+edge                        already done, skipping
+gbm_seq+energy+edge                      already done, skipping
+gbm_boltz+node+energy                    already done, skipping
+gbm_boltz+node+edge                      already done, skipping
+gbm_boltz+energy+edge                    already done, skipping
+gbm_node+energy+edge                     dim 26,400  train +0.869  val +0.174  test -0.099  [  123s]
+gbm_seq+boltz+node+energy                dim 14,357  train +0.962  val +0.471  test +0.564  [  213s]
+gbm_seq+boltz+node+edge                  dim 28,377  train +0.922  val +0.425  test +0.519  [  362s]
+gbm_seq+boltz+energy+edge                dim 17,287  train +0.908  val +0.437  test +0.556  [  438s]
+gbm_seq+node+energy+edge                 dim 27,260  train +0.908  val +0.189  test -0.062  [  636s]
+gbm_boltz+node+energy+edge               dim 27,947  train +0.946  val +0.427  test +0.544  [  809s]
+gbm_seq+boltz+node+energy+edge           dim 28,807  train +0.950  val +0.433  test +0.548  [  988s]
+
+done in 16.5 min

@@ -1,0 +1,34 @@
+# split_B comparison (held-out peptides), 54 alleles, 13 clusters
+# n = 9,398   train 6,558  val 1,416  test 1,424   (5,600 not yet predicted)
+# Linear(n_in,128) -> GELU -> Dropout(0.3) -> Linear(128,32) -> GELU -> Dropout(0.3) -> Linear(32,1)
+# Adam lr=0.001 weight_decay=0.0001 batch=32 dropout=0.3, early stopping patience 40
+# Spearman rank correlation, mean +/- s.d. over seeds; 'ep' = epochs run, 'best' = restored epoch
+# test(ens) averages the 5 seeds' PREDICTIONS first, then correlates: an
+#   ensemble, so it is systematically higher than the mean of the single
+#   seed values. The parity grid plots the ensemble; compare like with like.
+# WARNING: peptides held out: a test 9-mer appears nowhere in train, under any allele. A real generalisation estimate for a NEW PEPTIDE on a SEEN allele; it does not test a new allele (that is split_C2)
+#
+representation          dim    params    ep  best             train             val            test  test(ens)
+seq+boltz_pooled       2407   312,385    68    28     +0.966 +/-0.010   +0.772 +/-0.001   +0.782 +/-0.003     +0.799
+boltz_pooled           1547   202,305    84    44     +0.967 +/-0.009   +0.758 +/-0.004   +0.758 +/-0.005     +0.774
+seq                     860   114,369    88    48     +0.963 +/-0.014   +0.742 +/-0.004   +0.735 +/-0.008     +0.762
+seq+boltz_pep_tokens   4316   556,737    69    29     +0.958 +/-0.010   +0.704 +/-0.003   +0.666 +/-0.006     +0.684
+boltz_receptor          384    53,441    56    16     +0.859 +/-0.031   +0.631 +/-0.006   +0.619 +/-0.006     +0.639
+boltz_pep_tokens       3456   446,657    60    20     +0.942 +/-0.011   +0.658 +/-0.003   +0.612 +/-0.008     +0.629
+boltz_pep_mean          384    53,441    53    13     +0.880 +/-0.048   +0.617 +/-0.006   +0.587 +/-0.004     +0.614
+seq_hla_pseudo          680    91,329   112    72     +0.559 +/-0.001   +0.536 +/-0.001   +0.535 +/-0.002     +0.538
+boltz_conf                9     5,441   135    95     +0.481 +/-0.002   +0.444 +/-0.001   +0.445 +/-0.002     +0.447
+seq_peptide             180    27,329    45     5     +0.601 +/-0.041   +0.453 +/-0.005   +0.440 +/-0.009     +0.451
+
+# paired bootstrap of the test Spearman against 'seq', 2,000 resamples of complexes
+representation           delta         95% interval   beats baseline
+seq+boltz_pooled        +0.038     [+0.019, +0.056]   YES
+boltz_pooled            +0.013     [-0.008, +0.034]   no
+seq                     +0.000     [+0.000, +0.000]   no
+seq+boltz_pep_tokens    -0.078     [-0.101, -0.055]   no
+boltz_receptor          -0.122     [-0.153, -0.093]   no
+boltz_pep_tokens        -0.132     [-0.161, -0.105]   no
+boltz_pep_mean          -0.148     [-0.179, -0.118]   no
+seq_hla_pseudo          -0.224     [-0.258, -0.191]   no
+boltz_conf              -0.315     [-0.359, -0.271]   no
+seq_peptide             -0.310     [-0.348, -0.271]   no

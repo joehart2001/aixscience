@@ -1,0 +1,25 @@
+{
+  "representation": "boltz_pep_tokens",
+  "description": "Boltz trunk single rep, all 9 peptide tokens, flattened",
+  "input_dim": 3456,
+  "n_parameters": 446657,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 61.2,
+  "spearman_train_mean": 0.9457544139956282,
+  "spearman_val_mean": 0.6557858033186477,
+  "spearman_test_mean": 0.6147241691167624,
+  "spearman_test_sd": 0.005195706222484847,
+  "spearman_test_per_seed": [
+    0.6152433696717443,
+    0.6155563275220365,
+    0.614185793237546,
+    0.6224845141606162,
+    0.606150840991869
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "representation": "seq+boltz_pooled",
+  "description": "sequence baseline concatenated with the Boltz pooled blocks",
+  "input_dim": 2407,
+  "n_parameters": 312385,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 58.2,
+  "spearman_train_mean": 0.9614681072020733,
+  "spearman_val_mean": 0.769824479252434,
+  "spearman_test_mean": 0.7771606117472456,
+  "spearman_test_sd": 0.0019160957477607887,
+  "spearman_test_per_seed": [
+    0.774827556557374,
+    0.7767705881382384,
+    0.7755312390262471,
+    0.7787733319357885,
+    0.7799003430785804
+  ]
+}

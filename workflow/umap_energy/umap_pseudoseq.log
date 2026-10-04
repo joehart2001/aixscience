@@ -1,0 +1,11 @@
+14,997 complexes, 75 alleles, 22 clusters
+pseudoseq block (14997, 680); fitting UMAP ...
+/share/ijp30/hackathons/aixscience/.venv/lib/python3.12/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+/share/ijp30/hackathons/aixscience/.venv/lib/python3.12/site-packages/sklearn/manifold/_spectral_embedding.py:329: UserWarning: Graph is not fully connected, spectral embedding may not work as expected.
+  warnings.warn(
+
+pseudoseq:
+  neighbour purity   allele  98.8%   cluster 100.0%
+  half-life variance between alleles  31.6%  within  68.4%
+  extrapolation      test->train 4.997 vs train->train 0.001  (5517x)

@@ -1,0 +1,21 @@
+{
+  "split": "split_B",
+  "baseline": "seq",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "n_bootstrap": 2000,
+  "n_total": 9398,
+  "n_train": 6558,
+  "n_val": 1416,
+  "n_test": 1424,
+  "n_alleles": 54,
+  "n_clusters": 13,
+  "n_not_yet_predicted": 5600,
+  "minutes": 7.7,
+  "written_utc": "2026-10-04T02:43:42Z"
+}

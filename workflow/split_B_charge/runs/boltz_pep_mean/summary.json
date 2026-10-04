@@ -1,0 +1,25 @@
+{
+  "representation": "boltz_pep_mean",
+  "description": "Boltz trunk single rep, mean over peptide tokens",
+  "input_dim": 384,
+  "n_parameters": 53441,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 48.6,
+  "spearman_train_mean": 0.8626579697661253,
+  "spearman_val_mean": 0.6159218534773239,
+  "spearman_test_mean": 0.5848801843947313,
+  "spearman_test_sd": 0.003350825618371038,
+  "spearman_test_per_seed": [
+    0.5839707137450318,
+    0.5834268651456955,
+    0.5898059337628624,
+    0.5871801499313486,
+    0.5800172593887185
+  ]
+}

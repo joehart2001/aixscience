@@ -1,0 +1,25 @@
+{
+  "representation": "charge_struct",
+  "description": "structure-derived charge: Coulomb proxy over charged centres, salt bridges, receptor charge within 8/12 A, per-position charge environment",
+  "input_dim": 20,
+  "n_parameters": 6849,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 167.2,
+  "spearman_train_mean": 0.6903499015010441,
+  "spearman_val_mean": 0.5479938127531495,
+  "spearman_test_mean": 0.5275194794469293,
+  "spearman_test_sd": 0.009090785866210822,
+  "spearman_test_per_seed": [
+    0.5120096530236918,
+    0.524957734358459,
+    0.537954804728155,
+    0.5350821013789662,
+    0.5275931037453748
+  ]
+}

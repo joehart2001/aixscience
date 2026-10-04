@@ -1,0 +1,11 @@
+[09:47:02] START peptide
+[09:50:41] DONE  peptide (exit 0)
+[09:50:41] START node_pooled
+[09:55:25] DONE  node_pooled (exit 0)
+[09:55:25] START node
+[09:59:36] DONE  node (exit 0)
+[09:59:36] START edge
+[10:04:00] DONE  edge (exit 0)
+[10:04:00] START pseudoseq
+[10:07:43] DONE  pseudoseq (exit 0)
+[10:07:43] all complete

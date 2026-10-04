@@ -1,0 +1,232 @@
+<title>Held-Out Allele Benchmark</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+/* Layout: a single measured column — headline figure, chart, legend, table. */
+:root{
+  --surface-1:#fbfbfa; --surface-2:#f2f2ef; --rule:#dedcd6;
+  --ink:#16181c; --ink-2:#55585f; --ink-3:#83868d;
+  --series-1:#2a78d6;  /* with Boltz-2 */
+  --series-2:#eb6834;  /* without */
+  --grid:#e4e3dd;
+  --font-display:"IBM Plex Serif",Georgia,serif;
+  --font-body:"IBM Plex Sans",system-ui,sans-serif;
+  --font-data:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --surface-1:#17181a; --surface-2:#202225; --rule:#34363b;
+  --ink:#f3f3f1; --ink-2:#b3b6bd; --ink-3:#83868d;
+  --series-1:#3987e5; --series-2:#d95926; --grid:#2b2d31;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --surface-1:#17181a; --surface-2:#202225; --rule:#34363b;
+  --ink:#f3f3f1; --ink-2:#b3b6bd; --ink-3:#83868d;
+  --series-1:#3987e5; --series-2:#d95926; --grid:#2b2d31;
+}
+*{box-sizing:border-box}
+body{background:var(--surface-1);color:var(--ink);font-family:var(--font-body);
+  font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:20px;padding-block:40px 56px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,4.2vw,38px);
+  line-height:1.15;margin:0 0 10px;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--ink-2);max-width:62ch;margin:0 0 28px}
+.eyebrow{font-family:var(--font-data);font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+.finding{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 30px}
+.stat{flex:1 1 210px;min-width:0;border:1px solid var(--rule);border-radius:8px;
+  padding:14px 16px;background:var(--surface-2)}
+.stat .k{font-family:var(--font-data);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-family:var(--font-data);font-size:21px;font-weight:600;
+  font-variant-numeric:tabular-nums;margin-top:3px}
+.stat .n{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.bar-with .v{color:var(--series-1)} .bar-without .v{color:var(--series-2)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;margin:0 0 6px}
+.lg{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--ink-2)}
+.sw{width:13px;height:13px;border-radius:3px;flex:none}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;margin:14px 0 0;
+  font-size:13px;color:var(--ink-2)}
+.key b{font-family:var(--font-data);font-weight:600;color:var(--ink);
+  background:var(--surface-2);border:1px solid var(--rule);border-radius:4px;
+  padding:0 5px;margin-right:5px}
+.chartbox{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;
+  background:var(--surface-2);padding:16px 14px 8px;margin:10px 0 0}
+svg{display:block;min-width:720px;width:100%;height:auto}
+.tick{font-family:var(--font-data);font-size:10.5px;fill:var(--ink-3)}
+.code{font-family:var(--font-data);font-size:11px;font-weight:500;fill:var(--ink-2)}
+.dl{font-family:var(--font-data);font-size:11px;font-weight:600;fill:var(--ink)}
+.axis-title{font-family:var(--font-body);font-size:12px;fill:var(--ink-2)}
+.bar{cursor:default}
+.bar:hover rect.m{filter:brightness(1.12)}
+.hit{fill:transparent}
+.tip{position:fixed;z-index:20;pointer-events:none;opacity:0;transition:opacity .09s;
+  background:var(--surface-1);border:1px solid var(--rule);border-radius:7px;
+  padding:9px 11px;font-size:12.5px;box-shadow:0 6px 22px rgba(0,0,0,.16);max-width:260px}
+.tip .t{font-family:var(--font-data);font-weight:600;margin-bottom:3px}
+.tip dl{display:grid;grid-template-columns:auto auto;gap:1px 12px;margin:4px 0 0}
+.tip dt{color:var(--ink-3)} .tip dd{margin:0;font-family:var(--font-data);
+  font-variant-numeric:tabular-nums;text-align:right}
+.controls{display:flex;gap:10px;align-items:center;margin:18px 0 0;flex-wrap:wrap}
+button{font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--rule);border-radius:7px;padding:6px 13px;cursor:pointer}
+button:hover{border-color:var(--ink-3)}
+button:focus-visible{outline:2px solid var(--series-1);outline-offset:2px}
+.tablebox{overflow-x:auto;margin-top:14px;border:1px solid var(--rule);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+th,td{padding:7px 12px;text-align:right;border-bottom:1px solid var(--rule);
+  font-variant-numeric:tabular-nums;font-family:var(--font-data)}
+th{font-family:var(--font-body);font-size:11.5px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;position:sticky;top:0;
+  background:var(--surface-2)}
+th:first-child,td:first-child{text-align:left}
+tbody tr:last-child td{border-bottom:none}
+td .chip{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px}
+.note{color:var(--ink-3);font-size:12.5px;margin-top:16px;max-width:70ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Peptide–HLA class I stability · split C2</p>
+  <h1>Only one feature block survives a held-out allele</h1>
+  <p class="sub">All 31 combinations of five feature blocks, scored by gradient-boosted
+  trees on 14,997 Boltz-2 complexes. Whole pseudosequence clusters are held out, so no
+  allele in the test fold — and no binding groove — appears in training. Spearman rank
+  correlation against measured log half-life, mean of 3 seeds.</p>
+
+  <div class="finding">
+    <div class="stat bar-with"><div class="k">16 combinations with Boltz-2</div>
+      <div class="v">+0.514 … +0.619</div><div class="n">median +0.557</div></div>
+    <div class="stat bar-without"><div class="k">15 combinations without</div>
+      <div class="v">−0.226 … +0.029</div><div class="n">median −0.099</div></div>
+    <div class="stat"><div class="k">Overlap between the two groups</div>
+      <div class="v">none</div><div class="n">a single binary splits all 31</div></div>
+  </div>
+
+  <div class="legend">
+    <span class="lg"><span class="sw" style="background:var(--series-1)"></span>Includes Boltz-2 embeddings</span>
+    <span class="lg"><span class="sw" style="background:var(--series-2)"></span>No Boltz-2 embeddings</span>
+  </div>
+
+  <div class="chartbox"><svg id="chart" viewBox="0 0 960 430" role="img"
+    aria-label="Bar chart of test Spearman for 31 feature-block combinations, ordered descending."></svg></div>
+
+  <div class="key">
+    <span><b>B</b>Boltz-2 embeddings</span>
+    <span><b>S</b>Sequence one-hot</span>
+    <span><b>E</b>Atomic energy</span>
+    <span><b>N</b>Node features</span>
+    <span><b>G</b>Edge features</span>
+  </div>
+
+  <div class="controls">
+    <button id="toggle" aria-expanded="false">Show data table</button>
+    <span class="lg" style="font-size:12.5px">Whiskers show ±1 s.d. across 3 seeds.</span>
+  </div>
+  <div class="tablebox" id="tablebox" hidden></div>
+
+  <p class="note">Letter codes are alphabetical, so <b style="font-family:var(--font-data)">BNS</b>
+  is Boltz-2 + node features + sequence. Atomic energy takes <b style="font-family:var(--font-data)">E</b>
+  and edge features <b style="font-family:var(--font-data)">G</b>, since both words begin with the
+  same letter. Node, edge and atomic-energy features come from MACE-OFF24 descriptors of the
+  predicted structures.</p>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+document.body.dataset.palette = "#2a78d6,#eb6834";
+document.body.dataset.mode = "light";
+</script>
+<script type="module" src="validate_palette.js"></script>
+<script>
+const DATA = [["BS",0.6192,0.0036,0.409,0.9384,2407,1],["BE",0.6145,0.011,0.4216,0.9648,1977,1],["BES",0.6106,0.0031,0.4299,0.9622,2837,1],["B",0.603,0.0035,0.4003,0.9559,1547,1],["BN",0.5709,0.0037,0.4567,0.9334,13067,1],["BENS",0.5644,0.0073,0.471,0.962,14357,1],["BEN",0.5589,0.0111,0.4404,0.9393,13497,1],["BEG",0.5583,0.0068,0.4357,0.9528,16427,1],["BEGS",0.5564,0.0114,0.4374,0.9084,17287,1],["BGN",0.5557,0.0136,0.4308,0.9118,27517,1],["BG",0.5521,0.0029,0.4148,0.9066,15997,1],["BNS",0.5494,0.0063,0.4482,0.9427,13927,1],["BEGNS",0.5477,0.0088,0.4325,0.9496,28807,1],["BEGN",0.5438,0.0028,0.4271,0.946,27947,1],["BGNS",0.5191,0.0178,0.4246,0.9215,28377,1],["BGS",0.514,0.0067,0.4093,0.8951,16857,1],["EN",0.0292,0.0436,0.1961,0.922,11950,0],["ENS",0.0272,0.0158,0.1842,0.9338,12810,0],["N",0.0202,0.0181,0.1804,0.7676,11520,0],["GN",-0.0526,0.0218,0.1555,0.7739,25970,0],["EGNS",-0.062,0.1405,0.1895,0.9079,27260,0],["G",-0.067,0.052,0.1456,0.7661,14450,0],["ES",-0.081,0.1341,0.1445,0.8107,1290,0],["EGN",-0.0991,0.0254,0.174,0.8688,26400,0],["EG",-0.1228,0.0355,0.1329,0.8507,14880,0],["NS",-0.1254,0.0199,0.1385,0.8718,12380,0],["E",-0.1708,0.047,-0.0193,0.6265,430,0],["S",-0.189,0.0628,0.0759,0.7607,860,0],["GNS",-0.2012,0.0806,0.0975,0.8306,26830,0],["EGS",-0.2223,0.0592,0.122,0.8295,15740,0],["GS",-0.2256,0.0674,0.0856,0.7865,15310,0]];
+const NAMES = {B:"Boltz-2 embeddings",S:"Sequence one-hot",E:"Atomic energy",
+               N:"Node features",G:"Edge features"};
+const W=960,H=430,M={t:16,r:14,b:54,l:52};
+const iw=W-M.l-M.r, ih=H-M.t-M.b;
+const lo=-0.30, hi=0.70;
+const y=v=>M.t+ih*(hi-v)/(hi-lo);
+const bw=iw/DATA.length, barW=Math.max(6,bw-2);   /* 2px surface gap */
+const svg=document.getElementById('chart'), NS='http://www.w3.org/2000/svg';
+const el=(n,a)=>{const e=document.createElementNS(NS,n);
+  for(const k in a) e.setAttribute(k,a[k]); return e;};
+
+for(let t=-0.3;t<=0.7001;t+=0.1){
+  const v=Math.round(t*10)/10, yy=y(v), zero=Math.abs(v)<1e-9;
+  svg.appendChild(el('line',{x1:M.l,x2:W-M.r,y1:yy,y2:yy,
+    stroke:zero?'var(--ink-3)':'var(--grid)','stroke-width':zero?1.25:1}));
+  const lab=el('text',{x:M.l-9,y:yy+3.5,'text-anchor':'end',class:'tick'});
+  lab.textContent=(v>0?'+':'')+v.toFixed(1); svg.appendChild(lab);
+}
+const at=el('text',{x:M.l-9,y:M.t-4,'text-anchor':'end',class:'axis-title'});
+at.textContent='ρ'; svg.appendChild(at);
+
+DATA.forEach((d,i)=>{
+  const [code,test,sd,val,train,dim,hasB]=d;
+  const x=M.l+i*bw+(bw-barW)/2, y0=y(0), y1=y(test);
+  const g=el('g',{class:'bar'});
+  const top=Math.min(y0,y1), h=Math.max(1.5,Math.abs(y1-y0));
+  const col=hasB?'var(--series-1)':'var(--series-2)';
+  /* 4px rounded data-end, square against the baseline */
+  const r=Math.min(4,h,barW/2), up=test>=0;
+  const path=up
+    ? `M${x} ${y0} L${x} ${top+r} Q${x} ${top} ${x+r} ${top} L${x+barW-r} ${top} Q${x+barW} ${top} ${x+barW} ${top+r} L${x+barW} ${y0} Z`
+    : `M${x} ${y0} L${x} ${top+h-r} Q${x} ${top+h} ${x+r} ${top+h} L${x+barW-r} ${top+h} Q${x+barW} ${top+h} ${x+barW} ${top+h-r} L${x+barW} ${y0} Z`;
+  g.appendChild(el('path',{d:path,fill:col,class:'m'}));
+  if(sd>0){
+    const cx=x+barW/2, a=y(test-sd), b=y(test+sd);
+    g.appendChild(el('line',{x1:cx,x2:cx,y1:a,y2:b,stroke:'var(--ink-2)','stroke-width':1.1,opacity:.75}));
+    g.appendChild(el('line',{x1:cx-2.5,x2:cx+2.5,y1:a,y2:a,stroke:'var(--ink-2)','stroke-width':1.1,opacity:.75}));
+    g.appendChild(el('line',{x1:cx-2.5,x2:cx+2.5,y1:b,y2:b,stroke:'var(--ink-2)','stroke-width':1.1,opacity:.75}));
+  }
+  const cl=el('text',{x:x+barW/2,y:H-M.b+15,'text-anchor':'middle',class:'code'});
+  cl.textContent=code; svg.appendChild(cl);
+  if(i===0||i===DATA.length-1){                     /* selective direct labels */
+    const dl=el('text',{x:x+barW/2,y:up?top-9:top+h+15,'text-anchor':'middle',class:'dl'});
+    dl.textContent=(test>0?'+':'')+test.toFixed(3); g.appendChild(dl);
+  }
+  const hit=el('rect',{x:M.l+i*bw,y:M.t,width:bw,height:ih,class:'hit'});
+  g.appendChild(hit);
+  const blocks=code.split('').map(c=>NAMES[c]).join(' · ');
+  g.addEventListener('pointerenter',e=>show(e,code,blocks,dim,train,val,test,sd));
+  g.addEventListener('pointermove',move);
+  g.addEventListener('pointerleave',hide);
+  svg.appendChild(g);
+});
+const axl=el('text',{x:M.l+iw/2,y:H-8,'text-anchor':'middle',class:'axis-title'});
+axl.textContent='Feature-block combination (alphabetical code), ordered by test ρ';
+svg.appendChild(axl);
+
+const tip=document.getElementById('tip');
+const f=v=>(v>0?'+':'')+v.toFixed(3);
+function show(e,code,blocks,dim,train,val,test,sd){
+  tip.innerHTML=`<div class="t">${code}</div><div style="color:var(--ink-2)">${blocks}</div>
+   <dl><dt>test ρ</dt><dd>${f(test)} ±${sd.toFixed(3)}</dd>
+   <dt>validation ρ</dt><dd>${f(val)}</dd><dt>train ρ</dt><dd>${f(train)}</dd>
+   <dt>inputs</dt><dd>${dim.toLocaleString()}</dd></dl>`;
+  tip.style.opacity=1; move(e);
+}
+function move(e){
+  const p=12, w=tip.offsetWidth, h=tip.offsetHeight;
+  let x=e.clientX+p, yy=e.clientY+p;
+  if(x+w>innerWidth-8) x=e.clientX-w-p;
+  if(yy+h>innerHeight-8) yy=e.clientY-h-p;
+  tip.style.left=x+'px'; tip.style.top=yy+'px';
+}
+function hide(){tip.style.opacity=0}
+
+const box=document.getElementById('tablebox'), btn=document.getElementById('toggle');
+box.innerHTML='<table><thead><tr><th>Code</th><th>Blocks</th><th>Inputs</th>'
+ +'<th>Train ρ</th><th>Val ρ</th><th>Test ρ</th><th>±s.d.</th></tr></thead><tbody>'
+ +DATA.map(([c,t,s,v,tr,dim,hb])=>`<tr><td><span class="chip" style="background:${
+   hb?'var(--series-1)':'var(--series-2)'}"></span>${c}</td>`
+   +`<td style="text-align:left;font-family:var(--font-body)">${c.split('').map(x=>NAMES[x]).join(', ')}</td>`
+   +`<td>${dim.toLocaleString()}</td><td>${f(tr)}</td><td>${f(v)}</td>`
+   +`<td><strong>${f(t)}</strong></td><td>${s.toFixed(3)}</td></tr>`).join('')
+ +'</tbody></table>';
+btn.addEventListener('click',()=>{
+  const open=box.hidden; box.hidden=!open;
+  btn.textContent=open?'Hide data table':'Show data table';
+  btn.setAttribute('aria-expanded',String(open));
+});
+</script>

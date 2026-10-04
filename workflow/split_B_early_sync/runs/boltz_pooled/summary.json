@@ -1,0 +1,25 @@
+{
+  "representation": "boltz_pooled",
+  "description": "Boltz pooled blocks, the hook's own feature vector",
+  "input_dim": 1547,
+  "n_parameters": 202305,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 84.0,
+  "spearman_train_mean": 0.967402939636742,
+  "spearman_val_mean": 0.7575376196753179,
+  "spearman_test_mean": 0.7581685864601895,
+  "spearman_test_sd": 0.00469480057800084,
+  "spearman_test_per_seed": [
+    0.7603017147244593,
+    0.7570901442406986,
+    0.7661264394182444,
+    0.7531368956123514,
+    0.7541877383051933
+  ]
+}

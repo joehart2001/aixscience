@@ -1,0 +1,25 @@
+{
+  "representation": "seq",
+  "description": "peptide + pseudosequence one-hot (BASELINE)",
+  "input_dim": 860,
+  "n_parameters": 114369,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 88.4,
+  "spearman_train_mean": 0.9630513373489521,
+  "spearman_val_mean": 0.7420664413768471,
+  "spearman_test_mean": 0.734796685255257,
+  "spearman_test_sd": 0.007933158356639122,
+  "spearman_test_per_seed": [
+    0.7348840478416796,
+    0.7373636579718107,
+    0.7196583492647869,
+    0.7417399962525246,
+    0.740337374945484
+  ]
+}

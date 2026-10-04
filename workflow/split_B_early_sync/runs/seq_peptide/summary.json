@@ -1,0 +1,25 @@
+{
+  "representation": "seq_peptide",
+  "description": "peptide one-hot, 9 x 20",
+  "input_dim": 180,
+  "n_parameters": 27329,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 44.8,
+  "spearman_train_mean": 0.6006584952338878,
+  "spearman_val_mean": 0.4529580394641875,
+  "spearman_test_mean": 0.4398459293410637,
+  "spearman_test_sd": 0.009262171408282217,
+  "spearman_test_per_seed": [
+    0.4313628415082867,
+    0.4450533112709903,
+    0.4381452554205318,
+    0.4548757503345163,
+    0.4297924881709936
+  ]
+}

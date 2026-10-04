@@ -1,0 +1,14 @@
+gbm_seq                        dim   860  trees    129  best   129  train +0.769  val +0.088  test -0.198 +/- 0.060   [    3s]
+gbm_boltz_pooled               dim  1547  trees    250  best   250  train +0.943  val +0.399  test +0.604 +/- 0.007   [   17s]
+gbm_seq+boltz_pooled           dim  2407  trees    197  best   197  train +0.927  val +0.412  test +0.616 +/- 0.008   [   31s]
+
+gain by pooled Boltz block (gbm_boltz_pooled):
+  peptide_s_mean                 8.1%   per-feature  0.021%
+  peptide_s_max                  6.2%   per-feature  0.016%
+  contact_receptor_s_mean       20.4%   per-feature  0.053%
+  cross_z_mean                  12.6%   per-feature  0.099%
+  cross_z_max                   21.4%   per-feature  0.168%
+  cross_z_distance_weighted     31.0%   per-feature  0.242%
+  n_peptide_tokens               0.0%   per-feature  0.000%
+  n_contact_receptor_tokens      0.0%   per-feature  0.021%
+  confidence                     0.3%   per-feature  0.032%

@@ -1,0 +1,25 @@
+{
+  "representation": "seq_hla_pseudo",
+  "description": "NetMHCpan pseudosequence one-hot, 34 x 20",
+  "input_dim": 680,
+  "n_parameters": 91329,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs_mean": 91.4,
+  "spearman_train_mean": 0.5395511090230428,
+  "spearman_val_mean": 0.513540348835971,
+  "spearman_test_mean": 0.5030151881606356,
+  "spearman_test_sd": 0.002626993682651952,
+  "spearman_test_per_seed": [
+    0.5038682042907285,
+    0.502297133479333,
+    0.5051938281379754,
+    0.5054527853157513,
+    0.49826398957938944
+  ]
+}

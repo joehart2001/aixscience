@@ -1,0 +1,5 @@
+n = 6,493   alleles 33   train 4,505  val 964  test 1,024
+hess           dim    14   ridge +0.191   gbm +0.196
+gbsa           dim     5   ridge +0.012   gbm +0.227
+relax          dim     5   ridge +0.046   gbm +0.127
+mm             dim    24   ridge +0.195   gbm +0.334
