@@ -1,4 +1,4 @@
-# aixscience
+# Boltz-$\tau$
 
 Peptide–MHC class I binding **half-life (stability)** prediction (Serova Protein
 Engineering Track Challenge).
@@ -47,7 +47,7 @@ and Boltz-2 is the only one left predicting anything.
   </picture>
 </p>
 <p align="center">
-  <em>Graph comparing performance of each model on Pearson correlation across alleles and Spearman correlation within individual alleles. Dashed line indicates reference state-of-the-art methods performed on peptide-excluding splits from Karthikeyan et. al (2026).</em>
+  <em>Graph comparing performance of each model on Pearson correlation across alleles and Spearman correlation within individual alleles. Dashed line indicates reference state-of-the-art methods performed on splits by peptide from Rasmussen et. al (2016).</em>
 </p>
 
 | split label | held out | direct (MLP) | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
@@ -65,6 +65,21 @@ than a point value.</sub>
 From the above table and graph, we can see that of all the lighter archictectures perform at a level comparable to the current state-of-the-art MINT methods on random and peptide-excluded data partitioning. However, these lighter models fail to generalize to allele structures, with catastrophic failure when a completely unseen allele structure group is introduced, with the exception of the Boltz-2 embedded model. The reference value comes from an exclude-peptide-type splitting, which we also show is not sufficient to generalize structure predictions to different alleles.
 
 We also report the inter-allele Spearman correlation, which measures how well the models actually learned the peptide's influence on the lifetime as opposed to reading out exclusively for given allele types. This also shows a significant decline in correlation values, suggesting that further works need to consider these individual-allele benchmarks to truly evaluate the peptide learning task.
+
+### Extension to MACE architecture
+We also try a one-shot attempt to use the MACE-OFF (https://github.com/ACEsuit/mace-off) machine-learned interatomic potential on the Boltz-2 structure outputs. However, due to time and resource constraints, we were unable to run larger simulations which include electrostatics and the solvated environment, leading to no significant improvement from the MACE readouts.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="mace-peptide.png">
+    <img src="mace-peptide.png" alt="Bar graph of spearman correlation including various MACE and Boltz-2 readouts" width="920">
+  </picture>
+</p>
+<p align="center">
+  <em>Bar graph of spearman correlation including various MACE and Boltz-2 readouts. Note that including only MACE embeddings generally leads to worse results, likely due to the inability to include solvated environment static effects. </em>
+</p>
+
+Further work could use MACE's enriched descriptor basis from a more realistic structure to enhance accuracy.
 
 ## Repository structure
 
@@ -89,16 +104,6 @@ We also report the inter-allele Spearman correlation, which measures how well th
   — source of the `rasmussen_et_al_dataset.csv` stability measurements and the
   NetMHCstabpan method (pan-specific PCC = 0.676, global rescaling).
 
-### State-of-the-art reference values (plotted as dashed lines on correlation figures)
-- **Peptide:MHC Binding Stability Prediction Using Protein Language Models.**
-  *bioRxiv* 2026.
-  doi:[10.64898/2026.06.28.735023](https://doi.org/10.64898/2026.06.28.735023) ·
-  [bioRxiv](https://www.biorxiv.org/content/10.64898/2026.06.28.735023v1)
-  — best model (MINT Transfer) on the NetMHCstabpan test set under a
-  leakage-controlled 80%-identity peptide-cluster split: **Pearson r = 0.76,
-  Spearman ρ = 0.79** (the `REFERENCES` values in `*/plots.py`). NetMHCstabpan
-  scores ρ = 0.88 on that set but it is leakage-inflated.
-
 ### Other methods cited for context (binding *affinity*, not stability)
 - Reynisson B, Alvarez B, Paul S, Peters B, Nielsen M. **NetMHCpan-4.1 / NetMHCIIpan-4.0.**
   *Nucleic Acids Research.* 2020;48(W1):W449–W454.
@@ -111,4 +116,4 @@ We also report the inter-allele Spearman correlation, which measures how well th
 
 > Note: affinity (KD/IC50) is a different, less kinetically noisy target than
 > stability; those numbers are context only and are **not** used as reference
-> lines. The reference lines are the stability-specific values above.
+> lines. The reference lines are the stability-specific values from the dataset.
