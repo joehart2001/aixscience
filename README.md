@@ -1,7 +1,8 @@
 # Boltz-τ: HLA–Peptide Stability from Foundational Protein Embeddings
 
-Peptide–MHC class I binding **half-life (stability)** prediction (Serova Protein
-Engineering Track Challenge).
+Boltz-τ predicts the binding stability of peptide–HLA class I complexes: how
+long a peptide remains bound before it dissociates. It turns pretrained Boltz-2
+structural embeddings into a lightweight half-life predictor.
 
 <p align="center">
   <a href="https://joehart2001.github.io/boltz-tau/">
