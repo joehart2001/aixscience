@@ -218,7 +218,7 @@ function L(){
    ? {rail:{x:16,y:34,w:368,h:22,horiz:true}, pan:{x:16,y:80,w:368,h:438}}
    : {rail:{x:30,y:54,w:122,h:426,horiz:false}, pan:{x:188,y:52,w:782,h:428}};
 }
-const RAIL=[['MODELS','SEQUENCE'],['MODEL','BOLTZ-2'],['','RESULTS'],['EXTENSION','MACE'],['','FEATURE SPACE']];
+const RAIL=[['DEFAULT','SEQUENCE'],['FOUNDATION','BOLTZ-2'],['EVIDENCE','RESULTS'],['EXTENSION','MACE'],['FEATURE','SPACES']];
 function drawRail(idx,r){
   const N=RAIL.length;
   if(r.horiz){
@@ -256,8 +256,8 @@ const SEQCOLS=[
   note:'all-pairs attention, d_model 64, trained from scratch'}];
 
 function s1(p,pan){
-  txt('SEQUENCE MODELS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
-  txt('three ways to read the same amino-acid indices',pan.x,pan.y+(narrow?32:42),
+  txt('THE DEFAULT · LEARN FROM SEQUENCE',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
+  txt(narrow?'three architectures · labels only':'three architectures, all learning interaction patterns from labels alone',pan.x,pan.y+(narrow?32:42),
     {s:narrow?9.5:11,c:P.mut});
 
   // each column is lit in turn, then all three together for the comparison
@@ -347,16 +347,16 @@ function s1(p,pan){
     ctx.save();ctx.globalAlpha=g*.5;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
     ctx.beginPath();ctx.moveTo(pan.x,ny-30);ctx.lineTo(pan.x+pan.w*ease(g),ny-30);
     ctx.stroke();ctx.restore();
-    txt(narrow?'All three collapse on a new groove.'
-              :'Within 0.115 of each other on shuffled rows. All three go negative on an unseen groove.',
+    txt(narrow?'Sequence alone fails on a new groove.'
+              :'Different architectures, same limitation: sequence alone fails on an unseen groove.',
       pan.x,ny,{s:narrow?12:18,c:P.ink,f:'s',w:600,al:g});
   }
 }
 
 /* ---------- scene 2: boltz-2 ---------- */
 function s2(p,pan,ang){
-  txt('BOLTZ-2 · A STRUCTURAL EMBEDDING',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.bz,f:'d'});
-  txt('precomputed complex embedding · frozen · standardised on train only',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
+  txt(narrow?'OUR LEVERAGE · PRETRAINED 3D':'OUR LEVERAGE · A PRETRAINED 3D REPRESENTATION',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.bz,f:'d'});
+  txt(narrow?'reuse what Boltz-2 learned · frozen':'reuse what Boltz-2 learned about protein complexes · frozen · standardised on train only',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
   txt('\u03b11/\u03b12 platform \u00b7 2 helices, 9 strands \u00b7 ALLENIHRV in the groove',
     pan.x,pan.y+pan.h-(narrow?76:72),{s:narrow?9:10.5,c:P.mut,al:sub(p,.14,.26)*(1-sub(p,.34,.46))});
 
@@ -519,7 +519,7 @@ function s3(p,pan){
     const by=Y1+(narrow?62:74);
     ctx.save();ctx.globalAlpha=k*.5;ctx.strokeStyle=P.bz;ctx.lineWidth=1.5;
     ctx.beginPath();ctx.moveTo(pan.x,by);ctx.lineTo(pan.x+pan.w*ease(k),by);ctx.stroke();ctx.restore();
-    txt('Only the Boltz-2 embeddings generalise to an unseen allele.',pan.x,by+(narrow?19:24),
+    txt('Transferred 3D features generalise where sequence models do not.',pan.x,by+(narrow?19:24),
       {s:narrow?14:24,c:P.ink,f:'s',w:600,al:k});
     txt('0.714 on held-out alleles against 0.592 for the best sequence model, and on unseen',
       pan.x,by+(narrow?34:44),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.60,.70)});
@@ -532,8 +532,8 @@ function s3(p,pan){
 
 /* ---------- scene 4: MACE as an extension ---------- */
 function s4(p,pan){
-  txt('EXTENSION · ATOM-LEVEL PHYSICS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.se,f:'d'});
-  txt('would MACE descriptors add anything on top of the structural embedding?',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
+  txt(narrow?'MACE · CAN WE IMPROVE FURTHER?':'MACE EXTENSION · CAN WE IMPROVE FURTHER?',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.se,f:'d'});
+  txt(narrow?'atomistic foundation-model descriptors':'can atomistic-simulation foundation-model descriptors add to Boltz-2?',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
 
   const box={x:pan.x,y:pan.y+(narrow?50:54),w:narrow?pan.w:pan.w*.54,h:narrow?150:190};
   const L=fragLayout(box);
@@ -682,8 +682,8 @@ const UCOLS=[['boltz','Boltz-2 complex','1,547-d','bz'],
              ['edge','MACE edge','14,450-d','se']];
 
 function s5(p,pan){
-  txt('WHAT THE FEATURE SPACES LOOK LIKE',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
-  txt('UMAP of all 14,997 complexes, thinned to 1,800 · coloured by the C2 cluster split',
+  txt(narrow?'FOUNDATION-MODEL FEATURE SPACES':'INTERROGATING FOUNDATION-MODEL FEATURE SPACES',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
+  txt(narrow?'Boltz-2 and MACE · same complexes':'Boltz-2 and MACE views of the same complexes · learned before the half-life task',
     pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
 
   const GAP=narrow?0:20, cw=narrow?pan.w:(pan.w-2*GAP)/3;
