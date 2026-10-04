@@ -1,5 +1,17 @@
 # demo_app_html
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/protein.gif">
+    <img src="docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="520">
+  </picture>
+</p>
+<p align="center">
+  <em>HLA-A*02:01 with <code>ALLENIHRV</code> in the groove &mdash; the real Boltz-2 prediction,
+  t&frac12; 44.7&nbsp;h, complex pLDDT 0.988. Rendered by <code>tools/render_protein.py</code>
+  from the deposited coordinates.</em>
+</p>
+
 Two self-contained animated explainers for the peptide–HLA half-life work. Each
 builds to a single HTML file with no runtime dependencies, so it can be opened
 from disk, dropped into a slide, or published behind a link.
@@ -71,6 +83,21 @@ somewhere between the CIF and MACE, which is worth pinning down since it decides
 whether the atom-to-residue mapping is built from the CIF or from the protonated
 structure.
 
+## The README animation
+
+```bash
+python tools/render_protein.py                       # docs/protein.gif
+python tools/render_protein.py --theme light         # docs/protein-light.gif
+python tools/render_protein.py --width 800 --height 500 --frames 60
+```
+
+A faithful port of the canvas renderer — same secondary structure assignment,
+same painter's algorithm — drawn at 3× and downsampled, because PIL does not
+antialias polygons. Frames go to ffmpeg's `palettegen`/`paletteuse`, which
+produces a much better palette than quantising each frame independently.
+Needs Pillow, numpy and ffmpeg. Both themes are committed so the `<picture>`
+element above can follow the reader's GitHub theme.
+
 ## How the cartoon is drawn
 
 No DSSP and no viewer library. `src/lib/ss.js` scores each 5-residue window of
@@ -113,6 +140,8 @@ src/
 tools/
   extract_structure.py        ModelCIF -> JSON
   pack_structure.py           JSON -> inline constant
+  render_protein.py           the rotating GIF above
+docs/                         rendered GIFs, committed
 dist/                         generated, safe to delete
 ```
 

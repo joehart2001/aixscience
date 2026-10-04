@@ -229,16 +229,16 @@ function shade(c,t){
    becomes one primitive, all sorted far-to-near, so the sheet occludes
    correctly as the complex turns. */
 function drawCartoon(ang,cx,cy,zoom,al){
-  const HW=2.1*SC*zoom, EW=1.6*SC*zoom, CW=0.62*SC*zoom, HEAD=.72;
-  const BR=0.36*SC*zoom, SW=0.46*SC*zoom;
+  const HW=1.15*SC*zoom, EW=0.85*SC*zoom, CW=0.28*SC*zoom, HEAD=.68;
+  const BR=0.26*SC*zoom, SW=0.30*SC*zoom;
   const prims=[];
 
   RUNS.forEach(r=>{
     const raw=TRACE.slice(r.a,r.b+1); if(raw.length<2)return;
-    const sm=chaikin(raw, r.t==='H'?2:3);
+    const sm=chaikin(raw, r.t==='H'?4:r.t==='E'?2:3);
     const sp=sm.map(q=>proj(q,ang,cx,cy,zoom));
     const n=sp.length;
-    const wAt=u=>r.t==='H'?HW : r.t==='E'?(u<HEAD?EW:EW*2.0*(1-(u-HEAD)/(1-HEAD))) : CW;
+    const wAt=u=>r.t==='H'?HW : r.t==='E'?(u<HEAD?EW:EW*2.8*(1-(u-HEAD)/(1-HEAD))) : CW;
     // offset each point perpendicular to the screen-space tangent
     const Lp=[],Rp=[];
     for(let i=0;i<n;i++){
@@ -262,7 +262,7 @@ function drawCartoon(ang,cx,cy,zoom,al){
 
   prims.forEach(o=>{
     ctx.save(); ctx.globalAlpha=al;
-    const lit=cl((o.k-.86)*2.1,-.3,.34);           // nearer segments catch the light
+    const lit=cl((o.k-.86)*2.7,-.40,.40);          // nearer segments catch the light
     if(o.t==='B'){
       ctx.lineCap='round';
       ctx.strokeStyle=shade(P.dir,-.45); ctx.lineWidth=Math.max(1.4,o.w+1.5);
@@ -439,7 +439,7 @@ function s4(p,pan,ang){
     pan.x,pan.y+pan.h-(narrow?76:72),{s:narrow?9:10.5,c:P.mut,al:sub(p,.14,.26)*(1-sub(p,.42,.56))});
 
   const show=sub(p,.02,.12), fold=sub(p,.40,.58), vec=sub(p,.60,.78);
-  const cx=pan.x+pan.w/2, cy=pan.y+(narrow?166:146), zoom=(narrow?.42:.66)*(1-fold*.45);
+  const cx=pan.x+pan.w/2, cy=pan.y+(narrow?160:140), zoom=(narrow?.50:.78)*(1-fold*.45);
   if(show>0&&fold<1){
     const al=show*(1-fold*.9);
     drawCartoon(ang,cx,cy,zoom,al);
