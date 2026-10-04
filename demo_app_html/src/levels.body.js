@@ -449,7 +449,10 @@ function s3(p,pan){
   txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
   txt('Pearson r · 14.5k rows, 75 alleles, 22 clusters · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
 
-  const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?6:10);
+  // Keep the series endpoints inside the plot and reserve a clean gutter for
+  // their labels. Previously the labels sat on top of the final curve segment.
+  const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?68:126);
+  const labelX=X1+(narrow?8:14);
   const Y0=pan.y+(narrow?62:70), Y1=pan.y+pan.h-(narrow?124:98);
   const RMIN=-.12,RMAX=.85;
   const xOf=i=>X0+(X1-X0)*(i/3), yOf=r=>Y1-(r-RMIN)/(RMAX-RMIN)*(Y1-Y0);
@@ -462,9 +465,10 @@ function s3(p,pan){
     txt(v.toFixed(1),X0-7,y+4,{s:narrow?9:10.5,c:P.mut,ta:'right'});}
   ctx.restore();
   SPLITS.forEach((s,i)=>{const x=xOf(i), ta=i===0?'left':i===3?'right':'center';
-    const lab=s.k+' · '+s.short;
+    const lab=narrow?s.k:s.k+' · '+s.short;
     txt(lab,x,Y1+(narrow?19:23),{s:narrow?9.5:12,c:P.ink,ta,w:600,al:grid});
-    txt(s.plain,x,Y1+(narrow?31:38),{s:narrow?8.5:10.5,c:i===3?P.wrn:P.mut,ta,al:grid});});
+    txt(narrow?s.short:s.plain,x,Y1+(narrow?31:38),
+      {s:narrow?8.5:10.5,c:i===3?P.wrn:P.mut,ta,al:grid});});
   const ay=Y1+(narrow?44:54);
   ctx.save();ctx.globalAlpha=grid*.45;ctx.strokeStyle=P.ln;ctx.lineWidth=1.5;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(X0,ay);ctx.lineTo(X1-(narrow?40:54),ay);ctx.stroke();
@@ -499,18 +503,23 @@ function s3(p,pan){
 
   // end labels, separated so models that finish close together stay legible
   if(sub(p,.44,.54)>0){
-    const gap=narrow?12:14;
+    const reveal=sub(p,.44,.54), gap=narrow?12:14;
     const ls=['transformer','direct','sexgb','semlp','boltz2'].map(id=>{
       const m=MODELS.find(q=>q.id===id);
-      return {m,lead:id==='boltz2',y:yOf(M[id]['C2'][0])};});
+      const pointY=yOf(M[id]['C2'][0]);
+      return {m,lead:id==='boltz2',pointY,y:pointY};});
     ls.sort((a,b2)=>a.y-b2.y);
     for(let i=1;i<ls.length;i++)
       if(ls[i].y-ls[i-1].y<gap) ls[i].y=ls[i-1].y+gap;
     const shift=Math.max(0,ls[ls.length-1].y-(Y1-4));
     ls.forEach(l=>{
       const y=l.y-shift;
-      txt(l.m.l,xOf(3)+(narrow?0:6),y+(l.lead?(narrow?30:34):4),
-        {s:narrow?8.5:10.5,c:P[l.m.ck],ta:'right',al:(l.lead?1:.6)*sub(p,.44,.54),
+      const label=narrow?l.m.l.replace(' (MLP)','').replace(' (frozen)',''):l.m.l;
+      ctx.save();ctx.globalAlpha=(l.lead?.75:.3)*reveal;ctx.strokeStyle=P[l.m.ck];
+      ctx.lineWidth=l.lead?1.4:1;ctx.setLineDash(l.m.dash||[]);
+      ctx.beginPath();ctx.moveTo(X1+4,l.pointY);ctx.lineTo(labelX-3,y);ctx.stroke();ctx.restore();
+      txt(label,labelX,y+4,
+        {s:narrow?8.5:10.5,c:P[l.m.ck],ta:'left',al:(l.lead?1:.6)*reveal,
          w:l.lead?600:400});});
   }
 
@@ -645,18 +654,18 @@ function s4(p,pan){
   maceStrip(p,pan,ly+(narrow?54:64),.50);
 }
 
-/* three numbers that say whether the atomistic blocks earned their place */
+/* explicit answer to whether the atomistic blocks earned their place */
 function maceStrip(p,pan,top,at){
   const a=sub(p,at,at+.12); if(a<=0)return;
   ctx.save();ctx.globalAlpha=a*.6;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(pan.x,top);ctx.lineTo(pan.x+pan.w,top);ctx.stroke();ctx.restore();
-  txt('FEATURE ABLATION  ·  HELD-OUT TEST  ·  GBM HEAD  ·  SEPARATE RUN',pan.x,top-7,
+  txt('DO MACE FEATURES IMPROVE HELD-OUT PEARSON r?',pan.x,top-7,
     {s:narrow?8.5:10,c:P.mut,w:500,al:a});
 
   const cols=[
-    ['Boltz-2 alone',        MACE.boltz,     'structure only',  P.bz],
-    ['+ MACE node',          MACE.boltzNode, '− 0.032',    P.se],
-    ['MACE only, no Boltz',  MACE.node,      'at chance',       P.wrn]];
+    ['Boltz-2 only',   MACE.boltz,     'reference',   P.bz],
+    ['Boltz-2 + MACE', MACE.boltzNode, '↓ 0.032',      P.se],
+    ['MACE only',      MACE.node,      'train 0.768', P.wrn]];
   const w=pan.w/3;
   cols.forEach(([lab,v,sub2,col],i)=>{
     const aa=sub(p,at+i*.03,at+.1+i*.03), x=pan.x+i*w;
@@ -667,12 +676,15 @@ function maceStrip(p,pan,top,at){
   const g=sub(p,at+.14,at+.26);
   if(g>0){
     const ny=top+(narrow?76:70);
-    ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.se;
+    ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.wrn;
     ctx.beginPath();ctx.moveTo(pan.x,ny-7);ctx.lineTo(pan.x+6,ny-3.5);ctx.lineTo(pan.x,ny);
     ctx.closePath();ctx.fill();ctx.restore();
-    txt(narrow?'Tried. Did not add to Boltz-2.'
-              :'Tried, and it did not add. Trains to 0.768, tests at 0.020.',
+    txt(narrow?'NO — MACE does not improve test r.'
+              :'NO — MACE does not improve the held-out result.',
       pan.x+14,ny,{s:narrow?12:18,c:P.ink,f:'s',w:600,al:g});
+    txt(narrow?'combined 0.603 → 0.571 · MACE-only test 0.020'
+              :'Boltz-2 + MACE drops 0.603 → 0.571; MACE alone overfits (train 0.768, test 0.020).',
+      pan.x+14,ny+(narrow?15:19),{s:narrow?9:11.5,c:P.mut,f:'s',al:g});
   }
 }
 
