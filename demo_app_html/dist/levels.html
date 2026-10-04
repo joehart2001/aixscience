@@ -111,12 +111,12 @@ td.best::after{content:"▌";color:var(--boltz);margin-left:5px;font-size:9px;ve
   </div>
   <div class="chips">
     <button class="chip" data-at="0.005">Direct MLP</button>
-    <button class="chip" data-at="0.11">SE gate</button>
-    <button class="chip" data-at="0.17">Transformer</button>
-    <button class="chip" data-at="0.29">Boltz-2</button>
-    <button class="chip" data-at="0.49">MACE</button>
-    <button class="chip" data-at="0.67">Feature space</button>
-    <button class="chip" data-at="0.84">Results</button>
+    <button class="chip" data-at="0.10">SE gate</button>
+    <button class="chip" data-at="0.16">Transformer</button>
+    <button class="chip" data-at="0.28">Boltz-2</button>
+    <button class="chip" data-at="0.48">Results</button>
+    <button class="chip" data-at="0.68">MACE extension</button>
+    <button class="chip" data-at="0.86">Feature space</button>
   </div>
 </figure>
 
@@ -362,7 +362,7 @@ function L(){
    ? {rail:{x:16,y:34,w:368,h:22,horiz:true}, pan:{x:16,y:80,w:368,h:438}}
    : {rail:{x:30,y:54,w:122,h:426,horiz:false}, pan:{x:188,y:52,w:782,h:428}};
 }
-const RAIL=[['MODELS','SEQUENCE'],['MODEL','BOLTZ-2'],['MODEL','MACE'],['','FEATURE SPACE'],['','RESULTS']];
+const RAIL=[['MODELS','SEQUENCE'],['MODEL','BOLTZ-2'],['','RESULTS'],['EXTENSION','MACE'],['','FEATURE SPACE']];
 function drawRail(idx,r){
   const N=RAIL.length;
   if(r.horiz){
@@ -588,10 +588,96 @@ function resultStrip(id,p,pan,top,at,name,note){
   }
 }
 
-/* ---------- scene 3: MACE, atomistic descriptors ---------- */
+/* ---------- scene 3: results ---------- */
 function s3(p,pan){
-  txt('MACE · ATOMISTIC DESCRIPTORS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.se,f:'d'});
-  txt('MACE-MH-1 · an equivariant message-passing net over the complex',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
+  txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
+  txt('Pearson r · 14.5k rows, 75 alleles, 22 clusters · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
+
+  const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?6:10);
+  const Y0=pan.y+(narrow?62:70), Y1=pan.y+pan.h-(narrow?124:98);
+  const RMIN=-.12,RMAX=.85;
+  const xOf=i=>X0+(X1-X0)*(i/3), yOf=r=>Y1-(r-RMIN)/(RMAX-RMIN)*(Y1-Y0);
+
+  const grid=sub(p,0,.12);
+  ctx.save();ctx.globalAlpha=grid;
+  for(let r=0;r<=.8001;r+=.2){const v=Math.round(r*10)/10,y=yOf(v);
+    ctx.strokeStyle=P.ln;ctx.lineWidth=1;ctx.setLineDash(v===0?[]:[2,4]);
+    ctx.beginPath();ctx.moveTo(X0,y);ctx.lineTo(X1,y);ctx.stroke();
+    txt(v.toFixed(1),X0-7,y+4,{s:narrow?9:10.5,c:P.mut,ta:'right'});}
+  ctx.restore();
+  SPLITS.forEach((s,i)=>{const x=xOf(i), ta=i===0?'left':i===3?'right':'center';
+    const lab=s.k+' · '+s.short;
+    txt(lab,x,Y1+(narrow?19:23),{s:narrow?9.5:12,c:P.ink,ta,w:600,al:grid});
+    txt(s.plain,x,Y1+(narrow?31:38),{s:narrow?8.5:10.5,c:i===3?P.wrn:P.mut,ta,al:grid});});
+  const ay=Y1+(narrow?44:54);
+  ctx.save();ctx.globalAlpha=grid*.45;ctx.strokeStyle=P.ln;ctx.lineWidth=1.5;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(X0,ay);ctx.lineTo(X1-(narrow?40:54),ay);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X1-(narrow?46:60),ay-3.5);ctx.lineTo(X1-(narrow?40:54),ay);
+  ctx.lineTo(X1-(narrow?46:60),ay+3.5);ctx.stroke();ctx.restore();
+  txt('more leakage',X0,ay-5,{s:narrow?8:9.5,c:P.mut,al:grid*.9});
+  txt('harder',X1,ay+3,{s:narrow?8:9.5,c:P.mut,ta:'right',al:grid*.9,w:500});
+
+  ['transformer','direct','sexgb','semlp','boltz2'].forEach((id,oi)=>{
+    const m=MODELS.find(q=>q.id===id), lead=id==='boltz2';
+    const start=.10+oi*.055, a=sub(p,start,start+.17);
+    if(a<=0)return;
+    const pts=SPLITS.map((s,i)=>[xOf(i),yOf(M[id][s.k][0])]), grow=ease(a)*3;
+    ctx.save();ctx.strokeStyle=P[m.ck];ctx.globalAlpha=lead?1:.45;
+    ctx.lineWidth=lead?(narrow?2.6:3.4):(narrow?1.3:1.8);ctx.lineJoin='round';ctx.lineCap='round';
+    if(m.dash)ctx.setLineDash(m.dash);
+    ctx.beginPath();
+    for(let i=0;i<3;i++){const seg=cl(grow-i,0,1); if(seg<=0)break;
+      const A=pts[i],B=pts[i+1]; if(i===0)ctx.moveTo(A[0],A[1]);
+      ctx.lineTo(lerp(A[0],B[0],seg),lerp(A[1],B[1],seg));}
+    ctx.stroke();ctx.restore();
+    pts.forEach((q,i)=>{if(grow<i)return;
+      ctx.save();ctx.globalAlpha=lead?1:.5;ctx.fillStyle=P.sf;ctx.strokeStyle=P[m.ck];
+      ctx.lineWidth=lead?2.6:1.6;
+      ctx.beginPath();ctx.arc(q[0],q[1],lead?(narrow?4:4.8):(narrow?2.2:2.9),0,7);
+      ctx.fill();ctx.stroke();ctx.restore();});
+    if(lead&&grow>=3)pts.forEach((q,i)=>
+      txt(M[id][SPLITS[i].k][0].toFixed(3),q[0],q[1]-(narrow?10:13),
+        {s:narrow?10:11.5,w:600,c:P.bz,ta:i===3?'right':'center',al:sub(p,.44,.54)}));
+
+  });
+
+  // end labels, separated so models that finish close together stay legible
+  if(sub(p,.44,.54)>0){
+    const gap=narrow?12:14;
+    const ls=['transformer','direct','sexgb','semlp','boltz2'].map(id=>{
+      const m=MODELS.find(q=>q.id===id);
+      return {m,lead:id==='boltz2',y:yOf(M[id]['C2'][0])};});
+    ls.sort((a,b2)=>a.y-b2.y);
+    for(let i=1;i<ls.length;i++)
+      if(ls[i].y-ls[i-1].y<gap) ls[i].y=ls[i-1].y+gap;
+    const shift=Math.max(0,ls[ls.length-1].y-(Y1-4));
+    ls.forEach(l=>{
+      const y=l.y-shift;
+      txt(l.m.l,xOf(3)+(narrow?0:6),y+(l.lead?(narrow?30:34):4),
+        {s:narrow?8.5:10.5,c:P[l.m.ck],ta:'right',al:(l.lead?1:.6)*sub(p,.44,.54),
+         w:l.lead?600:400});});
+  }
+
+  const k=sub(p,.54,.64);
+  if(k>0){
+    const by=Y1+(narrow?62:74);
+    ctx.save();ctx.globalAlpha=k*.5;ctx.strokeStyle=P.bz;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(pan.x,by);ctx.lineTo(pan.x+pan.w*ease(k),by);ctx.stroke();ctx.restore();
+    txt('Only the Boltz-2 embeddings generalise to an unseen allele.',pan.x,by+(narrow?19:24),
+      {s:narrow?14:24,c:P.ink,f:'s',w:600,al:k});
+    txt('0.714 on held-out alleles against 0.592 for the best sequence model, and on unseen',
+      pan.x,by+(narrow?34:44),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.60,.70)});
+    txt('clusters every sequence model goes negative while Boltz-2 holds 0.425.',
+      pan.x,by+(narrow?47:60),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.66,.76)});
+    txt('C2 puts ~3 of 22 clusters in test, so treat the size of that gap cautiously.',
+      pan.x,by+(narrow?62:78),{s:narrow?9:11,c:P.wrn,f:'s',al:sub(p,.72,.82)});
+  }
+}
+
+/* ---------- scene 4: MACE as an extension ---------- */
+function s4(p,pan){
+  txt('EXTENSION · ATOM-LEVEL PHYSICS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.se,f:'d'});
+  txt('would MACE descriptors add anything on top of the structural embedding?',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
 
   const box={x:pan.x,y:pan.y+(narrow?50:54),w:narrow?pan.w:pan.w*.54,h:narrow?150:190};
   const L=fragLayout(box);
@@ -708,7 +794,7 @@ function maceStrip(p,pan,top,at){
   const a=sub(p,at,at+.12); if(a<=0)return;
   ctx.save();ctx.globalAlpha=a*.6;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(pan.x,top);ctx.lineTo(pan.x+pan.w,top);ctx.stroke();ctx.restore();
-  txt('HELD-OUT TEST  ·  GBM HEAD  ·  SEPARATE ABLATION RUN',pan.x,top-7,
+  txt('FEATURE ABLATION  ·  HELD-OUT TEST  ·  GBM HEAD  ·  SEPARATE RUN',pan.x,top-7,
     {s:narrow?8.5:10,c:P.mut,w:500,al:a});
 
   const cols=[
@@ -728,18 +814,18 @@ function maceStrip(p,pan,top,at){
     ctx.save();ctx.globalAlpha=g;ctx.fillStyle=P.se;
     ctx.beginPath();ctx.moveTo(pan.x,ny-7);ctx.lineTo(pan.x+6,ny-3.5);ctx.lineTo(pan.x,ny);
     ctx.closePath();ctx.fill();ctx.restore();
-    txt(narrow?'Memorises. Never reaches Boltz.'
-              :'Trains to 0.768, tests at 0.020. It memorises, and it never reaches Boltz.',
+    txt(narrow?'Tried. Did not add to Boltz-2.'
+              :'Tried, and it did not add. Trains to 0.768, tests at 0.020.',
       pan.x+14,ny,{s:narrow?12:18,c:P.ink,f:'s',w:600,al:g});
   }
 }
 
-/* ---------- scene 4: the feature spaces ---------- */
+/* ---------- scene 5: the feature spaces ---------- */
 const UCOLS=[['boltz','Boltz-2 complex','1,547-d','bz'],
              ['node','MACE node','11,520-d','se'],
              ['edge','MACE edge','14,450-d','se']];
 
-function s4(p,pan){
+function s5(p,pan){
   txt('WHAT THE FEATURE SPACES LOOK LIKE',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
   txt('UMAP of all 14,997 complexes, thinned to 1,800 · coloured by the C2 cluster split',
     pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
@@ -793,94 +879,8 @@ function s4(p,pan){
   }
 }
 
-/* ---------- scene 5: results ---------- */
-function s5(p,pan){
-  txt('THE GAP OPENS ON HARDER HOLDOUTS',pan.x,pan.y+(narrow?16:22),{s:narrow?15:22,w:600,c:P.ink,f:'d'});
-  txt('Pearson r · 14.5k rows, 75 alleles, 22 clusters · increasingly unfamiliar test sets',pan.x,pan.y+(narrow?32:42),{s:narrow?9.5:11,c:P.mut});
-
-  const X0=pan.x+(narrow?34:44), X1=pan.x+pan.w-(narrow?6:10);
-  const Y0=pan.y+(narrow?62:70), Y1=pan.y+pan.h-(narrow?124:98);
-  const RMIN=-.12,RMAX=.85;
-  const xOf=i=>X0+(X1-X0)*(i/3), yOf=r=>Y1-(r-RMIN)/(RMAX-RMIN)*(Y1-Y0);
-
-  const grid=sub(p,0,.12);
-  ctx.save();ctx.globalAlpha=grid;
-  for(let r=0;r<=.8001;r+=.2){const v=Math.round(r*10)/10,y=yOf(v);
-    ctx.strokeStyle=P.ln;ctx.lineWidth=1;ctx.setLineDash(v===0?[]:[2,4]);
-    ctx.beginPath();ctx.moveTo(X0,y);ctx.lineTo(X1,y);ctx.stroke();
-    txt(v.toFixed(1),X0-7,y+4,{s:narrow?9:10.5,c:P.mut,ta:'right'});}
-  ctx.restore();
-  SPLITS.forEach((s,i)=>{const x=xOf(i), ta=i===0?'left':i===3?'right':'center';
-    const lab=s.k+' · '+s.short;
-    txt(lab,x,Y1+(narrow?19:23),{s:narrow?9.5:12,c:P.ink,ta,w:600,al:grid});
-    txt(s.plain,x,Y1+(narrow?31:38),{s:narrow?8.5:10.5,c:i===3?P.wrn:P.mut,ta,al:grid});});
-  const ay=Y1+(narrow?44:54);
-  ctx.save();ctx.globalAlpha=grid*.45;ctx.strokeStyle=P.ln;ctx.lineWidth=1.5;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(X0,ay);ctx.lineTo(X1-(narrow?40:54),ay);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(X1-(narrow?46:60),ay-3.5);ctx.lineTo(X1-(narrow?40:54),ay);
-  ctx.lineTo(X1-(narrow?46:60),ay+3.5);ctx.stroke();ctx.restore();
-  txt('more leakage',X0,ay-5,{s:narrow?8:9.5,c:P.mut,al:grid*.9});
-  txt('harder',X1,ay+3,{s:narrow?8:9.5,c:P.mut,ta:'right',al:grid*.9,w:500});
-
-  ['transformer','direct','sexgb','semlp','boltz2'].forEach((id,oi)=>{
-    const m=MODELS.find(q=>q.id===id), lead=id==='boltz2';
-    const start=.10+oi*.055, a=sub(p,start,start+.17);
-    if(a<=0)return;
-    const pts=SPLITS.map((s,i)=>[xOf(i),yOf(M[id][s.k][0])]), grow=ease(a)*3;
-    ctx.save();ctx.strokeStyle=P[m.ck];ctx.globalAlpha=lead?1:.45;
-    ctx.lineWidth=lead?(narrow?2.6:3.4):(narrow?1.3:1.8);ctx.lineJoin='round';ctx.lineCap='round';
-    if(m.dash)ctx.setLineDash(m.dash);
-    ctx.beginPath();
-    for(let i=0;i<3;i++){const seg=cl(grow-i,0,1); if(seg<=0)break;
-      const A=pts[i],B=pts[i+1]; if(i===0)ctx.moveTo(A[0],A[1]);
-      ctx.lineTo(lerp(A[0],B[0],seg),lerp(A[1],B[1],seg));}
-    ctx.stroke();ctx.restore();
-    pts.forEach((q,i)=>{if(grow<i)return;
-      ctx.save();ctx.globalAlpha=lead?1:.5;ctx.fillStyle=P.sf;ctx.strokeStyle=P[m.ck];
-      ctx.lineWidth=lead?2.6:1.6;
-      ctx.beginPath();ctx.arc(q[0],q[1],lead?(narrow?4:4.8):(narrow?2.2:2.9),0,7);
-      ctx.fill();ctx.stroke();ctx.restore();});
-    if(lead&&grow>=3)pts.forEach((q,i)=>
-      txt(M[id][SPLITS[i].k][0].toFixed(3),q[0],q[1]-(narrow?10:13),
-        {s:narrow?10:11.5,w:600,c:P.bz,ta:i===3?'right':'center',al:sub(p,.44,.54)}));
-
-  });
-
-  // end labels, separated so models that finish close together stay legible
-  if(sub(p,.44,.54)>0){
-    const gap=narrow?12:14;
-    const ls=['transformer','direct','sexgb','semlp','boltz2'].map(id=>{
-      const m=MODELS.find(q=>q.id===id);
-      return {m,lead:id==='boltz2',y:yOf(M[id]['C2'][0])};});
-    ls.sort((a,b2)=>a.y-b2.y);
-    for(let i=1;i<ls.length;i++)
-      if(ls[i].y-ls[i-1].y<gap) ls[i].y=ls[i-1].y+gap;
-    const shift=Math.max(0,ls[ls.length-1].y-(Y1-4));
-    ls.forEach(l=>{
-      const y=l.y-shift;
-      txt(l.m.l,xOf(3)+(narrow?0:6),y+(l.lead?(narrow?30:34):4),
-        {s:narrow?8.5:10.5,c:P[l.m.ck],ta:'right',al:(l.lead?1:.6)*sub(p,.44,.54),
-         w:l.lead?600:400});});
-  }
-
-  const k=sub(p,.54,.64);
-  if(k>0){
-    const by=Y1+(narrow?62:74);
-    ctx.save();ctx.globalAlpha=k*.5;ctx.strokeStyle=P.bz;ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(pan.x,by);ctx.lineTo(pan.x+pan.w*ease(k),by);ctx.stroke();ctx.restore();
-    txt('Only the Boltz-2 embeddings generalise to an unseen allele.',pan.x,by+(narrow?19:24),
-      {s:narrow?14:24,c:P.ink,f:'s',w:600,al:k});
-    txt('0.714 on held-out alleles against 0.592 for the best sequence model, and on unseen',
-      pan.x,by+(narrow?34:44),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.60,.70)});
-    txt('clusters every sequence model goes negative while Boltz-2 holds 0.425.',
-      pan.x,by+(narrow?47:60),{s:narrow?9.5:12.5,c:P.mut,f:'s',al:sub(p,.66,.76)});
-    txt('C2 puts ~3 of 22 clusters in test, so treat the size of that gap cautiously.',
-      pan.x,by+(narrow?62:78),{s:narrow?9:11,c:P.wrn,f:'s',al:sub(p,.72,.82)});
-  }
-}
-
 /* ---------- compose ---------- */
-const CUT=[.27,.47,.65,.82];
+const CUT=[.26,.46,.66,.84];
 const SCENES=[s1,s2,s3,s4,s5];
 function frame(){
   ctx.clearRect(0,0,VW,VH);ctx.fillStyle=P.sf;ctx.fillRect(0,0,VW,VH);
