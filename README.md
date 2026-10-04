@@ -1,8 +1,9 @@
 # Boltz-τ: HLA–Peptide Stability from Foundational Protein Embeddings
 
-Boltz-τ predicts the binding stability of peptide–HLA class I complexes: how
-long a peptide remains bound before it dissociates. It turns pretrained Boltz-2
-structural embeddings into a lightweight half-life predictor.
+Boltz-τ is a lightweight half-life predictor for peptide–HLA class I complexes.
+It keeps Boltz-2 frozen and trains a shallow MLP readout to map its structural
+embeddings to measured binding stability—how long a peptide remains bound before
+it dissociates.
 
 <p align="center">
   <a href="https://joehart2001.github.io/boltz-tau/">
@@ -36,10 +37,10 @@ This repository first splits peptide-allele information using several clustering
   <em>UMAP of allele structure configurations generated from Boltz-2 (https://github.com/jwohlwend/boltz) architecture </em>
 </p>
 
-**Frozen Boltz-2 complex embeddings beat every from-scratch sequence model, and
-the margin grows with how hard the split is.** On the cluster split, where no
-groove group leaks between train and test, every sequence model goes negative
-and Boltz-2 is the only one left predicting anything.
+**The shallow readout on frozen Boltz-2 complex embeddings beats every
+from-scratch sequence model, and the margin grows with how hard the split is.**
+On the cluster split, where no groove group leaks between train and test, every
+sequence model goes negative while the Boltz-τ readout remains predictive.
 
 <p align="center">
   <picture>
@@ -63,7 +64,11 @@ and Boltz-2 is the only one left predicting anything.
 C2 puts about 3 of its 22 clusters in test, so read that row as a spread rather
 than a point value.</sub>
 
-From the above table and graph, we can see that of all the lighter archictectures perform at a level comparable to the current state-of-the-art MINT methods on random and peptide-excluded data partitioning. However, these lighter models fail to generalize to allele structures, with catastrophic failure when a completely unseen allele structure group is introduced, with the exception of the Boltz-2 embedded model. The reference value comes from an exclude-peptide-type splitting, which we also show is not sufficient to generalize structure predictions to different alleles.
+The lightweight architectures are comparable to the reference MINT methods on
+random and peptide-held-out partitions. The sequence-only models do not
+generalise to unseen alleles or allele groups; the shallow MLP trained on frozen
+Boltz-2 embeddings does. This also shows why a peptide-only holdout is not enough
+to measure generalisation across HLA structures.
 
 We also report the inter-allele Spearman correlation, which measures how well the models actually learned the peptide's influence on the lifetime as opposed to reading out exclusively for given allele types. This also shows a significant decline in correlation values, suggesting that further works need to consider these individual-allele benchmarks to truly evaluate the peptide learning task.
 
