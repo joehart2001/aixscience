@@ -3,11 +3,42 @@
 Peptide–MHC class I binding **half-life (stability)** prediction (Serova Protein
 Engineering Track Challenge).
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="demo_app_html/docs/protein.gif">
+    <img src="demo_app_html/docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="520">
+  </picture>
+</p>
+<p align="center">
+  <em>HLA-A*02:01 with <code>ALLENIHRV</code> in the groove — the real Boltz-2
+  prediction, t½ 44.7 h, complex pLDDT 0.988.</em>
+</p>
+
+**Frozen Boltz-2 complex embeddings beat every from-scratch sequence model, and
+the margin grows with how hard the split is.** On the cluster split, where no
+peptide group leaks between train and test, they are the only representation
+left above chance.
+
+| split | held out | direct (MLP) | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
+|---|---|---|---|---|---|---|
+| A | nothing (shuffled) | 0.757 | 0.655 | 0.773 | 0.773 | **0.792** |
+| B | peptides | 0.715 | 0.643 | 0.723 | 0.720 | **0.764** |
+| C | alleles | 0.584 | 0.379 | 0.663 | 0.666 | **0.792** |
+| C2e | clusters | −0.034 | 0.158 | 0.116 | 0.014 | **0.511** |
+
+<sub>Pearson r on held-out test, 9,031 embedded rows across 54 alleles. Full
+table in `mlp-embeds/figs/compare/summary_all75_test_metrics.md`. C2e holds only
+2 test clusters, so read that row as a spread rather than a point value.</sub>
+
 - **`mlp-embeds/`** — the models: four `*-network/` frameworks (direct,
   transformer, squeeze-boost, boltz) sharing flat modules, plus a cross-network
   comparison harness in `mlp-embeds/figs/`. See `mlp-embeds/README.md`.
 - **`Data/`** — dataset, precomputed splits, and Boltz2 embeddings (source of
   truth; models read from it, never write to it).
+- **`demo_app_html/`** — animated explainers of the representation ladder and
+  the structure pipeline, each building to one dependency-free HTML file, plus
+  the renderer that produced the animation above. See
+  `demo_app_html/README.md`.
 
 ## References
 
