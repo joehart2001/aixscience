@@ -376,15 +376,29 @@ function s4(p,pan,ang){
   if(show>0)drawCartoon(ang,cx,cy,zoom,show);
   const reg={x:pan.x,y:pan.y+(narrow?236:220),w:pan.w,h:narrow?44:58};
   if(vec>0){
-    const N=narrow?80:160;
+    // the actual 1,547-d vector for this complex, z-scored and bucketed to fit
+    const N=EMB.z.length, mid=reg.y+reg.h/2, half=reg.h/2-1, w=reg.w/N;
+    ctx.save();ctx.globalAlpha=sub(vec,.1,.4)*.35;ctx.strokeStyle=P.ln;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(reg.x,mid);ctx.lineTo(reg.x+reg.w,mid);ctx.stroke();ctx.restore();
     for(let i=0;i<N;i++){
-      const a=sub(vec,(i/N)*.55,.3+(i/N)*.55);
+      const a=sub(vec,(i/N)*.5,.28+(i/N)*.5);
       if(a<=0)continue;
-      const w=reg.w/N, h=reg.h*(.16+Math.abs(Math.sin(i*.41)+Math.sin(i*.13))*.42);
-      ctx.save();ctx.globalAlpha=a*(.3+Math.abs(Math.sin(i*.27))*.65);ctx.fillStyle=P.bz;
-      ctx.fillRect(reg.x+i*w,reg.y+reg.h-h,w-.6,h);ctx.restore();
+      const h=(EMB.z[i]/2.6)*half;
+      ctx.save();ctx.globalAlpha=a*.85;ctx.fillStyle=EMB.z[i]<0?hex(P.bz,.55):P.bz;
+      ctx.fillRect(reg.x+i*w, h<0?mid:mid-h, Math.max(.6,w-.5), Math.abs(h));ctx.restore();
     }
-    txt(narrow?'1,547-d → the same MLP head':'1,547-d → the same 2×256 ReLU MLP head as the baseline',
+    // the nine blocks it is concatenated from
+    ctx.save();ctx.globalAlpha=sub(vec,.3,.6)*.4;ctx.strokeStyle=P.sf;ctx.lineWidth=1.4;
+    EMB.bounds.forEach(f=>{const x=reg.x+f*reg.w;
+      ctx.beginPath();ctx.moveTo(x,reg.y);ctx.lineTo(x,reg.y+reg.h);ctx.stroke();});
+    ctx.restore();
+    if(!narrow){
+      let acc=0;
+      EMB.labels.forEach(([n,sz])=>{
+        const x0=reg.x+(acc/EMB.n)*reg.w, wd=(sz/EMB.n)*reg.w; acc+=sz;
+        if(wd>70)txt(n,x0+3,reg.y-5,{s:9,c:P.mut,al:sub(vec,.35,.6)});});
+    }
+    txt(narrow?'1,547-d → the same MLP head':'1,547-d, z-scored → the same 2×256 ReLU MLP head as the baseline',
       pan.x,reg.y+reg.h+(narrow?17:20),{s:narrow?10:11.5,c:P.ink,al:sub(vec,.45,.75)});
     txt('backbone frozen',pan.x+pan.w,reg.y+reg.h+(narrow?32:20),{s:narrow?9.5:10.5,c:P.bz,ta:narrow?'left':'right',al:sub(vec,.45,.75)});
   }

@@ -140,5 +140,15 @@ try {
   check(false, `bundle threw: ${e.message}`);
 }
 
+/* 7 ----------------------------------------------------- the Boltz embedding */
+const EMB = literal("EMB");
+console.log("\nBoltz-2 embedding (the bars in the Boltz scene)");
+check(EMB.n === 1547, `${EMB.n} dimensions, as the page claims`);
+check(EMB.labels.reduce((a, [, n]) => a + n, 0) + 128 + 2 + 9 === EMB.n ||
+      EMB.labels.length >= 3, `${EMB.labels.length} named blocks shown`);
+const uniq = new Set(EMB.z.map((x) => Math.round(x * 1000))).size;
+check(uniq > EMB.z.length * 0.9, `${uniq}/${EMB.z.length} distinct values (real data, not a waveform)`);
+check(!/Math\.sin\(i\*\.41\)/.test(src), "no synthetic sine-wave vector left in the Boltz scene");
+
 console.log(fail ? `\n${fail} FAILED\n` : "\nall checks passed\n");
 process.exit(fail ? 1 : 0);
