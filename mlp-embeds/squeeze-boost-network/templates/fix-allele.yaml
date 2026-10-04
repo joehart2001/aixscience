@@ -1,0 +1,7 @@
+label: split C (allele)
+csv: ../../Data/rasmussen_et_al_dataset.csv
+splits_csv: ../../Data/subsets/splits.csv
+split: C
+hla_col: hla_pseudoseq
+embeddings_dir: ../../Data/boltz2/boltz_embeddings/all75
+figs_dir: figs/all75_split_C

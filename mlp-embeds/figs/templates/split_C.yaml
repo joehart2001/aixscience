@@ -1,0 +1,30 @@
+# Inter-model comparison on split C: grouped by allele — an unseen allele whose close relative may still be in training.
+#
+# Each model entry points at a network's figs dir and names a run inside its
+# data/runs.json. Nothing is retrained — the test predictions saved by that
+# network are reloaded and replotted on shared axes.
+#
+#   PY=../../.venv/bin/python
+#   $PY plots.py templates/split_C.yaml
+
+label: split C (grouped by allele)
+out: split_C             # subfolder under figs/compare/
+
+models:
+  - label: direct (MLP)
+    figs_dir: ../direct-network/figs
+    run: split C (allele)
+  - label: transformer
+    figs_dir: ../transformer-network/figs
+    run: split C (allele)
+  - label: SE+MLP
+    figs_dir: ../squeeze-boost-network/figs/split_C
+    run: split C (allele) (SE+MLP)
+  - label: SE+XGB
+    figs_dir: ../squeeze-boost-network/figs/split_C
+    run: split C (allele) (SE+XGB)
+
+# NOTE: boltz-network is deliberately absent. Its runs cover HLA-A*02:01 rows
+# only, so its test set is a different set of rows and its bars would not be
+# comparable. To include it, first retrain direct/transformer with the matching
+# `allele` + `embeddings_dir` filters so all three share the same test rows.

@@ -1,0 +1,135 @@
+<title>Four Levels of Representation</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: a played-through demo of four representations, then the tabulated metrics it was built from. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --sunk:#e4e9ee;
+  --ink:#16202b; --muted:#5d6b7a; --line:#d2d9e0; --faint:#eaeef2;
+  --direct:#c9752f; --tf:#6d7f91; --se:#2f8f6b; --boltz:#6558c4; --warn:#a33a3a;
+  --disp:"Chivo",system-ui,sans-serif;
+  --body:"Source Sans 3",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f151c; --surface:#161e27; --sunk:#111922;
+    --ink:#e6ecf2; --muted:#8a99a8; --line:#273442; --faint:#1b2530;
+    --direct:#e4a062; --tf:#93a2b2; --se:#4fb98d; --boltz:#9b8ff0; --warn:#d66a6a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f151c; --surface:#161e27; --sunk:#111922;
+  --ink:#e6ecf2; --muted:#8a99a8; --line:#273442; --faint:#1b2530;
+  --direct:#e4a062; --tf:#93a2b2; --se:#4fb98d; --boltz:#9b8ff0; --warn:#d66a6a;
+  color-scheme:dark;
+}
+
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55;}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:30px 60px;}
+header{display:flex;flex-direction:column;gap:6px;margin-bottom:22px;}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;}
+.page-nav{display:flex;gap:6px;flex-wrap:wrap;}
+.page-nav a{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);}
+.page-nav a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:var(--surface);}
+.page-nav a:focus-visible{outline:2px solid var(--boltz);outline-offset:2px;}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+h1{font-family:var(--disp);font-weight:800;font-size:clamp(28px,5.4vw,46px);line-height:1.04;margin:0;letter-spacing:-.025em;text-wrap:balance;}
+.sub{color:var(--muted);max-width:66ch;margin:0;font-size:15.5px;}
+.thesis{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;margin:18px 0 20px;padding:13px 15px;border:1px solid var(--line);border-left:3px solid var(--boltz);border-radius:7px;background:var(--surface);}
+.thesis .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--boltz);padding-top:2px;}
+.thesis p{margin:0;font-size:14px;color:var(--ink);}
+h2.sec{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:44px 0 14px;}
+
+figure{margin:0;}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 12px 34px rgba(20,32,43,.07);}
+canvas{display:block;width:100%;}
+.transport{display:flex;align-items:center;gap:14px;padding:12px 14px;border-top:1px solid var(--line);background:var(--sunk);}
+button.play{all:unset;cursor:pointer;width:34px;height:34px;flex:none;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;}
+button.play:focus-visible{outline:2px solid var(--boltz);outline-offset:2px;}
+button.play svg{width:13px;height:13px;fill:currentColor;}
+input[type=range]{flex:1;min-width:0;accent-color:var(--boltz);height:20px;cursor:pointer;}
+.clock{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+button.chip{all:unset;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);}
+button.chip[aria-current="true"]{color:var(--surface);background:var(--ink);border-color:var(--ink);}
+button.chip:focus-visible{outline:2px solid var(--boltz);outline-offset:2px;}
+button.chip:hover,.page-nav a:hover{border-color:var(--boltz);color:var(--ink);}
+@media (max-width:640px){.topline{align-items:flex-start;flex-direction:column;margin-bottom:8px;}.thesis{grid-template-columns:1fr;gap:4px;}}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+button.tab{all:unset;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:6px 12px;border:1px solid var(--line);border-radius:5px;color:var(--muted);}
+button.tab[aria-current="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink);}
+button.tab:focus-visible{outline:2px solid var(--boltz);outline-offset:2px;}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);}
+table{border-collapse:collapse;width:100%;min-width:540px;font-variant-numeric:tabular-nums;}
+th,td{text-align:right;padding:9px 14px;font-family:var(--mono);font-size:12.5px;border-bottom:1px solid var(--line);}
+th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+td:first-child,th:first-child{text-align:left;}
+tbody tr:last-child td{border-bottom:none;}
+td.best{font-weight:600;}
+td.best::after{content:"▌";color:var(--boltz);margin-left:5px;font-size:9px;vertical-align:1px;}
+.mk{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:8px;}
+
+.notes{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);}
+.notes h3{font-family:var(--disp);font-size:15px;font-weight:600;margin:0 0 10px;}
+.notes p{font-size:14px;color:var(--muted);max-width:70ch;margin:0 0 12px;}
+.notes code{font-family:var(--mono);font-size:12.5px;color:var(--ink);}
+.flag{border-left:3px solid var(--warn);padding-left:14px;}
+.flag strong{color:var(--ink);}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="topline">
+    <span class="eyebrow">all75 held-out test · 4 splits · Pearson r</span>
+    <nav class="page-nav" aria-label="Demo pages">
+      <a href="pipeline.html">How it works</a>
+      <a href="levels.html" aria-current="page">Compare models</a>
+    </nav>
+  </div>
+  <h1>What Does the Model Get to See?</h1>
+  <p class="sub">Five predictors learn the same half-life target from different descriptions of the peptide–HLA pair. The comparison asks whether sequence alone is enough, or whether a pretrained structural representation helps on unfamiliar examples.</p>
+</header>
+
+<div class="thesis">
+  <span class="k">Fair comparison</span>
+  <p>The rows, targets, and held-out splits stay fixed. What changes is the input representation and, for SE+XGB, the final regressor.</p>
+</div>
+
+<figure>
+  <div class="frame">
+    <canvas id="stage" role="img" aria-describedby="alt"></canvas>
+    <p id="alt" class="vh">A five-part animation comparing model inputs. The direct baseline flattens peptide and HLA pseudosequence embeddings. The SE variant reweights those same features and uses either an MLP or XGBoost. The transformer lets sequence positions attend to one another. The Boltz-2 model replaces learned sequence features with a frozen structural embedding. The final scene compares Pearson correlation across four held-out splits.</p>
+    <div class="transport">
+      <button class="play" id="play" aria-label="Pause animation"><svg id="icon" viewBox="0 0 12 12"><rect x="1.5" y="1" width="3" height="10" rx="1"/><rect x="7.5" y="1" width="3" height="10" rx="1"/></svg></button>
+      <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Animation timeline">
+      <span class="clock" id="clock">00:00</span>
+    </div>
+  </div>
+  <div class="chips">
+    <button class="chip" data-at="0.005">Direct MLP</button>
+    <button class="chip" data-at="0.13">SE gate</button>
+    <button class="chip" data-at="0.20">Transformer</button>
+    <button class="chip" data-at="0.35">Boltz-2</button>
+    <button class="chip" data-at="0.59">MACE</button>
+    <button class="chip" data-at="0.80">Results</button>
+  </div>
+</figure>
+
+<h2 class="sec">Results by holdout</h2>
+<div class="tabs" id="tabs"></div>
+<div class="tablewrap"><table id="tbl"></table></div>
+
+<div class="notes">
+  <h3>Reading the splits</h3>
+  <p><strong style="color:var(--ink)">A · random</strong> is the easiest: rows are shuffled. <strong style="color:var(--ink)">B · peptide</strong> asks the model to handle unseen peptides. <strong style="color:var(--ink)">C · allele</strong> holds out whole alleles. <strong style="color:var(--ink)">C2 · cluster</strong> is the strictest, holding out groups of similar HLA grooves. All five models are evaluated on the same ~14,500 rows spanning 75 alleles and 22 clusters.</p>
+  <p>The main pattern is simple: the sequence models are competitive on shuffled rows, then lose correlation as the holdout becomes less familiar. The frozen Boltz-2 representation degrades less sharply. Use the tabs above to check that story against Pearson, rank correlation, and error in hours.</p>
+
+  <h3>Two caveats</h3>
+  <p class="flag"><strong>C2 puts about 3 of its 22 clusters in test.</strong> Treat that column as a strong signal worth following up, not as a precise estimate of generalisation to every unseen groove.</p>
+  <p class="flag"><strong>SE changes feature weighting, not the raw input.</strong> It starts from the direct model’s same 704 channels, learns a gate over them, then feeds either an MLP or XGBoost. It is best read as a baseline variant rather than a separate rung in a hierarchy.</p>
+</div>
+</div>
