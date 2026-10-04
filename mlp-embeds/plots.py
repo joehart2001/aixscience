@@ -29,8 +29,7 @@ import numpy as np  # noqa: E402
 # Keyed by metric so each panel gets the comparable line; set a value to None or
 # remove the key to hide it.
 REFERENCES = {
-    "pearson": (0.76, r"MINT stability $r=0.76$ (Karthikeyan et. al, 2026)"),
-    "spearman": (0.79, r"MINT stability $ρ=0.79$ (Karthikeyan et. al, 2026)"),
+    "pearson": (0.693, r"NetMHCstabpan stability $r=0.76$ (Rasmussen et. al, 2016)"),
     # no directly-comparable published within-allele ρ, so none is drawn there
 }
 

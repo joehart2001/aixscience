@@ -50,12 +50,12 @@ and Boltz-2 is the only one left predicting anything.
   <em>Graph comparing performance of each model on Pearson correlation across alleles and Spearman correlation within individual alleles. Dashed line indicates reference state-of-the-art methods performed on peptide-excluding splits from Karthikeyan et. al (2026).</em>
 </p>
 
-| split | held out | direct (MLP) | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
+| split label | held out | direct (MLP) | transformer | SE+MLP | SE+XGB | **boltz2 (frozen)** |
 |---|---|---|---|---|---|---|
 | A | nothing (shuffled) | 0.728 | 0.634 | 0.749 | 0.741 | **0.794** |
 | B | peptides | 0.696 | 0.596 | 0.712 | 0.729 | **0.761** |
 | C | alleles | 0.570 | 0.375 | 0.592 | 0.487 | **0.714** |
-| C2 | clusters | −0.065 | −0.098 | −0.108 | −0.075 | **0.425** |
+| C2 | allele clusters | −0.065 | −0.098 | −0.108 | −0.075 | **0.425** |
 
 <sub>Pearson r on held-out test, ~14,500 embedded rows spanning 75 alleles and
 22 clusters. Full table in `mlp-embeds/figs/compare/summary_test_metrics.md`.
