@@ -6,7 +6,7 @@ Engineering Track Challenge).
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="demo_app_html/docs/protein.gif">
-    <img src="demo_app_html/docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="520">
+    <img src="demo_app_html/docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="460">
   </picture>
 </p>
 <p align="center">

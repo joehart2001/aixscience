@@ -3,7 +3,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/protein.gif">
-    <img src="docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="520">
+    <img src="docs/protein-light.gif" alt="HLA-A*02:01 with the peptide ALLENIHRV bound in the groove, rotating" width="460">
   </picture>
 </p>
 <p align="center">
@@ -88,8 +88,15 @@ structure.
 ```bash
 python tools/render_protein.py                       # docs/protein.gif
 python tools/render_protein.py --theme light         # docs/protein-light.gif
-python tools/render_protein.py --width 800 --height 500 --frames 60
+python tools/render_protein.py --frames 120 --fps 12 # slower and smoother
 ```
+
+Defaults are 460x288, 90 frames at 9 fps: one revolution every 10 s, 4 degrees
+per frame. Those two numbers trade off against each other — dropping the frame
+rate alone slows the spin but makes each step more visible, so a slower
+rotation needs *more* frames to stay smooth, and the GIF grows with them. The
+pair of themes is about 4.5 MB; if that becomes a nuisance, drop the light
+variant and serve the dark one to both themes.
 
 A faithful port of the canvas renderer — same secondary structure assignment,
 same painter's algorithm — drawn at 3× and downsampled, because PIL does not

@@ -215,10 +215,10 @@ def frame(ang, cfg) -> Image.Image:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--width", type=int, default=560)
-    ap.add_argument("--height", type=int, default=340)
-    ap.add_argument("--frames", type=int, default=48)
-    ap.add_argument("--fps", type=int, default=16)
+    ap.add_argument("--width", type=int, default=460)
+    ap.add_argument("--height", type=int, default=288)
+    ap.add_argument("--frames", type=int, default=90)
+    ap.add_argument("--fps", type=int, default=9)    # 90/9 = one slow revolution per 10s
     ap.add_argument("--theme", choices=list(THEMES), default="dark")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
