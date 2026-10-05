@@ -1,5 +1,17 @@
 # Boltz-τ: HLA–Peptide Stability from Foundational Protein Embeddings
 
+<p align="center">
+  <a href="https://iterate.inc/london-ai-science?tab=submissions"><img src="https://img.shields.io/badge/%F0%9F%A5%88%20Runner--up-London%20AI%20x%20Science%20Hackathon%202026-C0C0C0?style=for-the-badge" alt="Runner-up, London AI x Science Hackathon 2026"></a>
+  <a href="https://luma.com/3iipivod"><img src="https://img.shields.io/badge/Track-Drug%20%26%20Protein%20Design%20%C2%B7%20Serova-5B3FD1?style=for-the-badge" alt="Track: Drug and Protein Design, with Serova"></a>
+  <a href="https://luma.com/3iipivod"><img src="https://img.shields.io/badge/Built%20in-48%20hours-F28C28?style=for-the-badge" alt="Built in 48 hours"></a>
+</p>
+
+> [!NOTE]
+> 🥈 **Runner-up in the Drug & Protein Design track** at the
+> [London AI x Science Hackathon](https://iterate.inc/london-ai-science?tab=submissions)
+> (3–4 October 2026), hosted by Iterate and futurebio.xyz with track partner Serova.
+> Everything here was built during the 48-hour event.
+
 Boltz-τ is a lightweight half-life predictor for peptide–HLA class I complexes.
 It keeps Boltz-2 frozen and trains a shallow MLP readout to map its structural
 embeddings to measured binding stability—how long a peptide remains bound before
